@@ -1,0 +1,135 @@
+.main-login-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    margin-top: 80px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.login-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; 
+    height: 700px;
+    background-color: transparent;
+    
+}
+
+.form-background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url('../Assets/Ellipse 3.png');
+    background-size: cover;
+    background-position: left;
+    background-repeat: no-repeat;
+}
+
+.form-content {
+    position: relative; 
+    z-index: 1;
+    background-color:pink;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 380px;
+    margin: 0.5rem;
+    
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: black;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: -6px !important;
+    font-weight: 500;
+    color: black !important;
+    font-size:1rem !important;
+}
+
+.form-input {
+    background-color: white !important;
+}
+
+.login-button {
+    padding: 8px !important;
+    margin: 1.5rem 0 !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    background-color: #d32f2f !important;
+}
+
+.social-login-section {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.social-logos-container {
+    display: flex;
+    justify-content: center;
+    gap: 50px ;
+}
+
+.social-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-image-container {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.forgot{
+    display: flex;
+    align-items: end !important;
+    justify-content: end;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .main-login-container {
+        flex-direction: column;
+        margin-top: 60px;
+    }
+    
+    .login-image-container, .form-background-overlay {
+        display: none;
+    }
+    
+    .form-content {
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: none;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .social-logos-container {
+        gap: 1rem;
+    }
+    
+    .social-logo {
+        width: 36px;
+        height: 36px;
+    }
+}

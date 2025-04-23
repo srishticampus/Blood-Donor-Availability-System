@@ -1,0 +1,109 @@
+.registration-container {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background-image: linear-gradient(rgba(255, 195, 195, 0), rgba(255, 195, 195, 0.263)), url('../Assets/regBG.png');
+  z-index: -2;
+  padding-bottom: 30px;
+
+}
+
+
+.registration-box {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 450px;
+  max-width: 100%;
+  margin-top: 70px;
+  /* height: 70vh; */
+}
+.sign-up-title{
+  font-size: 30px;
+  margin-top: -20px;
+  font-weight: 500;
+}
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  filter: drop-shadow(1px 2px 2px black);
+  margin-bottom: 10px;
+}
+
+.file-upload {
+  display: none;
+}
+
+.upload-file-btn {
+  background-color:rgb(176, 26, 26)!important;
+  cursor: pointer;
+  font-size: 14px;
+  color: white !important;
+}
+
+
+.form-group {
+  margin-bottom: 4px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.submit-button {
+  margin-top: 20px;
+  padding: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  font-size: 16px !important;
+}
+.dropdown-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: white;
+  transition: border-color 0.3s;
+}
+
+.dropdown-select:focus {
+  outline: none;
+  border-color: #ef6b6b;
+}
+
+.form-group .MuiOutlinedInput-root {
+  border-radius: 4px !important;
+}
+.user-selection{
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+}
+.upload-label{
+  background-color: rgb(218, 62, 62) !important;
+}
+@media (max-width: 480px) {
+  .registration-box {
+    width: 100%;
+    padding: 20px;
+  }
+}

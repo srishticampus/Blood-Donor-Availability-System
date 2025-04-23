@@ -1,0 +1,24 @@
+.about-us-main-container{
+    background-image: url('../Assets/aboutBg.png');
+    height: 94vh;
+    width: 100%;
+    /* background-position: center; */
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.about-us-paragraph{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    width: 50vw;
+    background-color: #FFFFFF;
+    border-radius: 15px;
+}
+.copy-right{
+    text-align: center;
+
+}

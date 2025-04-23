@@ -1,0 +1,78 @@
+.main-MedicalInfo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.MedicalInfo-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+}
+#medical-notes-input{
+    height: 30px !important;
+}
+.medical-title {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+#medical-notes-input {
+    height: 15px !important;
+}
+
+.select-Blood-grp, 
+.select-Health-details {
+    margin-bottom: 20px;
+}
+
+.blood-group-select .MuiSelect-select,
+.health-details-select .MuiSelect-select {
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.medical-notes-input {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.medical-notes-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.registration-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px !important;
+    background-color: #D32F2F !important;
+    text-transform: none;
+}
+
+.MuiMenuItem-root {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 8px 16px !important;
+}
+
+.MuiListItemText-root {
+    margin-right: 16px;
+}

@@ -1,0 +1,80 @@
+.landing-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 5%;
+    gap: 3rem;
+    min-height: calc(100vh - 60px); 
+    overflow-y: hidden;
+    margin-top: 60px;
+}
+
+.image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.blood-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+}
+
+.welcome-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-title {
+    font-size: 3rem;
+    color: #d32f2f; 
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.welcome-text {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    max-width: 500px;
+    text-align: center;
+}
+
+.register-button {
+    width: fit-content;
+    padding: 8px!important;
+    width: 160px !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    background-color: #d32f2f !important;
+    border-radius: 25px !important;
+    text-transform: inherit !important;
+}
+
+
+@media (max-width: 768px) {
+    .landing-container {
+        flex-direction: column;
+        padding: 2rem;
+    }
+    
+    .welcome-container {
+        text-align: center;
+        align-items: center;
+    }
+    
+    .welcome-title {
+        font-size: 2.2rem;
+    }
+    
+    .welcome-text {
+        font-size: 1rem;
+    }
+}

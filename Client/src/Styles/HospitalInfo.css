@@ -1,0 +1,89 @@
+.main-hos-reg-container {
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .hospitalInfo-container {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(255, 255, 255, 0.682);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 450px;
+    /* max-width: 600px; */
+  }
+  .hospitalInfo-container h2 {
+    color: black;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .hospitalInfo-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .hospitalInfo-row {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  .hospitalInfo-pass{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  .hospitalInfo-pass 
+  .hospitalInfo-textField {
+    background-color: #fff;
+  }
+  
+  .hospitalInfo-uploadContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 25px;
+  }
+  
+  .hospitalInfo-uploadLabel {
+    display: inline-block;
+    width: 200px;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: #1976d2;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  
+  .hospitalInfo-uploadLabel:hover {
+    background-color: #125ea2;
+  }
+  
+  .hospitalInfo-button {
+    /* text-transform: inherit !important; */
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+    align-self: center;
+    background-color: #D32F2F !important;
+  }
+
+  .hospitalInfo-buttonContainer{
+display: flex;
+justify-content: center;
+  }

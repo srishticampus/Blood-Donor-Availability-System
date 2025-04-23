@@ -1,0 +1,28 @@
+
+.login-button {
+  background-color: #d32f2f !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  border-radius: 4px !important;
+  text-transform: none !important;
+}
+
+.login-button:hover {
+  background-color: #b71c1c !important;
+}
+
+
+.nav-options{
+  color:black !important;
+font-weight: bold !important;
+ text-transform: 'none'!important;
+ font-size: '1rem'!important;
+}
+.nav-options:hover{
+background-color: skyblue !important;
+}
+.mobile-menu a{
+  text-decoration: none;
+  color: black;
+}
