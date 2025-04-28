@@ -4,6 +4,7 @@ const HospitalController = require('./controllers/HospitalController')
 const AdminController = require('./controllers/AdminController')
 const DonerController=require('./controllers/DonerController')
 const UserController=require('./controllers/UserController')
+const BloodRequestController = require('./controllers/BloodRequestController')
 
 router.post('/adminlogin',AdminController.login)
 
@@ -26,6 +27,7 @@ router.post('/viewAllHos',HospitalController.ViewAllHospital)
 router.post('/hospitalApprove',HospitalController.ApproveHospital)
 router.post('/hospitalReject',HospitalController.RejectHospital)
 
+
 router.post('/UserRegistration',UserController.upload,UserController.UserRegistration)
 router.post('/UserLogin',UserController.UserLogin)
 router.post('/FindUserEmail',UserController.FindEmail)
@@ -33,6 +35,7 @@ router.post('/ForgotPass-user/:Email',UserController.ForgotPassword)
 router.post('/EditUserdata',UserController.upload,UserController.editUserProfile)
 
 
+router.post('/AddBloodRequest',BloodRequestController.createBloodRequest)
 
 module.exports=router
 
