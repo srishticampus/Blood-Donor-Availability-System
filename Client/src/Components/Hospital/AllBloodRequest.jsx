@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../Styles/TableStyle.css';
 import {
     Table,
@@ -9,192 +9,197 @@ import {
     TableRow,
     Paper,
     Box,
+    Button,
     Typography,
-    Button
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
-import { Link } from 'react-router-dom';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Link } from 'react-router-dom';
+
+const getBloodTypeStyle = (bloodType) => {
+    const baseStyle = {
+        fontWeight: 'bold',
+        padding: '2px 4px',
+        borderRadius: '6px',
+        display: 'inline-block',
+        minWidth: '36px',
+        textAlign: 'center',
+        fontSize: '0.85rem'
+    };
+
+    switch (bloodType) {
+        case "A+":
+            return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFEBEB" };
+        case "A-":
+            return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFD5D5" };
+        case "B+":
+            return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#DBF0FF" };
+        case "B-":
+            return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#C4E4FF" };
+        case "AB+":
+            return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#E9DDFF" };
+        case "AB-":
+            return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#D8C7FF" };
+        case "O+":
+            return { ...baseStyle, color: "#D32F84", backgroundColor: "#FFD9ED" };
+        case "O-":
+            return { ...baseStyle, color: "#ADD32F", backgroundColor: "#F3FFCA" };
+        default:
+            return {
+                ...baseStyle,
+                color: "#666",
+                backgroundColor: "#f0f0f0"
+            };
+    }
+};
 
 function AllBloodRequest() {
-    const emergencyRequests = [
-        {
-            id: 1,
-            name: "Sharath",
-            contact: "9446847055",
-            bloodType: "O+",
-            units: "2 Units",
-            status: "Pending",
-        },
-        {
-            id: 2,
-            name: "Rahul",
-            contact: "9876543210",
-            bloodType: "A-",
-            units: "3 Units",
-            status: "Urgent",
-        },
-        {
-            id: 3,
-            name: "Priya",
-            contact: "8765432109",
-            bloodType: "B+",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 4,
-            name: "Anjali",
-            contact: "9123456780",
-            bloodType: "AB+",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 5,
-            name: "Vikram",
-            contact: "9988776655",
-            bloodType: "O-",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 6,
-            name: "Meera",
-            contact: "9876543211",
-            bloodType: "A+",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 7,
-            name: "Ravi",
-            contact: "9123456789",
-            bloodType: "B-",
-            units: "3 Units",
-            status: "Pending",
-        },
-        {
-            id: 8,
-            name: "Kiran",
-            contact: "9876543222",
-            bloodType: "AB-",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 9,
-            name: "Sita",
-            contact: "8765432108",
-            bloodType: "O+",
-            units: "5 Units",
-            status: "Fulfilled",
-        },
-        {
-            id: 10,
-            name: "Arjun",
-            contact: "9446847056",
-            bloodType: "A-",
-            units: "2 Units",
-            status: "Pending",
-        },
-        {
-            id: 11,
-            name: "Divya",
-            contact: "9988776656",
-            bloodType: "B+",
-            units: "1 Unit",
-            status: "Urgent",
-        },
-        {
-            id: 12,
-            name: "Manoj",
-            contact: "9876543212",
-            bloodType: "AB+",
-            units: "3 Units",
-            status: "Fulfilled",
-        },
-        {
-            id: 13,
-            name: "Sneha",
-            contact: "9123456781",
-            bloodType: "O-",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 14,
-            name: "Ramesh",
-            contact: "9876543223",
-            bloodType: "A+",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 15,
-            name: "Geeta",
-            contact: "8765432107",
-            bloodType: "B-",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 16,
-            name: "Ajay",
-            contact: "9446847057",
-            bloodType: "AB-",
-            units: "3 Units",
-            status: "Pending",
-        },
-        {
-            id: 17,
-            name: "Pooja",
-            contact: "9988776657",
-            bloodType: "O+",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 18,
-            name: "Nikhil",
-            contact: "9876543213",
-            bloodType: "A-",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 19,
-            name: "Lakshmi",
-            contact: "9123456782",
-            bloodType: "B+",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 20,
-            name: "Suresh",
-            contact: "9876543224",
-            bloodType: "AB+",
-            units: "3 Units",
-            status: "Urgent",
+    const [requests, setRequests] = useState([]);
+    const [filteredRequests, setFilteredRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const hospitalId = localStorage.getItem('hospitalId');
+
+        if (!hospitalId) {
+            toast.error('Hospital ID not found');
+            setLoading(false);
+            return;
         }
-    ];
+
+        setLoading(true);
+        axios.get(`http://localhost:4005/ShowRequest/${hospitalId}`)
+            .then(response => {
+                setRequests(response.data);
+                setFilteredRequests(response.data);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching blood requests:', error);
+                toast.error('Failed to fetch blood requests');
+                setLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (searchTerm === '') {
+            setFilteredRequests(requests);
+        } else {
+            const filtered = requests.filter(request => {
+                const searchLower = searchTerm.toLowerCase();
+                const formattedBloodType = formatBloodType(request.BloodType).toLowerCase();
+                
+                return (
+                    (request.PatientName && request.PatientName.toLowerCase().includes(searchLower)) ||
+                    (request.ContactNumber && request.ContactNumber.toString().includes(searchLower)) ||
+                    (request.BloodType && formattedBloodType.includes(searchLower)) ||
+                    (request.UnitsRequired && request.UnitsRequired.toString().includes(searchLower)) ||
+                    (request.Status && request.Status.toLowerCase().includes(searchLower))
+                );
+            });
+            setFilteredRequests(filtered);
+        }
+    }, [searchTerm, requests]);
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleDeleteClick = (requestId) => {
+        setSelectedRequestId(requestId);
+        setOpenDeleteDialog(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (!selectedRequestId) return;
+        
+        axios.post(`http://localhost:4005/bloodRequests/${selectedRequestId}`)
+            .then(response => {
+                const updatedRequests = requests.filter(request => request._id !== selectedRequestId);
+                setRequests(updatedRequests);
+                setFilteredRequests(updatedRequests);
+                toast.success('Blood request deleted successfully');
+                setOpenDeleteDialog(false);
+            })
+            .catch(error => {
+                console.error('Error deleting blood request:', error);
+                toast.error('Failed to delete blood request');
+                setOpenDeleteDialog(false);
+            });
+    };
+
+    const handleDeleteCancel = () => {
+        setOpenDeleteDialog(false);
+        setSelectedRequestId(null);
+    };
 
     const getStatusIndicator = (status) => {
-        if (status === "Pending") {
-            return <span className="status-indicator status-pending"></span>;
-        } else if (status === "Urgent") {
-            return <span className="status-indicator status-urgent"></span>;
-        } else if (status === "Fulfilled") {
-            return <span className="status-indicator status-fulfilled"></span>;
-        } else {
-            return null;
+        switch (status) {
+            case "Planned":
+                return <span className="status-indicator status-pending"></span>;
+            case "Very Urgent":
+                return <span className="status-indicator status-urgent"></span>;
+            case "Emergency":
+                return <span className="status-indicator status-emergency"></span>;
+            case "Fulfilled":
+                return <span className="status-indicator status-fulfilled"></span>;
+            default:
+                return <span className="status-indicator status-pending"></span>;
         }
     };
-    
+
+    const formatBloodType = (bloodType) => {
+        if (!bloodType) return '';
+        const parts = bloodType.split('(');
+        if (parts.length > 1) {
+            return parts[1].replace(')', '').trim();
+        }
+        return bloodType;
+    };
+
+    if (loading) {
+        return (
+            <Box className="main-container">
+                <HosNav searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+                <Box className="sidemenu">
+                    <HosSidemenu />
+                    <Box className="content-box">
+                        <Typography variant="h4" className="title">
+                            Blood Request Management
+                        </Typography>
+                        <Typography>Loading...</Typography>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
     return (
         <Box className="main-container">
-            <HosNav />
+            <HosNav searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ marginTop: "80px" }}
+            />
             <Box className="sidemenu">
                 <HosSidemenu />
                 <Box className="content-box">
@@ -213,33 +218,94 @@ function AllBloodRequest() {
                                     <TableCell className="table-head-cell">Blood Type</TableCell>
                                     <TableCell className="table-head-cell">Units</TableCell>
                                     <TableCell className="table-head-cell">Status</TableCell>
+                                    <TableCell className="table-head-cell">Action</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {emergencyRequests.map((request) => (
-                                    <TableRow key={request.id} hover>
-                                        <TableCell className="tableCell">
-                    
-                                                {request.name}
+                                {filteredRequests.length > 0 ? (
+                                    filteredRequests.map((request) => {
+                                        const formattedBloodType = formatBloodType(request.BloodType);
+                                        const bloodTypeStyle = getBloodTypeStyle(formattedBloodType);
+
+                                        return (
+                                            <TableRow key={request._id} hover>
+                                                <TableCell className="tableCell">
+                                                    {request.PatientName}
+                                                </TableCell>
+                                                <TableCell className="tableCell">{request.ContactNumber}</TableCell>
+                                                <TableCell className="tableCell">
+                                                    <Box sx={bloodTypeStyle}>
+                                                        {formattedBloodType}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell className="tableCell">
+                                                    {request.UnitsRequired} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
+                                                </TableCell>
+                                                <TableCell className="tableCell">
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
+                                                        {getStatusIndicator(request.Status)}
+                                                        {request.Status}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell className="tableCell" style={{ display: "flex", justifyContent: "center" }}>
+                                                    <Box sx={{ display: 'flex', gap: '10px' }}>
+                                                        <Link to={`/editBloodReq/${request._id}`}>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="success"
+                                                                size="small"
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                        </Link>
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="error"
+                                                            size="small"
+                                                            onClick={() => handleDeleteClick(request._id)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} align="center" className="tableCell">
+                                            {searchTerm ? 'No matching blood requests found' : 'No blood requests found'}
                                         </TableCell>
-                                        <TableCell className="tableCell">{request.contact}</TableCell>
-                                        <TableCell className="tableCell">{request.bloodType}</TableCell>
-                                        <TableCell className="tableCell">{request.units}</TableCell>
-                                        <TableCell className="tableCell">
-                                            <Box sx={{ display: 'flex', alignItems: 'center',justifyContent:"center" }}>
-                                                {getStatusIndicator(request.status)}
-                                                {request.status}
-                                            </Box>
-                                        </TableCell>
-                                        
-                                        
                                     </TableRow>
-                                ))}
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
                 </Box>
             </Box>
+
+            <Dialog
+                open={openDeleteDialog}
+                onClose={handleDeleteCancel}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                style={{textAlign:"center" , borderRadius:"25px"}}
+            >
+                <DialogTitle id="alert-dialog-title" style={{backgroundColor:"red" , color:"white"}}>Confirm Deletion</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this blood request?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancel} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

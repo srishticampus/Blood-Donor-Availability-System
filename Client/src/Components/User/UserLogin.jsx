@@ -35,9 +35,13 @@ function UserLogin() {
         e.preventDefault();
         axios.post('http://localhost:4005/UserLogin', login)
             .then((result) => {
+                // console.log(result.data.data._id);
+                
                 const { data } = result;
                 if (data.message === "Login successful") {
                     localStorage.setItem('User', JSON.stringify(result.data.data));
+                    localStorage.setItem('UserId',result.data.data._id)
+
                     toast.success('Login Successfully')
                     setTimeout(() => navigator('/UserDashboard'), 2000); 
                     

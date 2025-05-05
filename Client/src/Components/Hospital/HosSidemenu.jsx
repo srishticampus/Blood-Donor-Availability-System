@@ -44,9 +44,9 @@ console.log(hospitalData);
             name: 'Request Management',
             icon: icon2,
             subItems: [
-                { name: 'User Request', path: '#' },
-                { name: 'Approved Request', path: '#' },
-                { name: 'Cancel Requests', path: '#' }
+                { name: 'User Request', path: '/manageUserBlood' },
+                { name: 'Approved Request', path: '/approvedRequests' },
+                { name: 'Cancel Requests', path: '/canceledRequests' }
             ]
         },
         {
@@ -54,8 +54,8 @@ console.log(hospitalData);
             icon: icon6,
             subItems: [
                 { name: "Add New Blood Request", path: '/bloodrequesthos' },
-                { name: "Edit Blood Request", path: '/editBloodReq' },
-                { name: "All Request for Blood", path: '/hosEmergency' }
+                { name: "All Request for Blood", path: '/hosEmergency' },
+                { name: "Willing Doners", path: '/willingDoners' },
             ]
         },
         { name: 'Completed Requests', icon: icon7, path: '/hosCompletedReq' },

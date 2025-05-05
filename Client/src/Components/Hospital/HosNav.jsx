@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import Logo from '../../Assets/logo.png';
 import SearchBar from './SearchBar';
 
-function HosNav() {
+function HosNav({ searchTerm, onSearchChange }) {
     return (
         <AppBar position="fixed" sx={{ backgroundColor: 'white', color: 'black', boxShadow: 1 }}>
             <Container maxWidth="xl" sx={{ px: 2, maxWidth: '1200px' }}>
@@ -36,12 +36,14 @@ function HosNav() {
                         />
                     </Box>
                     <Box>
-                        <SearchBar />
+                        <SearchBar 
+                            searchTerm={searchTerm} 
+                            onSearchChange={onSearchChange} 
+                        />
                     </Box>
                 </Toolbar>
             </Container>
         </AppBar>
     );
 }
-
 export default HosNav;

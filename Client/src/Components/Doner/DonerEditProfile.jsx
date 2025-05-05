@@ -8,11 +8,11 @@ import {
 } from '@mui/material';
 import { PhotoCamera } from '@mui/icons-material';
 import '../../Styles/EditHospital.css';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
+import { Link } from 'react-router-dom';
 
 function DonerEditProfile() {
     const navigate = useNavigate();
@@ -161,7 +161,7 @@ function DonerEditProfile() {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleNext = (e) => {
         e.preventDefault();
 
         if (!validateForm()) {
@@ -169,38 +169,14 @@ function DonerEditProfile() {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('id', donorData._id);
-    
-        Object.entries(formData).forEach(([key, value]) => {
-            formDataToSend.append(key, value);
-        });
-    
-        if (profileImageFile) {
-            formDataToSend.append('ProfilePhoto', profileImageFile);
-        }
-    
-        axios.post('http://localhost:4005/donorEditProfile', formDataToSend, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-            .then(response => {
-                console.log(response);
-                
-                if (response.data.message === "Profile updated successfully") {
-                    toast.success("Profile updated successfully");
-                    localStorage.setItem('Doner', JSON.stringify(response.data.donor));
-                    setTimeout(() => navigate('/doner-Profile'), 2000); 
+        // Prepare the data to pass to the next component
+        const donorProfileData = {
+            ...formData,
+            ProfilePhoto: profileImageFile || donorData.ProfilePhoto
+        };
 
-                } else {
-                    toast.error(response.data.message || 'Failed to update profile');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating profile:', error);
-                toast.error(error.response?.data?.message || 'An error occurred while updating the profile');
-            });
+        // Navigate to health details with state
+        navigate('/healthDetails', { state: { donorProfileData } });
     };
 
     return (
@@ -266,7 +242,7 @@ function DonerEditProfile() {
                         </label>
                     </Box>
 
-                    <Box className="content-box-hos" component="form" onSubmit={handleSubmit}>
+                    <Box className="content-box-hos" component="form" onSubmit={handleNext}>
                         <div className='edit-feilds'>
                             <h5>Full Name
                                 <TextField
@@ -359,7 +335,7 @@ function DonerEditProfile() {
                                     type="submit"
                                     size="large"
                                 >
-                                    Update Profile
+                                    Next
                                 </Button>
                             </div>
                         </div>

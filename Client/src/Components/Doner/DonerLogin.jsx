@@ -48,8 +48,11 @@ function DonerLogin() {
 
                 if (response.data.message === "Login successful") {
                     localStorage.setItem('Doner', JSON.stringify(response.data.data));
-toast.success('Login Successfully')
-setTimeout(() => navigate('/doner-dashboard'), 2000); 
+                    localStorage.setItem('DonerBloodType', JSON.stringify(response.data.data.bloodgrp));
+                    localStorage.setItem('DonerId',response.data.data._id)
+
+                    toast.success('Login Successfully')
+                    setTimeout(() => navigate('/doner-dashboard'), 2000);
 
                 } else if (response.data.message === "Password Mismatch") {
                     toast.error('Incorrect password');

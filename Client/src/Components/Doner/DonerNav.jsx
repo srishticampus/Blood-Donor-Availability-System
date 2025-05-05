@@ -3,11 +3,25 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../Assets/logo.png';
 import DonerSearchBar from './DonerSearchBar';
 
-function DonerNav() {
+function DonerNav({ searchTerm, onSearchChange }) {
+    const location = useLocation();
+    
+    // Paths where search bar should be hidden
+    const hideSearchPaths = [
+        '/doner-dashboard',
+        '/doner-Profile',
+        '/doner-edit-profile'
+    ];
+    
+    // Check if current path should hide search
+    const shouldHideSearch = hideSearchPaths.some(path => 
+        location.pathname.startsWith(path)
+    );
+
     return (
         <AppBar position="fixed" sx={{ backgroundColor: 'white', color: 'black', boxShadow: 1 }}>
             <Container maxWidth="xl" sx={{ px: 2, maxWidth: '1200px' }}>
@@ -35,9 +49,14 @@ function DonerNav() {
                             }}
                         />
                     </Box>
-                    <Box>
-                        <DonerSearchBar />
-                    </Box>
+                    {!shouldHideSearch && (
+                        <Box>
+                            <DonerSearchBar 
+                                searchTerm={searchTerm} 
+                                onSearchChange={onSearchChange} 
+                            />
+                        </Box>
+                    )}
                 </Toolbar>
             </Container>
         </AppBar>

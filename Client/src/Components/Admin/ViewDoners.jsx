@@ -87,12 +87,12 @@ function ViewDoner() {
                                         <TableCell className="tableCell">{donor.District}</TableCell>
                                         <TableCell className="tableCell">
                                             <Link 
-                                                // to={`/doner-details/${donor._id}`}
-                                                // style={{
-                                                //     textDecoration: 'none',
-                                                //     color: '#2196F3',
-                                                //     fontWeight: 500
-                                                // }}
+                                                to={`/doner-details/${donor._id}`}
+                                                style={{
+                                                    textDecoration: 'none',
+                                                    color: '#2196F3',
+                                                    fontWeight: 500
+                                                }}
                                             >
                                                 View Details
                                             </Link>

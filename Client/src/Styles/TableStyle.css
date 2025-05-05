@@ -99,13 +99,16 @@
 }
 
 .status-pending {
-  background-color: #FFC107; 
+  background-color: #01AE01; 
 }
 
 .status-urgent {
-  background-color: #F44336; 
+  background-color: #DF7C00; 
 }
+.status-emergency{
+  background-color: #C41616; 
 
+}
 .status-fulfilled {
   background-color: #4CAF50;
 }

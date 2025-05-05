@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import '../../Styles/TableStyle.css';
@@ -11,187 +11,80 @@ import {
     TableRow,
     Paper,
     Box,
-    Typography,
-    Button
+    Typography
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 function EmergencyAlert() {
-    const emergencyRequests = [
-        {
-            id: 1,
-            name: "Sharath",
-            contact: "9446847055",
-            bloodType: "O+",
-            units: "2 Units",
-            status: "Pending",
-        },
-        {
-            id: 2,
-            name: "Rahul",
-            contact: "9876543210",
-            bloodType: "A-",
-            units: "3 Units",
-            status: "Urgent",
-        },
-        {
-            id: 3,
-            name: "Priya",
-            contact: "8765432109",
-            bloodType: "B+",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 4,
-            name: "Anjali",
-            contact: "9123456780",
-            bloodType: "AB+",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 5,
-            name: "Vikram",
-            contact: "9988776655",
-            bloodType: "O-",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 6,
-            name: "Meera",
-            contact: "9876543211",
-            bloodType: "A+",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 7,
-            name: "Ravi",
-            contact: "9123456789",
-            bloodType: "B-",
-            units: "3 Units",
-            status: "Pending",
-        },
-        {
-            id: 8,
-            name: "Kiran",
-            contact: "9876543222",
-            bloodType: "AB-",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 9,
-            name: "Sita",
-            contact: "8765432108",
-            bloodType: "O+",
-            units: "5 Units",
-            status: "Fulfilled",
-        },
-        {
-            id: 10,
-            name: "Arjun",
-            contact: "9446847056",
-            bloodType: "A-",
-            units: "2 Units",
-            status: "Pending",
-        },
-        {
-            id: 11,
-            name: "Divya",
-            contact: "9988776656",
-            bloodType: "B+",
-            units: "1 Unit",
-            status: "Urgent",
-        },
-        {
-            id: 12,
-            name: "Manoj",
-            contact: "9876543212",
-            bloodType: "AB+",
-            units: "3 Units",
-            status: "Fulfilled",
-        },
-        {
-            id: 13,
-            name: "Sneha",
-            contact: "9123456781",
-            bloodType: "O-",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 14,
-            name: "Ramesh",
-            contact: "9876543223",
-            bloodType: "A+",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 15,
-            name: "Geeta",
-            contact: "8765432107",
-            bloodType: "B-",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 16,
-            name: "Ajay",
-            contact: "9446847057",
-            bloodType: "AB-",
-            units: "3 Units",
-            status: "Pending",
-        },
-        {
-            id: 17,
-            name: "Pooja",
-            contact: "9988776657",
-            bloodType: "O+",
-            units: "2 Units",
-            status: "Urgent",
-        },
-        {
-            id: 18,
-            name: "Nikhil",
-            contact: "9876543213",
-            bloodType: "A-",
-            units: "1 Unit",
-            status: "Fulfilled",
-        },
-        {
-            id: 19,
-            name: "Lakshmi",
-            contact: "9123456782",
-            bloodType: "B+",
-            units: "4 Units",
-            status: "Pending",
-        },
-        {
-            id: 20,
-            name: "Suresh",
-            contact: "9876543224",
-            bloodType: "AB+",
-            units: "3 Units",
-            status: "Urgent",
-        }
-    ];
+    const [emergencyRequests, setEmergencyRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetch('http://localhost:4005/ShowAllBloodRequest')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch emergency requests');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const emergencyOnly = data.filter(request => request.Status === "Emergency");
+                setEmergencyRequests(emergencyOnly);
+                setLoading(false);
+            })
+            .catch(err => {
+                setError(err.message);
+                setLoading(false);
+            });
+    }, []);
 
     const getStatusIndicator = (status) => {
         if (status === "Pending") {
             return <span className="status-indicator status-pending"></span>;
-        } else if (status === "Urgent") {
-            return <span className="status-indicator status-urgent"></span>;
-        } else if (status === "Fulfilled") {
+        } else if (status === "Emergency") {
+            return <span className="status-indicator status-emergency"></span>;
+        } else if (status === "Fulfilled" || status === "Planned") {
             return <span className="status-indicator status-fulfilled"></span>;
         } else {
             return null;
         }
     };
-    
+
+    if (loading) {
+        return (
+            <Box className="main-container">
+                <AdSidemenu />
+                <Box className="sidemenu">
+                    <AdminNav />
+                    <Box className="content-box">
+                        <Typography variant="h4" className="title">
+                            Emergency Alerts
+                        </Typography>
+                        <Typography>Loading emergency requests...</Typography>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box className="main-container">
+                <AdSidemenu />
+                <Box className="sidemenu">
+                    <AdminNav />
+                    <Box className="content-box">
+                        <Typography variant="h4" className="title">
+                         Emergency Alerts
+                        </Typography>
+                        <Typography color="error">Error: {error}</Typography>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
     return (
         <Box className="main-container">
             <AdSidemenu />
@@ -208,48 +101,58 @@ function EmergencyAlert() {
                         <Table aria-label="emergency requests table">
                             <TableHead>
                                 <TableRow className="table-head-row">
-                                    <TableCell className="table-head-cell">Name</TableCell>
+                                    <TableCell className="table-head-cell">Patient Name</TableCell>
                                     <TableCell className="table-head-cell">Contact</TableCell>
                                     <TableCell className="table-head-cell">Blood Type</TableCell>
                                     <TableCell className="table-head-cell">Units Required</TableCell>
+                                    <TableCell className="table-head-cell">Doctor</TableCell>
+                                    <TableCell className="table-head-cell">Specialization</TableCell>
                                     <TableCell className="table-head-cell">Status</TableCell>
-                                    <TableCell className="table-head-cell">View More</TableCell>
+                                    {/* <TableCell className="table-head-cell">View More</TableCell> */}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {emergencyRequests.map((request) => (
-                                    <TableRow key={request.id} hover>
-                                        <TableCell className="tableCell">
-                    
-                                                {request.name}
-                                        </TableCell>
-                                        <TableCell className="tableCell">{request.contact}</TableCell>
-                                        <TableCell className="tableCell">{request.bloodType}</TableCell>
-                                        <TableCell className="tableCell">{request.units}</TableCell>
-                                        <TableCell className="tableCell">
-                                            <Box sx={{ display: 'flex', alignItems: 'center',justifyContent:"center" }}>
-                                                {getStatusIndicator(request.status)}
-                                                {request.status}
-                                            </Box>
-                                        </TableCell>
-                                        
-                                        <TableCell className="tableCell">
-                                            <Link 
-                                                to={`/emergency-alerts/${request.id}`}
-                                                style={{
-                                                    textDecoration: 'none',
-                                                    color: '#2196F3',
-                                                    fontWeight: 500,
-                                                    '&:hover': {
-                                                        textDecoration: 'underline'
-                                                    }
-                                                }}
-                                            >
-                                                View Details
-                                            </Link>
+                                {emergencyRequests.length > 0 ? (
+                                    emergencyRequests.map((request) => (
+                                        <TableRow key={request._id} hover>
+                                            <TableCell className="tableCell">
+                                                {request.PatientName}
+                                            </TableCell>
+                                            <TableCell className="tableCell">{request.ContactNumber}</TableCell>
+                                            <TableCell className="tableCell">{request.BloodType}</TableCell>
+                                            <TableCell className="tableCell">{request.UnitsRequired} Units</TableCell>
+                                            <TableCell className="tableCell">{request.doctorName}</TableCell>
+                                            <TableCell className="tableCell">{request.specialization}</TableCell>
+                                            <TableCell className="tableCell">
+                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
+                                                    {getStatusIndicator(request.Status)}
+                                                    {request.Status}
+                                                </Box>
+                                            </TableCell>
+                                            {/* <TableCell className="tableCell">
+                                                <Link 
+                                                    to={`/emergency-alerts/${request._id}`}
+                                                    style={{
+                                                        textDecoration: 'none',
+                                                        color: '#2196F3',
+                                                        fontWeight: 500,
+                                                        '&:hover': {
+                                                            textDecoration: 'underline'
+                                                        }
+                                                    }}
+                                                >
+                                                    View Details
+                                                </Link>
+                                            </TableCell> */}
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center">
+                                            No emergency requests found
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>

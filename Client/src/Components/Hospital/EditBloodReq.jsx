@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import {
@@ -12,9 +12,13 @@ import {
     Radio,
     Button
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 function EditBloodReq() {
+    const { id } = useParams();
+const navigate = useNavigate()
     const bloodGroups = [
         "A Positive (A+)", "A Negative (A-)",
         "B Positive (B+)", "B Negative (B-)",
@@ -23,13 +27,36 @@ function EditBloodReq() {
     ];
 
     const [formData, setFormData] = React.useState({
-        patientName: '',
-        contactNumber: '',
-        bloodType: '',
-        unitsRequired: '',
-        category: '',
-        status: ''
+        PatientName: '',
+        ContactNumber: '',
+        BloodType: '',
+        UnitsRequired: '',
+        Status: ''
     });
+
+    useEffect(() => {
+        const fetchRequestData = async () => {
+            try {
+                const response = await axios.post(`http://localhost:4005/FetchHosReq/${id}`);
+                console.log(response.data);
+                if (response.data) {
+                    setFormData({
+                        PatientName: response.data.PatientName || '',
+                        ContactNumber: response.data.ContactNumber || '',
+                        BloodType: response.data.BloodType || '',
+                        UnitsRequired: response.data.UnitsRequired || '',
+                        Status: response.data.Status || ''
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching blood request:", error);
+            }
+        };
+
+        if (id) {
+            fetchRequestData();
+        }
+    }, [id]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -39,8 +66,31 @@ function EditBloodReq() {
         }));
     };
 
+    const handleSubmit = async () => {
+        try {
+            await axios.post(`http://localhost:4005/EditHospital/BloodReq/${id}`, formData);
+            toast.success('Request updated successfully!');
+            navigate("/hosEmergency")
+        } catch (error) {
+            console.error("Error updating blood request:", error);
+            toast.error('Error updating request');
+        }
+    };
+
     return (
         <Box className="main-container">
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ marginTop: "80px" }}
+            />
             <HosNav />
             <Box className="sidemenu">
                 <HosSidemenu />
@@ -55,21 +105,21 @@ function EditBloodReq() {
                         <div className='edit-feilds'>
                             <h5>Patient Name <TextField
                                 className="edit-input"
-                                name="patientName"
-                                value={formData.patientName}
+                                name="PatientName"
+                                value={formData.PatientName}
                                 onChange={handleChange}
                             /></h5>
 
                             <h5>Contact Number <TextField
                                 className="edit-input"
-                                name="contactNumber"
-                                value={formData.contactNumber}
+                                name="ContactNumber"
+                                value={formData.ContactNumber}
                                 onChange={handleChange}
                             /></h5>
 
                             <h5>Blood Type<Select
-                                name="bloodType"
-                                value={formData.bloodType}
+                                name="BloodType"
+                                value={formData.BloodType}
                                 onChange={handleChange}
                                 renderValue={(selected) => selected || "Select Blood Group"}
                                 displayEmpty
@@ -87,17 +137,15 @@ function EditBloodReq() {
 
                             <h5>Units Required <TextField
                                 className="edit-input"
-                                name="unitsRequired"
-                                value={formData.unitsRequired}
+                                name="UnitsRequired"
+                                value={formData.UnitsRequired}
                                 onChange={handleChange}
                                 type="number"
                             /></h5>
 
-
-
                             <h5>Status<Select
-                                name="status"
-                                value={formData.status}
+                                name="Status"
+                                value={formData.Status}
                                 onChange={handleChange}
                                 renderValue={(selected) => selected || "Select Status"}
                                 displayEmpty
@@ -109,7 +157,7 @@ function EditBloodReq() {
                                 <MenuItem value="Planned">
                                     <ListItemIcon>
                                         <Radio
-                                            checked={formData.status === 'Planned'}
+                                            checked={formData.Status === 'Planned'}
                                             sx={{
                                                 color: '#6B7280',
                                                 '&.Mui-checked': {
@@ -123,7 +171,7 @@ function EditBloodReq() {
                                 <MenuItem value="Very Urgent">
                                     <ListItemIcon>
                                         <Radio
-                                            checked={formData.status === 'Very Urgent'}
+                                            checked={formData.Status === 'Very Urgent'}
                                             sx={{
                                                 color: '#FBBF24',
                                                 '&.Mui-checked': {
@@ -137,7 +185,7 @@ function EditBloodReq() {
                                 <MenuItem value="Emergency">
                                     <ListItemIcon>
                                         <Radio
-                                            checked={formData.status === 'Emergency'}
+                                            checked={formData.Status === 'Emergency'}
                                             sx={{
                                                 color: '#EF4444',
                                                 '&.Mui-checked': {
@@ -150,27 +198,24 @@ function EditBloodReq() {
                                 </MenuItem>
                             </Select></h5>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '40px' }}>
-                                <Link to='/hosEmergency'>
                                 <Button
                                     variant="contained"
-                                    color="primary"
+                                    color="success"
                                     style={{ marginTop: '20px' }}
-                                    onClick={() => console.log(formData)}
+                                    onClick={handleSubmit}
                                 >
-                                    Submit Request
+                                    Update Request
                                 </Button>
-                                </Link>
-                               
-                                <Button
-                                    variant="contained"
-                                    color="gray"
-                                    style={{ marginTop: '20px' }}
-                                    onClick={() => console.log(formData)}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
 
+                                <Link to='/hosEmergency'>
+                                    <Button
+                                        variant="contained"
+                                        style={{ marginTop: '20px' }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     </Box>
                 </Box>

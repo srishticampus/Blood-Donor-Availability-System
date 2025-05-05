@@ -39,11 +39,11 @@ console.log(UserData);
     const menuItems = [
         { name: 'Dashboard', icon: icon3, path: '/UserDashboard' },
         { name: 'Profile', icon: icon2, path: '/user-profile' },
-        { name: 'Blood Donation Request', icon: icon4, path: '#' },
-        { name: 'Notification', icon: icon5, path: '#' },
-        { name: 'Doner History', icon: icon7, path: '#' },
-        { name: 'Hospitals', icon: icon8, path: '#' },
-        { name: 'Send Request', icon: icon9, path: '#' },
+        { name: 'Blood Donation Request', icon: icon4, path: '/user-view-requests' },
+        { name: 'Notification', icon: icon5, path: '/user-view-notifications' },
+        { name: 'History', icon: icon7, path: '/user-requests' },
+        { name: 'Hospitals', icon: icon8, path: '/user-HospitalList' },
+        { name: 'Send Request', icon: icon9, path: '/user-blood-request' },
         { name: 'Logout', icon: icon1, action: () => setOpenLogoutDialog(true) }
     ];
 
@@ -54,8 +54,9 @@ console.log(UserData);
 
     const handleLogout = () => {
         localStorage.removeItem('User');
+        localStorage.removeItem('UserId');
+
         setOpenLogoutDialog(false);
-        // window.location.href = '/'; 
         navigate("/")
     };
 

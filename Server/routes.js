@@ -15,6 +15,8 @@ router.post('/donorEditProfile',DonerController.upload,DonerController.editDonor
 router.post('/ViewAllDoner',DonerController.ViewAllDonors)
 router.post('/FindDonerEmail',DonerController.FindEmail)
 router.post('/ForgotPass-doner/:Email',DonerController.ForgotPassword)
+router.post('/ViewDonerProfile/:id',DonerController.FindOneDoner)
+router.post('/findDoner/:id',DonerController.FindDonerParams)
 
 
 
@@ -36,6 +38,21 @@ router.post('/EditUserdata',UserController.upload,UserController.editUserProfile
 
 
 router.post('/AddBloodRequest',BloodRequestController.createBloodRequest)
-
+router.get('/ShowRequest/:hospitalId', BloodRequestController.getHospitalBloodRequests);
+router.get('/ShowRequestUser/:USERID', BloodRequestController.getUserBloodRequests);
+router.get('/ShowAllBloodRequest',BloodRequestController.getAllBloodRequests)
+router.post("/:id/approve", BloodRequestController.approveBloodRequest);
+router.post("/:id/Donerapprove", BloodRequestController.approveBloodRequestByDoner);
+router.post("/:id/DonerReject", BloodRequestController.donerrejectBloodRequest);
+router.post("/:id/reject", BloodRequestController.rejectBloodRequest)
+router.post("/:id/delete", BloodRequestController.deletingBloodRequest)
+router.post("/EditHospital/BloodReq/:_id", BloodRequestController.updateBloodRequest);
+router.post("/FetchHosReq/:id", BloodRequestController.getBloodRequestById)
+router.post("/bloodRequests/:id", BloodRequestController.deleteBloodRequest)
+router.post("/FullFill/:id", BloodRequestController.FullFillBloodRequest)
+router.post("/Cancel/:id", BloodRequestController.donercancelBloodRequest)
+router.patch('/notifications/:requestId/admin-read', BloodRequestController.markAsReadByAdmin);
+router.patch('/notifications/:requestId/user-read', BloodRequestController.markAsReadByUser);
+router.patch('/notifications/:requestId/donor-read', BloodRequestController.markAsReadByDoner);
 module.exports=router
 

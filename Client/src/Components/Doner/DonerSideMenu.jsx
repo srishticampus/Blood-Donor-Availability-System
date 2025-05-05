@@ -35,23 +35,21 @@ function DonerSideMenu() {
     const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
     const donorData = JSON.parse(localStorage.getItem('Doner') || '{}');
-    console.log(donorData);
   const profilePhotoUrl = donorData.ProfilePhoto?.filename 
     ? `http://localhost:4005/${donorData.ProfilePhoto.filename}`
     : dp; 
 
     const menuItems = [
         { name: 'Dashboard', icon: icon9, path: '/doner-dashboard' },
-        {
-            name: 'Profile Management',
-            icon: icon1,
-            subItems: [
-                { name: 'Profile', path: '/doner-Profile' },
-                { name: 'Donation History', path: '#' }
-            ]
+        { name: 'Profile Management',icon: icon1, path:'/doner-Profile'
+            // subItems: [
+            //     { name: 'Profile', path: '/doner-Profile' },
+            //     { name: 'Donation History', path: '#' }
+            // ]
         },
-        { name: 'Blood Donation Request', icon: icon2, path: '#' },
-        { name: 'Donation History', icon: icon7, path: '#' },
+        { name: 'Blood Donation Request', icon: icon2, path: '/donation-req' },
+        { name: 'Manage Request', icon: icon2, path: '/doner-FullFilled' },
+        { name: 'Donation History', icon: icon7, path: '/doner-completed-requests' },
         { name: 'Notification', icon: icon4, path: '#' },
         { name: 'About Us', icon: icon5, path: '#' },
         { name: 'Contact Us', icon: icon6, path: '#' },
@@ -68,6 +66,8 @@ function DonerSideMenu() {
 
     const handleLogout = () => {
         localStorage.removeItem('Doner');
+        localStorage.removeItem('DonerBloodType');
+        localStorage.removeItem('DonerId');
 
         setOpenLogoutDialog(false);
         navigate('/');

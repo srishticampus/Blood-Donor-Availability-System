@@ -36,9 +36,10 @@ function HosLogin() {
         e.preventDefault();
         axios.post('http://localhost:4005/hospital-login', login)
             .then((result) => {
-                localStorage.setItem('hospitalId',result.data.data._id)
-                console.log(result.data.data._id);
+               
                 if (result.data.message === "Login successful") {
+                    localStorage.setItem('hospitalId',result.data.data._id)
+                    console.log(result.data.data._id);
                     localStorage.setItem('Hospital', JSON.stringify(result.data.data));
                     toast.success('Login Successfully')
                     setTimeout(() => navigate('/Hospital-Dashboard'), 2000); 

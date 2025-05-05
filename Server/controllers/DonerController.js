@@ -10,7 +10,19 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage: storage }).single("ProfilePhoto");
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'ProfilePhoto' || file.fieldname === 'ConsentForm') {
+            cb(null, true);
+        } else {
+            cb(new Error('Unexpected field'), false);
+        }
+    }
+}).fields([
+    { name: 'ProfilePhoto', maxCount: 1 },
+    { name: 'ConsentForm', maxCount: 1 }
+]);
 
 const newRegistration = (req, res) => {
     const {
@@ -19,7 +31,8 @@ const newRegistration = (req, res) => {
         issues, donationHistory, eligibility, Category
     } = req.body;
 
-    const ProfilePhoto = req.file || null;
+    // Changed from req.file to req.files.ProfilePhoto
+    const ProfilePhoto = req.files && req.files['ProfilePhoto'] ? req.files['ProfilePhoto'][0] : null;
 
     RegistrationSchema.findOne({ Email })
         .then(existingEmail => {
@@ -42,7 +55,12 @@ const newRegistration = (req, res) => {
             }
 
             const Registration = new RegistrationSchema({
-                ProfilePhoto,
+                ProfilePhoto: ProfilePhoto ? {
+                    filename: ProfilePhoto.filename,
+                    path: ProfilePhoto.path,
+                    mimetype: ProfilePhoto.mimetype,
+                    size: ProfilePhoto.size
+                } : null,
                 FullName,
                 DateOfBirth,
                 Email,
@@ -71,26 +89,41 @@ const newRegistration = (req, res) => {
         })
         .catch(error => {
             console.error('Registration error:', error);
-            
+
             if (error.status && error.message) {
                 return res.status(error.status).json({ message: error.message });
             }
-            
+
             if (error.name === 'ValidationError') {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     message: 'Validation failed',
-                    errors: Object.values(error.errors).map(e => e.message) 
+                    errors: Object.values(error.errors).map(e => e.message)
                 });
             }
 
-            res.status(500).json({ 
+            res.status(500).json({
                 message: 'Something went wrong',
-                error: error.message 
+                error: error.message
             });
         });
 };
 const FindDoner = (req, res) => {
     RegistrationSchema.findById(req.body.id)
+        .then(result => {
+            res.status(200).json({
+                data: result,
+                message: 'Donor found'
+            });
+        })
+        .catch(error => {
+            console.error(error);
+            res.status(500).json({ message: 'Error finding donor', error });
+        });
+};
+
+
+const FindDonerParams = (req, res) => {
+    RegistrationSchema.findById(req.params.id)
         .then(result => {
             res.status(200).json({
                 data: result,
@@ -144,7 +177,12 @@ const editDonorProfile = (req, res) => {
         bloodgrp,
         weight,
         eligibility,
-        issues
+        issues,
+        vaccinationsTaken,
+        medicines,
+        SurgicalHistory,
+        PregnancyorBreastfeed,
+        Allergy
     } = req.body;
 
     const updateData = {
@@ -160,25 +198,52 @@ const editDonorProfile = (req, res) => {
         eligibility
     };
 
-    if (issues && issues !== 'undefined') {
-        try {
-            updateData.issues = JSON.parse(issues);
-        } catch (error) {
-            console.error('Error parsing issues:', error);
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid issues format'
-            });
+    const handleArrayField = (field, fieldName) => {
+        if (field && field !== 'undefined') {
+            if (typeof field === 'string') {
+                updateData[fieldName] = field.split(',').map(item => item.trim());
+            } else if (Array.isArray(field)) {
+                updateData[fieldName] = field;
+            }
+        }
+    };
+
+    try {
+        handleArrayField(issues, 'issues');
+        handleArrayField(vaccinationsTaken, 'vaccinationsTaken');
+        handleArrayField(medicines, 'medicines');
+        handleArrayField(SurgicalHistory, 'SurgicalHistory');
+        handleArrayField(Allergy, 'Allergy');
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Error processing array fields'
+        });
+    }
+
+    if (PregnancyorBreastfeed && PregnancyorBreastfeed !== 'undefined') {
+        updateData.PregnancyorBreastfeed = PregnancyorBreastfeed;
+    }
+
+    if (req.files) {
+        if (req.files['ProfilePhoto']) {
+            const file = req.files['ProfilePhoto'][0];
+            updateData.ProfilePhoto = {
+                filename: file.filename,
+                path: file.path,
+                mimetype: file.mimetype
+            };
+        }
+        if (req.files['ConsentForm']) {
+            const file = req.files['ConsentForm'][0];
+            updateData.ConsentForm = {
+                filename: file.filename,
+                path: file.path,
+                mimetype: file.mimetype
+            };
         }
     }
 
-    if (req.file) {
-        updateData.ProfilePhoto = {
-            filename: req.file.filename,
-            path: req.file.path,
-            mimetype: req.file.mimetype
-        };
-    }
     RegistrationSchema.findById(id)
         .then(existingDonor => {
             if (!existingDonor) {
@@ -268,9 +333,9 @@ const ViewAllDonors = (req, res) => {
         })
         .catch(error => {
             console.error(error);
-            res.status(500).json({ 
+            res.status(500).json({
                 message: 'Error retrieving donors',
-                error: error.message 
+                error: error.message
             });
         });
 };
@@ -316,5 +381,19 @@ const ForgotPassword = (req, res) => {
         });
 };
 
+const FindOneDoner = (req, res) => {
+    const { id } = req.params
+    RegistrationSchema.findById(id)
 
-module.exports = { newRegistration, upload, FindDoner, DonerLogin, editDonorProfile ,ViewAllDonors , FindEmail,ForgotPassword};
+        .then((result) => {
+            res.json({
+                data: result
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+
+        })
+}
+
+module.exports = { newRegistration, upload, FindDoner, DonerLogin, editDonorProfile, ViewAllDonors, FindEmail, ForgotPassword, FindOneDoner,FindDonerParams };

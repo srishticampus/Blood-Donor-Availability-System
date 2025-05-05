@@ -1,4 +1,4 @@
-  import React from 'react'
+import React from 'react'
 import LandingPage from './Components/common/LandingPage'
 import Login from './Components/Doner/DonerLogin'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -48,78 +48,104 @@ import DonerEditProfile from './Components/Doner/DonerEditProfile';
 import UserEditProfile from './Components/User/UserEditProfile';
 import DonerForgot from './Components/Doner/DonerForgot';
 import DonerResetPass from './Components/Doner/DonerResetPass';
-  
-  function App() {
-    return (
-      <div>
+import UserBloodReq from './Components/User/UserBloodReq';
+import ManageUserBlood from './Components/Hospital/ManageUserBlood';
+import ApprovedRequest from './Components/Hospital/ApprovedRequest';
+import CalceledRequest from './Components/Hospital/CanceledRequest';
+import DonerBloodRequest from './Components/Doner/DonerBloodRequest';
+import AddHealthDetails from './Components/Doner/AddHealthDetails';
+import RequestHistory from './Components/User/RequestHistory';
+import EditUserRequest from './Components/User/EditUserRequest';
+import HospitalList from './Components/User/HospitalList';
+import Approving from './Components/Doner/Approving';
+import DonerDonationHistory from './Components/Doner/DonerDonationHistory';
+import ViewRequests from './Components/User/ViewRequests';
+import UserNotification from './Components/User/UserNotification';
+
+function App() {
+  return (
+    <div>
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />
-          <Route path="/about" element={<AboutUs/>} />
+          <Route path="/about" element={<AboutUs />} />
 
-{/* Doner route */}
+          {/* Doner route */}
           <Route path="/login" element={<Login />} />
-          <Route path="/doner-registration" element={<DonerRegistration/>} />
-          <Route path="/forgotPass-doner" element={<DonerForgot/>} />
-          <Route path="/resetPassDoner/:id" element={<DonerResetPass/>} />
-
-          <Route path="/doner-medical-details" element={<MedicalInfo/>} />
-          <Route path="/donation-req" element={<DonationRequest/>} />
-          <Route path="/doner-dashboard" element={<DonerDashboard/>} />
-          <Route path="/doner-Profile" element={<DonerProfile/>} />
-          <Route path="/doner-edit-profile" element={<DonerEditProfile/>} />
+          <Route path="/doner-registration" element={<DonerRegistration />} />
+          <Route path="/forgotPass-doner" element={<DonerForgot />} />
+          <Route path="/resetPassDoner/:id" element={<DonerResetPass />} />
+          <Route path="/healthDetails" element={<AddHealthDetails />} />
+          <Route path="/doner-medical-details" element={<MedicalInfo />} />
+          <Route path="/donation-req" element={<DonerBloodRequest />} />
+          <Route path="/doner-dashboard" element={<DonerDashboard />} />
+          <Route path="/doner-Profile" element={<DonerProfile />} />
+          <Route path="/doner-edit-profile" element={<DonerEditProfile />} />
+          <Route path="/doner-completed-requests" element={<DonerDonationHistory />} />
+          <Route path="/doner-details/:id" element={<DonerDetails />} />
+          <Route path="/doner-FullFilled" element={<Approving />} />
 
           {/* Admin route */}
-          <Route path="/AdminLogin" element={<AdminLogin/>} />
-          <Route path="/AdminDashBord" element={<AdminDashboard/>} />
+          <Route path="/AdminLogin" element={<AdminLogin />} />
+          <Route path="/AdminDashBord" element={<AdminDashboard />} />
 
-          <Route path="/Hospital-req" element={<HospitalReqt/>} />
-          <Route path="/approved-hospitals" element={<ApprovedHospitals/>} />
-          <Route path="/view-members" element={<ViewMembers/>} />
-          <Route path="/view-doners" element={<ViewDoner/>} />
-          <Route path="/emergency-alerts" element={<EmergencyAlert/>} />
-          <Route path="/completed-requests" element={<CompletedRequests/>} />
-          <Route path="/enquiries" element={<UserEnquiry/>} />
-          <Route path="/notifications" element={<Notification/>} />
-          <Route path="/blood-requests" element={<BloodRequests/>} />
-          <Route path="/member-details" element={<OrganizationMembers/>} />
-          <Route path="/doner-details" element={<DonerDetails/>} />
+          <Route path="/Hospital-req" element={<HospitalReqt />} />
+          <Route path="/approved-hospitals" element={<ApprovedHospitals />} />
+          <Route path="/view-members" element={<ViewMembers />} />
+          <Route path="/view-doners" element={<ViewDoner />} />
+          <Route path="/emergency-alerts" element={<EmergencyAlert />} />
+          <Route path="/completed-requests" element={<CompletedRequests />} />
+          <Route path="/enquiries" element={<UserEnquiry />} />
+          <Route path="/notifications" element={<Notification />} />
+          <Route path="/blood-requests" element={<BloodRequests />} />
+          <Route path="/member-details" element={<OrganizationMembers />} />
 
 
-{/* Hospital route */}
+          {/* Hospital route */}
 
-          <Route path="/hospitalRegistration" element={<HosRegistration/>} />
-          <Route path="/hospitalInfo" element={<HospitalInfo/>} />
-          <Route path="/Hospital-Dashboard" element={<HosDashboard/>} />
+          <Route path="/hospitalRegistration" element={<HosRegistration />} />
+          <Route path="/hospitalInfo" element={<HospitalInfo />} />
+          <Route path="/Hospital-Dashboard" element={<HosDashboard />} />
 
-          <Route path="/hosLogin" element={<HosLogin/>}/>
-          <Route path="/forgotPass" element={<Forgot/>} />
-          <Route path="/resetPass/:id" element={<HosResetPass/>} />
-          <Route path="/hosProfile" element={<HospitalProfile/>} />
-          <Route path="/hosEditProfile" element={<EditHospital/>} />
-          <Route path="/hospatManagement" element={<HosPatManagement/>} />
-          <Route path="/hosPatDetails" element={<HosPatDetails/>} />
-          <Route path="/edithospatDetails" element={<EditHosPatDetails/>} />
-          <Route path="/bloodrequesthos" element={<BloodRequestHos/>} />
-          <Route path="/editBloodReq" element={<EditBloodReq/>} />
-          <Route path="/willingDoners" element={<WilligDoners/>} />
-          <Route path="/hosCompletedReq" element={<HosCompletedReq/>} />
-          <Route path="/hosEmergency" element={<AllBloodRequest/>} />
+          <Route path="/hosLogin" element={<HosLogin />} />
+          <Route path="/forgotPass" element={<Forgot />} />
+          <Route path="/resetPass/:id" element={<HosResetPass />} />
+          <Route path="/hosProfile" element={<HospitalProfile />} />
+          <Route path="/hosEditProfile" element={<EditHospital />} />
+          <Route path="/hospatManagement" element={<HosPatManagement />} />
+          <Route path="/hosPatDetails" element={<HosPatDetails />} />
+          <Route path="/edithospatDetails" element={<EditHosPatDetails />} />
+          <Route path="/bloodrequesthos" element={<BloodRequestHos />} />
+          <Route path="/editBloodReq/:id" element={<EditBloodReq />} />
+          <Route path="/willingDoners" element={<WilligDoners />} />
+          <Route path="/hosCompletedReq" element={<HosCompletedReq />} />
+          <Route path="/hosEmergency" element={<AllBloodRequest />} />
+          <Route path="/manageUserBlood" element={<ManageUserBlood />} />
+          <Route path="/approvedRequests" element={<ApprovedRequest />} />
+          <Route path="/canceledRequests" element={<CalceledRequest />} />
 
-          <Route path="/UserRegistration" element={<UserRegistration/>} />
-          <Route path="/UserLogin" element={<UserLogin/>} />
-          <Route path="/UserDashboard" element={<UserDashboard/>} />
-          <Route path="/forgotPassuser" element={<UserForgotPass/>} />
-          <Route path="/resetPassuser/:id" element={<UserResetPassword/>} />
-          <Route path="/user-profile" element={<UserProfile/>} />
-          <Route path="/user-edit-profile" element={<UserEditProfile/>} />
+
+
+          <Route path="/UserRegistration" element={<UserRegistration />} />
+          <Route path="/UserLogin" element={<UserLogin />} />
+          <Route path="/UserDashboard" element={<UserDashboard />} />
+          <Route path="/forgotPassuser" element={<UserForgotPass />} />
+          <Route path="/resetPassuser/:id" element={<UserResetPassword />} />
+          <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/user-edit-profile" element={<UserEditProfile />} />
+          <Route path="/user-blood-request" element={<UserBloodReq />} />
+          <Route path="/user-requests" element={<RequestHistory />} />
+          <Route path="/user-edit-request/:id" element={<EditUserRequest />} />
+          <Route path="/user-HospitalList" element={<HospitalList />} />
+          <Route path="/user-view-requests" element={<ViewRequests />} />
+          <Route path="/user-view-notifications" element={<UserNotification />} />
 
 
         </Routes>
       </Router>
-      </div>
-    )
-  }
-  
-  export default App
+    </div>
+  )
+}
+
+export default App
