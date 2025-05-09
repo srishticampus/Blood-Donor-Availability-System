@@ -65,7 +65,7 @@ import UserNotification from './Components/User/UserNotification';
 function App() {
   return (
     <div>
-      <Router>
+      <Router basename='blood_donor'>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />
