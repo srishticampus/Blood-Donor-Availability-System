@@ -16,6 +16,7 @@ import {
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function DonerDonationHistory() {
   const DonerId = localStorage.getItem("DonerId");
@@ -27,7 +28,7 @@ function DonerDonationHistory() {
   useEffect(() => {
     const fetchDonationHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:4005/ShowAllBloodRequest');
+        const response = await axios.get(`${baseUrl}ShowAllBloodRequest`);
         console.log(response)
         const filteredData = response.data.filter(request => 
           request.AcceptedByDoner.some(donor => 

@@ -14,6 +14,7 @@ import {
 import axios from 'axios';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
+import { baseUrl } from '../../baseUrl';
 
 function HospitalList() {
   const [hospital, setHospital] = useState([]);
@@ -21,7 +22,7 @@ function HospitalList() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    axios.post('http://localhost:4005/viewAllHos')
+    axios.post(`${baseUrl}viewAllHos`)
       .then((result) => {
         console.log(result);
         

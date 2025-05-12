@@ -22,6 +22,7 @@ import { Link } from 'react-router-dom';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
 import SearchIcon from '@mui/icons-material/Search';
+import { baseUrl } from '../../baseUrl';
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -77,7 +78,7 @@ function ViewRequests() {
         }
 
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowRequestUser/${USERID}`)
+        axios.get(`${baseUrl}ShowRequestUser/${USERID}`)
             .then(response => {
                 console.log(response);
                 const filteredRequests = response.data.filter(request => 

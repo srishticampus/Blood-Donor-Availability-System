@@ -16,6 +16,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Line, Pie } from 'react-chartjs-2';
+import { baseUrl } from '../../baseUrl';
 
 ChartJS.register(
   CategoryScale,
@@ -55,7 +56,7 @@ function HosDashboard() {
   const fetchPendingRequests = () => {
     const HospitalId = localStorage.getItem('hospitalId');
 
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axios.get(`${baseUrl}ShowAllBloodRequest`)
       .then(response => {
         const filteredRequests = response.data.filter(request => 
           (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 
@@ -82,7 +83,7 @@ function HosDashboard() {
   const fetchApprovedRequests = () => {
     const HospitalId = localStorage.getItem('hospitalId');
 
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axios.get(`${baseUrl}ShowAllBloodRequest`)
       .then(response => {
         const filteredRequests = response.data.filter(request => {
           const isHospitalMatch = request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId;
@@ -104,7 +105,7 @@ function HosDashboard() {
   const fetchEmergencyRequests = () => {
     const HospitalId = localStorage.getItem('hospitalId');
 
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axios.get(`${baseUrl}ShowAllBloodRequest`)
       .then(response => {
         const filteredRequests = response.data.filter(request => 
           (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 
@@ -121,7 +122,7 @@ function HosDashboard() {
   const fetchAcceptedRequests = () => {
     const HospitalId = localStorage.getItem('hospitalId');
 
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axios.get(`${baseUrl}ShowAllBloodRequest`)
       .then(response => {
         const filteredRequests = response.data.filter(request => 
           (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 

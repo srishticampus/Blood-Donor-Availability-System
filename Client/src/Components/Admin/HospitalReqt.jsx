@@ -15,12 +15,13 @@ import {
   Typography
 } from '@mui/material';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function HospitalReqt() {
   const [hospital, setHospital] = useState([]);
 
   useEffect(() => {
-    axios.post('http://localhost:4005/viewAllHos')
+    axios.post(`${baseUrl}viewAllHos`)
       .then((result) => {
         const pendingHospitals = result.data.data.filter(
           hospital => hospital.isAdminApprove === false
@@ -33,7 +34,7 @@ function HospitalReqt() {
   }, []);
 
   const handleApprove = (hospitalId) => {
-    axios.post('http://localhost:4005/hospitalApprove', { id: hospitalId })
+    axios.post(`${baseUrl}hospitalApprove`, { id: hospitalId })
       .then((result) => {
         console.log(result);
         setHospital(prevHospitals => prevHospitals.filter(hospital => hospital._id !== hospitalId));
@@ -44,7 +45,7 @@ function HospitalReqt() {
   };
   
   const handleReject = (hospitalId) => {
-    axios.post('http://localhost:4005/hospitalReject', { id: hospitalId })
+    axios.post(`${baseUrl}hospitalReject`, { id: hospitalId })
       .then((result) => {
         console.log(result);
         setHospital(prevHospitals => prevHospitals.filter(hospital => hospital._id !== hospitalId));

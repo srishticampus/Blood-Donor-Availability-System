@@ -22,6 +22,7 @@ import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import { useParams } from 'react-router-dom';
 import dp from '../../Assets/dp.jpg';
+import { baseUrl } from '../../baseUrl';
 
 function DonerDetails() {
     const { id } = useParams();
@@ -33,11 +34,11 @@ function DonerDetails() {
     const [consentError, setConsentError] = useState(null);
 
     const profilePhotoUrl = donor?.ProfilePhoto?.filename 
-        ? `http://localhost:4005/${donor?.ProfilePhoto?.filename}`
+        ? `${baseUrl}${donor?.ProfilePhoto?.filename}`
         : dp; 
     
     useEffect(() => {
-        axios.post(`http://localhost:4005/ViewDonerProfile/${id}`)
+        axios.post(`${baseUrl}ViewDonerProfile/${id}`)
             .then(response => {
                 setDonor(response.data.data);
             })
@@ -234,7 +235,7 @@ function DonerDetails() {
                             
                             {donor.ConsentForm?.mimetype?.includes('image') ? (
                                 <img 
-                                    src={`http://localhost:4005/${donor.ConsentForm.filename}`} 
+                                    src={`${baseUrl}${donor.ConsentForm.filename}`} 
                                     alt="Consent Form" 
                                     style={{ 
                                         width: '100%', 
@@ -249,7 +250,7 @@ function DonerDetails() {
                                 />
                             ) : (
                                 <iframe 
-                                    src={`http://localhost:4005/${donor.ConsentForm.filename}`} 
+                                    src={`${baseUrl}${donor.ConsentForm.filename}`} 
                                     style={{ 
                                         width: '100%', 
                                         height: '500px', 

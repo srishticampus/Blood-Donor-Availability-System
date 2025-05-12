@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
+import { baseUrl } from '../../baseUrl';
 
 const USERID = localStorage.getItem("UserId");
 console.log(USERID);
@@ -223,7 +224,7 @@ function UserBloodReq() {
             Time: formData.Time
         };
 
-        axios.post('http://localhost:4005/AddBloodRequest', requestData)
+        axios.post(`${baseUrl}AddBloodRequest`, requestData)
             .then(response => {
                 console.log(response.data);
                 toast.success('Blood request submitted successfully!');

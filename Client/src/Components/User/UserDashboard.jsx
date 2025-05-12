@@ -6,6 +6,7 @@ import UserNav from './UserNav';
 import axios from 'axios';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { baseUrl } from '../../baseUrl';
 
 function UserDashboard() {
     const [doners, setDoners] = useState([]);
@@ -13,7 +14,7 @@ function UserDashboard() {
     const [monthlyDonations, setMonthlyDonations] = useState([]);
 
     useEffect(() => {
-        axios.post('http://localhost:4005/ViewAllDoner')
+        axios.post(`${baseUrl}ViewAllDoner`)
             .then((result) => {
                 const donorData = result.data.data;
                 setDoners(donorData);

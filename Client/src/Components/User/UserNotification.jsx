@@ -7,6 +7,7 @@ import UserSideMenu from './UserSideMenu';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { baseUrl } from '../../baseUrl';
 
 function UserNotification() {
     const USERID = localStorage.getItem("UserId");
@@ -23,7 +24,7 @@ function UserNotification() {
 
         const fetchNotifications = async () => {
             try {
-                const response = await axios.get(`http://localhost:4005/ShowRequestUser/${USERID}`);
+                const response = await axios.get(`${baseUrl}ShowRequestUser/${USERID}`);
                 const requests = response.data;
                 
                 // Filter requests where ReadbyUser is "Pending" AND (donor/hospital accepted or donation fulfilled)
@@ -79,7 +80,7 @@ function UserNotification() {
 
     const markAsRead = async (id) => {
         try {
-            await axios.patch(`http://localhost:4005/notifications/${id}/user-read`);
+            await axios.patch(`${baseUrl}notifications/${id}/user-read`);
             
             // Remove the notification from the list since we only show pending ones
             setNotifications(notifications.filter(notification => notification.id !== id));

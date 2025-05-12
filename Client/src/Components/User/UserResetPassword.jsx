@@ -7,6 +7,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Nav from '../common/Nav';
+import { baseUrl } from '../../baseUrl';
 
 function UserResetPassword() {
     const navigate = useNavigate();
@@ -55,7 +56,7 @@ function UserResetPassword() {
             return;
         }
 
-        axios.post(`http://localhost:4005/ForgotPass-user/${id}`, {Password: password})
+        axios.post(`${baseUrl}ForgotPass-user/${id}`, {Password: password})
             .then(res => {
                 toast.success("Password reset successfully!");
                 setTimeout(() => navigate('/UserLogin'), 2000); 

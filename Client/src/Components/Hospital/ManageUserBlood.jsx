@@ -19,6 +19,7 @@ import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { baseUrl } from '../../baseUrl';
 
 function RejectionModal({ open, onClose, onConfirm }) {
     const [reason, setReason] = useState('');
@@ -91,7 +92,7 @@ function ManageUserBlood() {
 
     const fetchBloodRequests = () => {
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowAllBloodRequest`)
+        axios.get(`${baseUrl}ShowAllBloodRequest`)
             .then(response => {
                 console.log(response);
 
@@ -131,7 +132,7 @@ function ManageUserBlood() {
     };
 
     const handleApprove = (requestId) => {
-        axios.post(`http://localhost:4005/${requestId}/approve`, {
+        axios.post(`h${baseUrl}${requestId}/approve`, {
             hospitalId: HOSPITAL_ID
         })
             .then(response => {
@@ -151,7 +152,7 @@ function ManageUserBlood() {
     };
 
     const handleConfirmRejection = (reason) => {
-        axios.post(`http://localhost:4005/${selectedRequestId}/reject`, {
+        axios.post(`${baseUrl}${selectedRequestId}/reject`, {
             hospitalId: HOSPITAL_ID,
             reason: reason
         })

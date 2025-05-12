@@ -13,6 +13,7 @@ import {
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   const [open, setOpen] = useState(false);
@@ -121,7 +122,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
 
     try {
       const response = await axios.post(
-        `http://localhost:4005/${emergencyRequest._id}/Donerapprove`,
+        `${baseUrl}${emergencyRequest._id}/Donerapprove`,
         { DonerId }
       );
 

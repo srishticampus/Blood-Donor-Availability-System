@@ -19,6 +19,7 @@ import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { baseUrl } from '../../baseUrl';
 
 function HosCompletedReq() {
   const HospitalId = localStorage.getItem('hospitalId');
@@ -62,7 +63,7 @@ function HosCompletedReq() {
 
   const fetchCompletedRequests = () => {
     setLoading(true);
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axios.get(`${baseUrl}ShowAllBloodRequest`)
       .then(response => {
         // Filter for requests approved by this hospital
         const filteredRequests = response.data.filter(request => 

@@ -9,6 +9,7 @@ import '../../Styles/HospitalInfo.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function HospitalInfo() {
     const location = useLocation();
@@ -67,7 +68,7 @@ function HospitalInfo() {
 
         console.log('Submitting hospital data:', hospital);
 
-        axios.post('http://localhost:4005/hospital-registration', formDataToSend)
+        axios.post(`${baseUrl}hospital-registration`, formDataToSend)
         .then(response => {
             const { message } = response.data;
 

@@ -11,7 +11,7 @@ app.use(express.static(`${__dirname}/upload`))
 app.use(cors())
 
 const route = require('./routes')
-app.use('/blood_donor_api', route)
+app.use('/', route)
 
 app.listen(PORT, () => {
     console.log(`Server created successfully at ${PORT}`);

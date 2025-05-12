@@ -23,6 +23,7 @@ import DonerSideMenu from './DonerSideMenu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { baseUrl } from '../../baseUrl';
 
 function AddHealthDetails() {
   const location = useLocation();
@@ -193,7 +194,7 @@ const [inputValues, setInputValues] = useState({
   
       formData.append('id', donorData._id);
   
-      const response = await axios.post('http://localhost:4005/donorEditProfile', formData, {
+      const response = await axios.post(`${baseUrl}donorEditProfile`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

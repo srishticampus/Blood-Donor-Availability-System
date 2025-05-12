@@ -23,6 +23,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
+import { baseUrl } from '../../baseUrl';
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -79,7 +80,7 @@ function AllBloodRequest() {
         }
 
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowRequest/${hospitalId}`)
+        axios.get(`${baseUrl}ShowRequest/${hospitalId}`)
             .then(response => {
                 setRequests(response.data);
                 setFilteredRequests(response.data);
@@ -124,7 +125,7 @@ function AllBloodRequest() {
     const handleDeleteConfirm = () => {
         if (!selectedRequestId) return;
         
-        axios.post(`http://localhost:4005/bloodRequests/${selectedRequestId}`)
+        axios.post(`${baseUrl}bloodRequests/${selectedRequestId}`)
             .then(response => {
                 const updatedRequests = requests.filter(request => request._id !== selectedRequestId);
                 setRequests(updatedRequests);

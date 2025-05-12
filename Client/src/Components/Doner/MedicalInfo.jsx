@@ -12,6 +12,7 @@ import Nav from '../common/Nav';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { baseUrl } from '../../baseUrl';
 
 function MedicalInfo() {
   const location = useLocation();
@@ -106,7 +107,7 @@ function MedicalInfo() {
     completeData.append('issues', medicalInfo.issues.join(', '));
     completeData.append('weight', medicalInfo.weight);
 
-    axios.post('http://localhost:4005/registration', completeData)
+    axios.post(`${baseUrl}registration`, completeData)
       .then(response => {
         console.log('Registration successful:', response.data);
 

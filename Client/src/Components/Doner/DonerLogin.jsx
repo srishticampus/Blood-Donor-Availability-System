@@ -12,6 +12,7 @@ import { IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../../baseUrl';
 
 function DonerLogin() {
     const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +40,7 @@ function DonerLogin() {
         e.preventDefault();
         setError('');
 
-        axios.post('http://localhost:4005/donerlogin', {
+        axios.post(`${baseUrl}donerlogin`, {
             Email: formData.Email,
             Password: formData.Password
         })

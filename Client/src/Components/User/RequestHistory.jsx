@@ -17,6 +17,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
+import { baseUrl } from '../../baseUrl';
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -72,7 +73,7 @@ function RequestHistory() {
         }
 
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowRequestUser/${USERID}`)
+        axios.get(`${baseUrl}ShowRequestUser/${USERID}`)
             .then(response => {
                 console.log(response);
                 setRequests(response.data);

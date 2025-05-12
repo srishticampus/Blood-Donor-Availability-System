@@ -13,12 +13,13 @@ import {
   Typography
 } from '@mui/material';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function ApprovedHospitals() {
   const [hospital, setHospital] = useState([]);
 
   useEffect(() => {
-    axios.post('http://localhost:4005/viewAllHos')
+    axios.post(`${baseUrl}viewAllHos`)
       .then((result) => {
         const approvedHospitals = result.data.data.filter(
           hospital => hospital.isAdminApprove === true

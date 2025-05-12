@@ -16,12 +16,13 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function ViewDoner() {
     const [doners, setDoners] = useState([]);
 
     useEffect(() => {
-        axios.post('http://localhost:4005/ViewAllDoner')
+        axios.post(`${baseUrl}ViewAllDoner`)
             .then((result) => {
                 console.log(result.data.data);
                 setDoners(result.data.data);
@@ -75,7 +76,7 @@ function ViewDoner() {
                                         <TableCell className="tableCell">
                                             <Avatar 
                                                 alt={donor.FullName} 
-                                                src={`http://localhost:4005/${donor.ProfilePhoto?.filename}`} 
+                                                src={`${baseUrl}${donor.ProfilePhoto?.filename}`} 
                                                 sx={{ width: 40, height: 40 }}
                                             />
                                         </TableCell>

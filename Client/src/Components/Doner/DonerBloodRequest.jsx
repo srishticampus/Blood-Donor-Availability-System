@@ -19,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import EmergencyPopup from './EmergencyPopup';
+import { baseUrl } from '../../baseUrl';
 
 function DonerBloodRequest() {
     const DonerId = localStorage.getItem("DonerId");
@@ -97,7 +98,7 @@ function DonerBloodRequest() {
 
     const fetchBloodRequests = () => {
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowAllBloodRequest`)
+        axios.get(`${baseUrl}ShowAllBloodRequest`)
             .then(response => {
                 console.log(response);
                 
@@ -165,7 +166,7 @@ function DonerBloodRequest() {
 
         try {
             const response = await axios.post(
-                `http://localhost:4005/${requestId}/Donerapprove`,
+                `${baseUrl}${requestId}/Donerapprove`,
                 { DonerId }
             );
 
@@ -196,7 +197,7 @@ function DonerBloodRequest() {
 
         try {
             const response = await axios.post(
-                `http://localhost:4005/${requestId}/DonerReject`,
+                `${baseUrl}${requestId}/DonerReject`,
                 { donerId: DonerId }
             );
 

@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Nav from '../common/Nav';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { baseUrl } from '../../baseUrl';
 
 
 function DonerRegistration() {
@@ -132,7 +133,7 @@ function DonerRegistration() {
         formDataToSend.append('District', doner.District);
         formDataToSend.append('City', doner.City);
 
-        axios.post('http://localhost:4005/UserRegistration', formDataToSend, {
+        axios.post(`${baseUrl}UserRegistration`, formDataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

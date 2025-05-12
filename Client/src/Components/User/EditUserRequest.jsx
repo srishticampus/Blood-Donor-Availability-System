@@ -16,6 +16,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
+import { baseUrl } from '../../baseUrl';
 
 function EditUserRequest() {
     const { id } = useParams();
@@ -74,7 +75,7 @@ function EditUserRequest() {
     useEffect(() => {
         const fetchRequestData = async () => {
             try {
-                const response = await axios.post(`http://localhost:4005/FetchHosReq/${id}`);
+                const response = await axios.post(`${baseUrl}FetchHosReq/${id}`);
                 if (response.data) {
                     const requestDate = response.data.Date ? formatDate(response.data.Date) : '';
                     const today = getTodayDate();
@@ -187,7 +188,7 @@ function EditUserRequest() {
             Time: formData.Time
         };
 
-        axios.post(`http://localhost:4005/EditHospital/BloodReq/${id}`, requestData)
+        axios.post(`${baseUrl}EditHospital/BloodReq/${id}`, requestData)
             .then(response => {
                 toast.success('Blood request updated successfully!');
                 navigate('/user-requests');

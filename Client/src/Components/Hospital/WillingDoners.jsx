@@ -19,6 +19,7 @@ import {
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
+import { baseUrl } from '../../baseUrl';
 
 function WilligDoners() {
     const [donors, setDonors] = useState([]);
@@ -27,7 +28,7 @@ function WilligDoners() {
     useEffect(() => {
         const fetchDonors = async () => {
             try {
-                const response = await axios.post('http://localhost:4005/ViewAllDoner');
+                const response = await axios.post(`${baseUrl}ViewAllDoner`);
                 const processedDonors = processDonors(response.data.data);
                 setDonors(processedDonors);
                 setLoading(false);
