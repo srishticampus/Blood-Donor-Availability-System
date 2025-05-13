@@ -132,7 +132,7 @@ function AllBloodRequest() {
     const handleDeleteConfirm = () => {
         if (!selectedRequestId) return;
         
-        axios.post(`http://localhost:4005/bloodRequests/${selectedRequestId}`)
+        axios.post(`${baseUrl}bloodRequests/${selectedRequestId}`)
             .then(response => {
                 const updatedRequests = requests.filter(request => request._id !== selectedRequestId);
                 setRequests(updatedRequests);

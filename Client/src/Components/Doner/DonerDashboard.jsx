@@ -155,7 +155,7 @@ function DonerDashboard() {
     : 'Now (no donation history)';
 
   const profilePhotoUrl = donorData.ProfilePhoto?.filename
-    ? `http://localhost:4005/${donorData.ProfilePhoto.filename}`
+    ? `${baseUrl}${donorData.ProfilePhoto.filename}`
     : dp;
 
   return (

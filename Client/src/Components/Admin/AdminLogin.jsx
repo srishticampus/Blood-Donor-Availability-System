@@ -14,7 +14,8 @@ import { IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../Service/BaseUrl';
+import { baseUrl } from '../../baseUrl';
+
 function AdminLogin() {
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +47,7 @@ function AdminLogin() {
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
-        axiosInstance.post('/adminlogin', formData)
+        axios.post(`${baseUrl}adminlogin`, formData)
             .then((result) => {
                 console.log(result);
 

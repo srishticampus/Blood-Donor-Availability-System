@@ -3,7 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const db = require('./dbConnection')
 const cors = require('cors')
-const PORT = 4005
+const PORT = 4058
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())

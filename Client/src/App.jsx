@@ -63,7 +63,7 @@ import DonerAboutUs from './Components/Doner/DonerAboutUs';
 function App() {
   return (
     <div>
-      <Router>
+      <Router basename='blood_donor'>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />

@@ -1,0 +1,89 @@
+name: Deploy to VPS - MERN Stack - Blood Donor App
+
+on:
+  push:
+    branches: [deployment]
+
+env:
+  VPS_IP: ${{ secrets.VPS_IP }}
+  VPS_USER: ${{ secrets.VPS_USER }}
+  VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+  DEPLOY_DIR: /home/ubuntu/new_hybrid_projects/blood_donor
+  PM2_APP_NAME: blood_donor
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Frontend build (output to root dist)
+      - name: Build React frontend
+        working-directory: ./Client
+        run: |
+          npm ci
+          npm run build -- --outDir=../dist
+
+      # Backend preparation
+      - name: Prepare backend
+        working-directory: ./Server
+        run: |
+          npm i
+
+      # Create deployment package with proper .env handling
+      - name: Create deployment structure
+        run: |
+          mkdir -p deploy
+
+          # Copy frontend build files directly to deploy root
+          cp -r dist/* deploy/
+
+          # Create backend directory and copy files
+          mkdir -p deploy/backend
+          cp -r Server/* deploy/backend/
+          rm -rf deploy/backend/node_modules
+
+          # Create .env file directly in deploy/backend
+
+      # Compress for transfer
+      - name: Compress deployment package
+        run: tar -czvf blood_donor.tar.gz -C deploy .
+
+      # Deploy to VPS
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known_hosts: "just-a-placeholder-so-we-dont-get-errors"
+
+      - name: Transfer files to VPS
+        run: |
+          scp -o StrictHostKeyChecking=no blood_donor.tar.gz ${{ env.VPS_USER }}@${{ env.VPS_IP }}:/tmp/
+
+      - name: SSH and deploy on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_IP }} << EOF
+          # Create directory if not exists
+          mkdir -p ${{ env.DEPLOY_DIR }}
+
+          # Clear existing files (except uploads if needed)
+          rm -rf ${{ env.DEPLOY_DIR }}/*
+
+          # Extract files
+          tar -xzvf /tmp/blood_donor.tar.gz -C ${{ env.DEPLOY_DIR }}
+
+          # Ensure uploads directory exists with proper permissions
+          mkdir -p ${{ env.DEPLOY_DIR }}/backend/uploads
+          chmod -R 755 ${{ env.DEPLOY_DIR }}/backend/uploads
+
+          # Install backend dependencies
+          cd ${{ env.DEPLOY_DIR }}/backend
+          npm install --omit=dev
+
+          # Restart application with PM2
+          pm2 delete ${{ env.PM2_APP_NAME }} || true
+          pm2 start index.js --name "${{ env.PM2_APP_NAME }}"
+          pm2 save
+          EOF

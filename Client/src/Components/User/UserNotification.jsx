@@ -78,7 +78,7 @@ function UserNotification() {
 
     const markAsRead = async (id) => {
         try {
-            await axios.patch(`http://localhost:4005/notifications/${id}/user-read`);
+            await axios.patch(`${baseUrl}notifications/${id}/user-read`);
             
             setNotifications(notifications.filter(notification => notification.id !== id));
             

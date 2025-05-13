@@ -232,7 +232,7 @@ function UserEditProfile() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 userData.ProfilePhoto?.path ?
-                                    `http://localhost:4005/${userData.ProfilePhoto.filename}` : ''}
+                                    `${baseUrl}${userData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

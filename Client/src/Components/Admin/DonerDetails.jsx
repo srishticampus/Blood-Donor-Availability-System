@@ -33,7 +33,7 @@ function DonerDetails() {
     const [consentError, setConsentError] = useState(null);
 
     const profilePhotoUrl = donor?.ProfilePhoto?.filename 
-        ? `http://localhost:4005/${donor?.ProfilePhoto?.filename}`
+        ? `${baseUrl}${donor?.ProfilePhoto?.filename}`
         : dp; 
     
     useEffect(() => {
@@ -252,7 +252,7 @@ function DonerDetails() {
                             
                             {donor.ConsentForm?.mimetype?.includes('image') ? (
                                 <img 
-                                    src={`http://localhost:4005/${donor.ConsentForm.filename}`} 
+                                    src={`${baseUrl}${donor.ConsentForm.filename}`} 
                                     alt="Consent Form" 
                                     style={{ 
                                         width: '100%', 
