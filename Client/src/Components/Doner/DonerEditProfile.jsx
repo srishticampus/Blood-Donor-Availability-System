@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import { Link } from 'react-router-dom';
-
 function DonerEditProfile() {
     const navigate = useNavigate();
     const donorData = JSON.parse(localStorage.getItem('Doner') || '{}');
@@ -169,13 +168,11 @@ function DonerEditProfile() {
             return;
         }
 
-        // Prepare the data to pass to the next component
         const donorProfileData = {
             ...formData,
             ProfilePhoto: profileImageFile || donorData.ProfilePhoto
         };
 
-        // Navigate to health details with state
         navigate('/healthDetails', { state: { donorProfileData } });
     };
 

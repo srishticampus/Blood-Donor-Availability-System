@@ -16,7 +16,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-
+import axiosInstance from '../Service/BaseUrl'
 function EditUserRequest() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -74,12 +74,11 @@ function EditUserRequest() {
     useEffect(() => {
         const fetchRequestData = async () => {
             try {
-                const response = await axios.post(`http://localhost:4005/FetchHosReq/${id}`);
+                const response = await axiosInstance.post(`/FetchHosReq/${id}`);
                 if (response.data) {
                     const requestDate = response.data.Date ? formatDate(response.data.Date) : '';
                     const today = getTodayDate();
                     
-                    // Validate the existing date - if it's in the past, set to today's date
                     const validatedDate = requestDate < today ? today : requestDate;
                     
                     setFormData({
@@ -110,16 +109,12 @@ function EditUserRequest() {
         switch (name) {
             case 'patientName':
             case 'doctorName':
-                // Only allow alphabets and spaces
                 return !/^[A-Za-z\s]+$/.test(value);
             case 'contactNumber':
-                // Only allow numbers and exactly 10 digits
                 return !/^\d{10}$/.test(value);
             case 'unitsRequired':
-                // Only allow numbers greater than 0
                 return !/^\d+$/.test(value) || parseInt(value) <= 0;
             case 'Date':
-                // Don't allow past dates
                 return value < getTodayDate();
             default:
                 return false;
@@ -129,7 +124,6 @@ function EditUserRequest() {
     const handleChange = (event) => {
         const { name, value } = event.target;
         
-        // For date field, ensure it's not in the past
         if (name === 'Date') {
             const today = getTodayDate();
             const selectedDate = value;
@@ -139,17 +133,15 @@ function EditUserRequest() {
                     ...prev,
                     [name]: true
                 }));
-                return; // Don't update the state if date is in the past
+                return; 
             }
         }
         
-        // Validate the field
         setErrors(prev => ({
             ...prev,
             [name]: validateField(name, value)
         }));
 
-        // Update form data
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -157,7 +149,6 @@ function EditUserRequest() {
     };
 
     const handleSubmit = () => {
-        // Validate all fields before submission
         const newErrors = {
             patientName: validateField('patientName', formData.patientName),
             contactNumber: validateField('contactNumber', formData.contactNumber),
@@ -168,7 +159,6 @@ function EditUserRequest() {
 
         setErrors(newErrors);
 
-        // Check if any errors exist
         if (Object.values(newErrors).some(error => error)) {
             toast.error('Please correct the errors in the form');
             return;
@@ -187,7 +177,7 @@ function EditUserRequest() {
             Time: formData.Time
         };
 
-        axios.post(`http://localhost:4005/EditHospital/BloodReq/${id}`, requestData)
+        axiosInstance.post(`/EditHospital/BloodReq/${id}`, requestData)
             .then(response => {
                 toast.success('Blood request updated successfully!');
                 navigate('/user-requests');

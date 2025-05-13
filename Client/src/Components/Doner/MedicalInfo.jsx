@@ -7,12 +7,11 @@ import {
 } from '@mui/material';
 import '../../Styles/MedicalInfo.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import Nav from '../common/Nav';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import axiosInstance from '../Service/BaseUrl';
 function MedicalInfo() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -106,7 +105,7 @@ function MedicalInfo() {
     completeData.append('issues', medicalInfo.issues.join(', '));
     completeData.append('weight', medicalInfo.weight);
 
-    axios.post('http://localhost:4005/registration', completeData)
+    axiosInstance.post('/registration', completeData)
       .then(response => {
         console.log('Registration successful:', response.data);
 

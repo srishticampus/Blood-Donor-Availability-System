@@ -105,7 +105,6 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
 
-    // Check eligibility before approving
     const { eligible, nextDate } = checkDonationEligibility();
     if (!eligible) {
       const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
@@ -120,8 +119,8 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
     setIsApproving(true);
 
     try {
-      const response = await axios.post(
-        `http://localhost:4005/${emergencyRequest._id}/Donerapprove`,
+      const response = await axiosInstance.post(
+        `/${emergencyRequest._id}/Donerapprove`,
         { DonerId }
       );
 

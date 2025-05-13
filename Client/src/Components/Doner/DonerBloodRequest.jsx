@@ -100,37 +100,39 @@ function DonerBloodRequest() {
         axios.get(`http://localhost:4005/ShowAllBloodRequest`)
             .then(response => {
                 console.log(response);
-                
+
                 if (response.data && Array.isArray(response.data)) {
                     const cleanDonorBloodType = donorBloodType.replace(/"/g, '').trim().toUpperCase();
                     const currentDonorId = localStorage.getItem("DonerId");
-    
+
                     const filteredRequests = response.data.filter(request => {
                         // Skip if request is already approved by hospital
                         if (request.IsHospital === "Approved") return false;
-    
+
                         if (!request.BloodType) return false;
-    
+
                         const requestBloodType = formatBloodType(request.BloodType);
                         if (requestBloodType !== cleanDonorBloodType) return false;
-    
+
+                        // Check if current donor has already accepted this request
                         if (request.AcceptedByDoner && Array.isArray(request.AcceptedByDoner)) {
                             const hasAccepted = request.AcceptedByDoner.some(
-                                acceptance => acceptance.donerId._id === currentDonorId
+                                acceptance => acceptance.donerId && acceptance.donerId._id === currentDonorId
                             );
                             if (hasAccepted) return false;
                         }
-    
+
+                        // Check if current donor has already rejected this request
                         if (request.RejectedByDoner && Array.isArray(request.RejectedByDoner)) {
                             const hasRejected = request.RejectedByDoner.some(
                                 rejection => rejection.donerId === currentDonorId
                             );
                             if (hasRejected) return false;
                         }
-    
+
                         return request.IsDoner === "Pending";
                     });
-    
+
                     setRequests(filteredRequests);
                 } else {
                     setRequests([]);

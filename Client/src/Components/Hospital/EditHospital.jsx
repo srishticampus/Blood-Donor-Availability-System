@@ -14,7 +14,7 @@ import '../../Styles/EditHospital.css';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-
+import axiosInstance from '../Service/BaseUrl';
 function EditHospital() {
     const navigate = useNavigate();
     const hospitalData = JSON.parse(localStorage.getItem('Hospital') || '{}');
@@ -174,7 +174,7 @@ function EditHospital() {
                 formDataToSend.append('ProfilePhoto', profileImageFile);
             }
 
-            const response = await axios.post('http://localhost:4005/hosEditProfile', formDataToSend, {
+            const response = await axiosInstance.post('/hosEditProfile', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

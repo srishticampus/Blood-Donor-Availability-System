@@ -3,11 +3,15 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../Assets/logo.png';
 import SearchBar from './SearchBar';
 
 function HosNav({ searchTerm, onSearchChange }) {
+    const location = useLocation();
+    const hideSearchPaths = ['/hosProfile', '/hosEditProfile'];
+    const shouldHideSearch = hideSearchPaths.includes(location.pathname);
+
     return (
         <AppBar position="fixed" sx={{ backgroundColor: 'white', color: 'black', boxShadow: 1 }}>
             <Container maxWidth="xl" sx={{ px: 2, maxWidth: '1200px' }}>
@@ -35,15 +39,19 @@ function HosNav({ searchTerm, onSearchChange }) {
                             }}
                         />
                     </Box>
-                    <Box>
-                        <SearchBar 
-                            searchTerm={searchTerm} 
-                            onSearchChange={onSearchChange} 
-                        />
-                    </Box>
+                    
+                    {!shouldHideSearch && (
+                        <Box>
+                            <SearchBar 
+                                searchTerm={searchTerm} 
+                                onSearchChange={onSearchChange} 
+                            />
+                        </Box>
+                    )}
                 </Toolbar>
             </Container>
         </AppBar>
     );
 }
+
 export default HosNav;

@@ -16,7 +16,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-
+import axiosInstance from '../Service/BaseUrl';
 function BloodRequest() {
     const navigate = useNavigate()
     const HospitalId = localStorage.getItem('hospitalId')
@@ -224,7 +224,7 @@ function BloodRequest() {
             Time: formData.Time
         };
 
-        axios.post('http://localhost:4005/AddBloodRequest', requestData)
+        axiosInstance.post('/AddBloodRequest', requestData)
             .then(response => {
                 console.log(response.data);
                 toast.success('Blood request submitted successfully!');

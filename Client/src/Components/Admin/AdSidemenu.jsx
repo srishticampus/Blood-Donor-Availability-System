@@ -58,12 +58,12 @@ function AdSidemenu() {
         <div className='sidemenu-container'>
             <div className='Admin-card'>
                 <Avatar
-                    alt="Alex Thomas"
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQi2Mm5P8j09P4hPKa1B-t9eIOHzHmR7IBkw&s"
+                    alt="Admin"
+                    src="https://img.freepik.com/premium-vector/blue-white-logo-with-three-men-circle-with-picture-man-circle-with-picture-man-circle-with-rainbow-center_1205884-4061.jpg"
                 />
                 <div>
-                    <h3>Alex Thomas</h3>
-                    <h5>alxtms78@gmail.com</h5>
+                    <h3>BDAS</h3>
+                    <h5>admin@123</h5>
                 </div>
             </div>
             <div className='sidemenu-options'>

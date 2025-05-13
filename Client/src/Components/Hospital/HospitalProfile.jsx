@@ -11,7 +11,7 @@ import HosSidemenu from './HosSidemenu';
 import { Description } from '@mui/icons-material';
 import '../../Styles/EditHospital.css';
 import { Link } from 'react-router-dom';
-
+import axiosInstance from '../Service/BaseUrl';
 function HospitalProfile() {
     const hospitalData = JSON.parse(localStorage.getItem('Hospital') || '{}');
 

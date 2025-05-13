@@ -249,6 +249,7 @@ exports.approveBloodRequest = (req, res) => {
         {
           IsHospital: "Approved",
           AcceptedBy: hospitalId,
+          HospitalApprovedAt: new Date()
         },
         { new: true, runValidators: true }
       );
@@ -275,7 +276,6 @@ exports.approveBloodRequest = (req, res) => {
       }
     });
 };
-
 exports.rejectBloodRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -383,18 +383,23 @@ exports.approveBloodRequestByDoner = async (req, res) => {
     const requiredUnits = updateResult.UnitsRequired;
 
     if (currentCount >= requiredUnits) {
-      await BloodRequest.findByIdAndUpdate(
+      const fulfilledUpdate = await BloodRequest.findByIdAndUpdate(
         id,
-        { IsDoner: "Accepted" }
+        { 
+          IsDoner: "Fulfilled",
+          DonerFulfilledAt: new Date() // Set the fulfillment date
+        },
+        { new: true }
       );
-      updateResult.IsDoner = "Accepted";
+      updateResult.IsDoner = "Fulfilled";
+      updateResult.DonerFulfilledAt = fulfilledUpdate.DonerFulfilledAt;
     }
 
     res.status(200).json({
       message: "Donor acceptance recorded",
       data: updateResult,
       status: currentCount >= requiredUnits
-        ? "Fully approved"
+        ? "Fully fulfilled"
         : `Pending (${currentCount}/${requiredUnits})`
     });
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { 
   Avatar,
   Box, 
@@ -22,6 +21,7 @@ import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import { useParams } from 'react-router-dom';
 import dp from '../../Assets/dp.jpg';
+import axiosInstance from '../Service/BaseUrl';
 
 function DonerDetails() {
     const { id } = useParams();
@@ -37,7 +37,7 @@ function DonerDetails() {
         : dp; 
     
     useEffect(() => {
-        axios.post(`http://localhost:4005/ViewDonerProfile/${id}`)
+        axiosInstance.post(`/ViewDonerProfile/${id}`)
             .then(response => {
                 setDonor(response.data.data);
             })
@@ -69,17 +69,31 @@ function DonerDetails() {
         setOpenConsentDialog(false);
     };
 
+    // Helper function to display array data or "None" if empty
+    const displayArrayData = (arrayData) => {
+        if (!arrayData || arrayData.length === 0) return "None";
+        return arrayData.join(', ');
+    };
+
+    // Helper function to display any data with fallback
+    const displayData = (data, fallback = "N/A") => {
+        if (data === undefined || data === null || data === '') return fallback;
+        return data;
+    };
 
     if (loading) {
         return (
             <Box className="main-container">
-                <AdminNav />
+                <AdSidemenu />
                 <Box className="sidemenu">
-                    <AdSidemenu />
-                    <Box className="content-box">
-                        <Typography variant="h4" className="title">
-                            Loading donor details...
-                        </Typography>
+                    <AdminNav />
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '70vh' 
+                    }}>
+                        <CircularProgress size={60} />
                     </Box>
                 </Box>
             </Box>
@@ -89,13 +103,16 @@ function DonerDetails() {
     if (error) {
         return (
             <Box className="main-container">
-                <AdminNav />
+                <AdSidemenu />
                 <Box className="sidemenu">
-                    <AdSidemenu />
-                    <Box className="content-box">
-                        <Typography variant="h4" className="title" color="error">
-                            Error: {error}
-                        </Typography>
+                    <AdminNav />
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '70vh' 
+                    }}>
+                        <Typography color="error">Error: {error}</Typography>
                     </Box>
                 </Box>
             </Box>
@@ -105,13 +122,16 @@ function DonerDetails() {
     if (!donor) {
         return (
             <Box className="main-container">
-                <AdminNav />
+                <AdSidemenu />
                 <Box className="sidemenu">
-                    <AdSidemenu />
-                    <Box className="content-box">
-                        <Typography variant="h4" className="title">
-                            No donor data found
-                        </Typography>
+                    <AdminNav />
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '70vh' 
+                    }}>
+                        <Typography variant="h6">No donor data found</Typography>
                     </Box>
                 </Box>
             </Box>
@@ -120,21 +140,21 @@ function DonerDetails() {
 
     return (
         <Box className="main-container">
-            <AdminNav />
+            <AdSidemenu />
             <Box className="sidemenu">
-                <AdSidemenu />
+                <AdminNav />
                 <Box className="content-box">
                     <Typography variant="h4" className="title">
                         Donor Health Details
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                         <Avatar
-                            alt={donor.FullName || "Donor"}
+                            alt={displayData(donor.FullName, "Donor")}
                             src={profilePhotoUrl}
                             sx={{ width: 60, height: 60 }}
                         />
                         <Typography variant="h4" className="title-sub">
-                            Health Information for {donor.FullName || "Donor"}
+                            Health Information for {displayData(donor.FullName, "Donor")}
                         </Typography>
                     </Box>
                     
@@ -155,12 +175,12 @@ function DonerDetails() {
                                 </TableRow>
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Blood Group</TableCell>
-                                    <TableCell className="tableCell">{donor.bloodgrp || "N/A"}</TableCell>
+                                    <TableCell className="tableCell">{displayData(donor.bloodgrp)}</TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Vaccination Taken</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.vaccinationsTaken ? donor.vaccinationsTaken.join(', ') : "N/A"}
+                                        {displayArrayData(donor.vaccinationsTaken)}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
@@ -172,25 +192,25 @@ function DonerDetails() {
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Medicines</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.medicines ? donor.medicines.join(', ') : "None"}
+                                        {displayArrayData(donor.medicines)}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Surgical History</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.SurgicalHistory ? donor.SurgicalHistory.join(', ') : "None"}
+                                        {displayArrayData(donor.SurgicalHistory)}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Pregnancy / Breastfeeding</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.PregnancyorBreastfeed || "No"}
+                                        {displayData(donor.PregnancyorBreastfeed, "No")}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Any Allergy</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.Allergy ? donor.Allergy.join(', ') : "None"}
+                                        {displayArrayData(donor.Allergy)}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
@@ -218,7 +238,7 @@ function DonerDetails() {
                         fullWidth
                     >
                         <DialogTitle>
-                            Consent Form - {donor.ConsentForm?.filename}
+                            Consent Form - {donor.ConsentForm?.filename || "Unknown"}
                         </DialogTitle>
                         <DialogContent>
                             {isLoadingConsent && (
@@ -249,7 +269,7 @@ function DonerDetails() {
                                 />
                             ) : (
                                 <iframe 
-                                    src={`http://localhost:4005/${donor.ConsentForm.filename}`} 
+                                    src={`http://localhost:4005/${donor.ConsentForm?.filename}`} 
                                     style={{ 
                                         width: '100%', 
                                         height: '500px', 

@@ -7,7 +7,7 @@ import '../../Styles/Forgot.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Nav from '../common/Nav';
-
+import axiosInstance from '../Service/BaseUrl';
 function Forgot() {
     const navigate = useNavigate()
     const [email, setEmail] = useState('');
@@ -21,7 +21,7 @@ function Forgot() {
             return;
         }
 
-        axios.post('http://localhost:4005/hosEmailFind', { Email: email })
+        axiosInstance.post('/hosEmailFind', { Email: email })
             .then((response) => {
                 console.log(response);
                 navigate(`/resetPass/${response.data.data.Email}`)

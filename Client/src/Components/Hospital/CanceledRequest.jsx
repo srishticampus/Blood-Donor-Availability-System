@@ -17,7 +17,7 @@ import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import axiosInstance from '../Service/BaseUrl';
 function CanceledRequest() {
     const hospitalId = localStorage.getItem('hospitalId');
     const [requests, setRequests] = useState([]);
@@ -30,7 +30,6 @@ function CanceledRequest() {
     }, []);
 
     useEffect(() => {
-        // Filter requests whenever searchTerm or requests change
         if (searchTerm === '') {
             setFilteredRequests(requests);
         } else {
@@ -59,7 +58,7 @@ function CanceledRequest() {
     const fetchBloodRequests = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:4005/ShowAllBloodRequest`);
+            const response = await axiosInstance.get(`/ShowAllBloodRequest`);
             console.log("API Response:", response.data);
     
             const rejectedRequests = response.data.filter(request => {
@@ -225,7 +224,6 @@ function CanceledRequest() {
                             <TableBody>
                                 {filteredRequests.length > 0 ? (
                                     filteredRequests.map((request) => {
-                                        // Find this hospital's rejection
                                         const hospitalRejection = request.RejectedBy.find(
                                             rejection => 
                                                 rejection.hospitalId && 
