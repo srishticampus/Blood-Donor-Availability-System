@@ -231,7 +231,7 @@ function EditHospital() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 hospitalData.ProfilePhoto?.filename ?
-                                    `${baseUrl}${hospitalData.ProfilePhoto.filename}` : ''}
+                                    `http://localhost:4058/${hospitalData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

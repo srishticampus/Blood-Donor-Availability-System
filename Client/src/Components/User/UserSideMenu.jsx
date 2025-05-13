@@ -14,7 +14,6 @@ import icon9 from '../../Assets/SidemenuIcon/Send.png';
 import dp from '../../Assets/dp.jpg'
 
 
-
 function UserSideMenu() {
     const navigate = useNavigate()
         useEffect(() => {
@@ -30,7 +29,7 @@ function UserSideMenu() {
 
 console.log(UserData);
   const UserProfile = UserData.ProfilePhoto?.filename 
-    ? `http://localhost:4005/${UserData.ProfilePhoto.filename}`
+    ? `http://localhost:4058/${UserData.ProfilePhoto.filename}`
     : dp; 
 
 

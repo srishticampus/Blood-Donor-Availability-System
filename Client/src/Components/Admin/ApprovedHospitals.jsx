@@ -14,8 +14,6 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
-import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
 
 function ApprovedHospitals() {
   const [hospital, setHospital] = useState([]);
@@ -25,7 +23,8 @@ function ApprovedHospitals() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.post(`${baseUrl}viewAllHos`)
+    setLoading(true);
+    axiosInstance.post('/viewAllHos')
       .then((result) => {
         const approvedHospitals = result.data.data.filter(
           hospital => hospital.isAdminApprove === true

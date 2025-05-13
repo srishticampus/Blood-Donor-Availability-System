@@ -33,7 +33,7 @@ function DonerDetails() {
     const [consentError, setConsentError] = useState(null);
 
     const profilePhotoUrl = donor?.ProfilePhoto?.filename 
-        ? `${baseUrl}${donor?.ProfilePhoto?.filename}`
+        ? `http://localhost:4058/${donor?.ProfilePhoto?.filename}`
         : dp; 
     
     useEffect(() => {
@@ -267,7 +267,7 @@ function DonerDetails() {
                                 />
                             ) : (
                                 <iframe 
-                                    src={`http://localhost:4005/${donor.ConsentForm?.filename}`} 
+                                    src={`http://localhost:4058/${donor.ConsentForm?.filename}`} 
                                     style={{ 
                                         width: '100%', 
                                         height: '500px', 

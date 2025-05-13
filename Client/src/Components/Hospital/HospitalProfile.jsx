@@ -37,7 +37,7 @@ function HospitalProfile() {
                         }}>
                         <Avatar
                             src={hospitalData.ProfilePhoto?.filename ? 
-                                `http://localhost:4005/${hospitalData.ProfilePhoto.filename}` : ''}
+                                `http://localhost:4058/${hospitalData.ProfilePhoto.filename}` : ''}
                             sx={{ width: 120, height: 120, marginBottom: 2 }}
                             alt="Hospital Profile"
                         />
@@ -124,7 +124,7 @@ function HospitalProfile() {
                                             variant="outlined"
                                             startIcon={<Description />}
                                             component="a"
-                                            href={`http://localhost:4005/${hospitalData.Document.filename}`}
+                                            href={`http://localhost:4058/${hospitalData.Document.filename}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
