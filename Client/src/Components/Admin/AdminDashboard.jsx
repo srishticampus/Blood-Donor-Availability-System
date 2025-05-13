@@ -270,7 +270,6 @@ function PendingRequestsChart({ data }) {
 }
 
 function RequestTimelineChart({ data }) {
-  // Modified to work with the available data
   const approvedRequests = data.filter(request => 
     request.IsHospital === "Approved"
   );
@@ -298,10 +297,8 @@ function RequestTimelineChart({ data }) {
     }
   });
 
-  // Sort months chronologically
   const sortedMonths = Object.keys(monthlyData).sort();
   
-  // Prepare dataset for chart
   const chartData = {
     labels: sortedMonths,
     datasets: [

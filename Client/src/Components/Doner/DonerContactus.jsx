@@ -12,18 +12,18 @@ import {
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DonerNav from './DonerNav';
-import DonerSidemenu from './DonerSidemenu';
+import DonerSideMenu from './DonerSideMenu';
 
 function DonerContactUs() {
     const donerData = JSON.parse(localStorage.getItem('Doner') || '{}');
     const donerEmail = donerData.Email || '';
 
     const [formData, setFormData] = useState({
-        email: donerEmail, // Pre-populate with donor's email
+        email: donerEmail, 
         message: ''
     });
     const [errors, setErrors] = useState({
-        message: '' // Only need message validation now
+        message: '' 
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,7 +34,6 @@ function DonerContactUs() {
             [name]: value
         }));
 
-        // Only validate message field
         if (name === 'message') {
             if (!value) {
                 setErrors(prev => ({ ...prev, message: 'Message is required' }));
@@ -47,7 +46,6 @@ function DonerContactUs() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate only the message field
         if (!formData.message) {
             setErrors(prev => ({ ...prev, message: 'Message is required' }));
             toast.error('Please enter your enquiry message');
@@ -59,7 +57,7 @@ function DonerContactUs() {
         try {
             const response = await axios.post('http://localhost:4005/ContactUs', formData);
             toast.success('Your enquiry has been submitted successfully!');
-            setFormData(prev => ({ ...prev, message: '' })); // Only clear the message field
+            setFormData(prev => ({ ...prev, message: '' })); 
         } catch (error) {
             toast.error('There was an error submitting your enquiry. Please try again.');
             console.error('Error submitting form:', error);
@@ -71,7 +69,7 @@ function DonerContactUs() {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <DonerNav/>
-            <DonerSidemenu/>
+            <DonerSideMenu/>
             <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -116,10 +114,10 @@ function DonerContactUs() {
                                 }}
                                 sx={{ 
                                     '& .MuiInputBase-input.Mui-disabled': {
-                                        color: 'rgba(0, 0, 0, 0.87)', // Keep text color when disabled
-                                        WebkitTextFillColor: 'rgba(0, 0, 0, 0.87)' // For Safari
+                                        color: 'rgba(0, 0, 0, 0.87)', 
+                                        WebkitTextFillColor: 'rgba(0, 0, 0, 0.87)' 
                                     },
-                                    backgroundColor: '#f5f5f5' // Light gray background
+                                    backgroundColor: '#f5f5f5' 
                                 }}
                             />
                         </Box>

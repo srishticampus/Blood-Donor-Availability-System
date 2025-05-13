@@ -16,7 +16,6 @@ import axiosInstance from '../Service/BaseUrl';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -29,7 +28,6 @@ ChartJS.register(
   ArcElement
 );
 
-// Fixed chart dimensions
 const CHART_WIDTH = 600;
 const CHART_HEIGHT = 350;
 
@@ -42,7 +40,6 @@ function HosDashboard() {
     hospitalApprovedRequests: []
   });
 
-  // Fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,7 +65,6 @@ function HosDashboard() {
     fetchData();
   }, []);
 
-  // Helper functions
   const shortenBloodType = (type) => type.match(/\(([^)]+)\)/)?.[1] || type;
 
   const bloodTypeColors = {
@@ -80,7 +76,6 @@ function HosDashboard() {
 
   const getColor = (type) => bloodTypeColors[type] || '#607D8B';
 
-  // Process daily data
   const processDailyData = (requests, dateField = 'createdAt') => {
     const dailyCounts = {};
     
@@ -102,7 +97,6 @@ function HosDashboard() {
       .reduce((acc, date) => ({ ...acc, [date]: dailyCounts[date] }), {});
   };
 
-  // 1. Pending Requests by Blood Type (Bar Chart)
   const pendingBarData = {
     labels: [...new Set(dashboardData.pendingRequests.map(r => shortenBloodType(r.BloodType)))],
     datasets: [{
@@ -146,7 +140,6 @@ function HosDashboard() {
     }
   };
 
-  // 2. Monthly Approved/Fulfilled (Line Chart)
   const monthlyLineData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [{
@@ -182,7 +175,6 @@ function HosDashboard() {
     }
   };
 
-  // 3. Emergency Requests by Type (Pie Chart)
   const emergencyPieData = {
     labels: [...new Set(dashboardData.emergencyRequests.map(r => shortenBloodType(r.BloodType)))],
     datasets: [{
@@ -217,7 +209,6 @@ function HosDashboard() {
     }
   };
 
-  // 4. Daily Activity (Combined Line Chart)
   const donorDailyData = processDailyData(dashboardData.acceptedRequests, 'DonerFulfilledAt');
   const hospitalDailyData = processDailyData(dashboardData.hospitalApprovedRequests, 'HospitalApprovedAt');
   
@@ -290,7 +281,6 @@ function HosDashboard() {
           gap: '20px',
           marginTop: "30px"
         }}>
-          {/* Chart 1: Pending Requests */}
           <div style={{ 
             background: 'white', 
             padding: '20px', 
@@ -306,7 +296,6 @@ function HosDashboard() {
             />
           </div>
 
-          {/* Chart 2: Monthly Approved */}
           <div style={{ 
             background: 'white', 
             padding: '20px', 
@@ -322,7 +311,6 @@ function HosDashboard() {
             />
           </div>
 
-          {/* Chart 3: Emergency Requests */}
           <div style={{ 
             background: 'white', 
             padding: '20px', 
@@ -338,7 +326,6 @@ function HosDashboard() {
             />
           </div>
 
-          {/* Chart 4: Daily Activity */}
           <div style={{ 
             background: 'white', 
             padding: '20px', 
@@ -359,7 +346,7 @@ function HosDashboard() {
               data={dailyLineData} 
               options={dailyLineOptions} 
               width={CHART_WIDTH}
-              height={CHART_HEIGHT - 30} // Adjust for summary text
+              height={CHART_HEIGHT - 30}
             />
           </div>
         </div>

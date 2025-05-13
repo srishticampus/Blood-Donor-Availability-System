@@ -25,7 +25,6 @@ function ContactUs() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validateEmail = (email) => {
-        // Strong email validation regex
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     };
@@ -37,7 +36,6 @@ function ContactUs() {
             [name]: value
         }));
 
-        // Validate email on change
         if (name === 'email') {
             if (!value) {
                 setErrors(prev => ({ ...prev, email: 'Email is required' }));
@@ -52,7 +50,6 @@ function ContactUs() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate all fields before submission
         let isValid = true;
         const newErrors = { ...errors };
 

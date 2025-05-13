@@ -147,14 +147,12 @@ function RequestHistory() {
         return "Pending";
     };
 
-    // Check if donor has accepted the request
     const isDonorAccepted = (request) => {
         return request.AcceptedByDoner &&
             request.AcceptedByDoner.length > 0 &&
             request.AcceptedByDoner.some(donor => donor.donationStatus === "Accepted");
     };
 
-    // Loading skeleton for table rows
     const renderSkeletonRows = () => {
         return Array(5).fill().map((_, index) => (
             <TableRow key={index}>

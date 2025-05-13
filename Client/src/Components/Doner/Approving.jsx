@@ -125,12 +125,10 @@ const fetchBloodRequests = () => {
                     const currentDonorId = localStorage.getItem("DonerId");
 
                     const filteredRequests = response.data.filter(request => {
-                        // Check if current donor has accepted this request
                         const hasAccepted = request.AcceptedByDoner?.some(
                             a => a?.donerId && a.donerId._id === currentDonorId
                         );
 
-                        // Check if current donor has already fulfilled this request
                         const hasFulfilled = request.AcceptedByDoner?.some(
                             a => a?.donerId && a.donerId._id === currentDonorId && a.donationStatus === "Fulfilled"
                         );

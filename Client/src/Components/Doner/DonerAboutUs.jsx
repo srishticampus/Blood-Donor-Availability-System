@@ -1,7 +1,7 @@
 import React from 'react'
 import '../../Styles/AboutUs.css'
 import DonerNav from './DonerNav'
-import DonerSideMenu from './DonerSidemenu'
+import DonerSideMenu from './DonerSideMenu'
 function DonerAboutUs() {
   return (
     <div>

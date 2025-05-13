@@ -34,7 +34,7 @@ function UserEnquiry() {
       } catch (err) {
         setError('Failed to fetch enquiries. Please try again later.');
         setLoading(false);
-        console.error('Error fetching enquiries:', err);
+        console.error(err);
       }
     };
 

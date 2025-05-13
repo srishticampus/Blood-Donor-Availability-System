@@ -69,13 +69,11 @@ function DonerDetails() {
         setOpenConsentDialog(false);
     };
 
-    // Helper function to display array data or "None" if empty
     const displayArrayData = (arrayData) => {
         if (!arrayData || arrayData.length === 0) return "None";
         return arrayData.join(', ');
     };
 
-    // Helper function to display any data with fallback
     const displayData = (data, fallback = "N/A") => {
         if (data === undefined || data === null || data === '') return fallback;
         return data;

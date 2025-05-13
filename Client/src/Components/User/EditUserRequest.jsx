@@ -199,7 +199,6 @@ function EditUserRequest() {
                     <Typography variant="h5" className="sub-title">Edit Blood Request</Typography>
                     <Box className="content-box-hos">
                         <div className='edit-feilds'>
-                            {/* Patient Name */}
                             <h5>Patient Name
                                 <TextField
                                     className="edit-input"
@@ -214,7 +213,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Contact Number */}
                             <h5>Contact Number
                                 <TextField
                                     className="edit-input"
@@ -230,7 +228,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Doctor Name */}
                             <h5>Doctor Name
                                 <TextField
                                     className="edit-input"
@@ -245,7 +242,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Specialization */}
                             <h5>Specialization
                                 <Select
                                     name="specialization"
@@ -272,7 +268,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Blood Type */}
                             <h5>Blood Type
                                 <Select
                                     name="bloodType"
@@ -290,7 +285,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Units Required */}
                             <h5>Units Required
                                 <TextField
                                     className="edit-input"
@@ -308,7 +302,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Status */}
                             <h5>Status
                                 <Select
                                     name="status"
@@ -337,7 +330,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Date */}
                             <h5>Date
                                 <TextField
                                     className="edit-input"
@@ -354,7 +346,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Time */}
                             <h5>Time
                                 <TextField
                                     className="edit-input"
@@ -365,7 +356,6 @@ function EditUserRequest() {
                                     InputLabelProps={{ shrink: true }}
                                 />
                             </h5>
-                            {/* Buttons */}
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '40px' }}>
                                 <Button variant="contained" style={{ marginTop: '20px' }} onClick={handleSubmit}>
                                     Update

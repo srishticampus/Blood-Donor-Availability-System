@@ -101,7 +101,6 @@ function ManageUserBlood() {
             .then(response => {
                 console.log(response);
 
-                // User requests pending for this hospital
                 const userRequests = response.data.filter(request =>
                     request.USERID !== null &&
                     request.USERID !== undefined &&
@@ -110,7 +109,6 @@ function ManageUserBlood() {
                 );
                 setRequests(userRequests);
 
-                // Requests rejected by other hospitals
                 const otherHospitalRejected = response.data.filter(request =>
                     request.USERID !== null &&
                     request.USERID !== undefined &&
@@ -129,7 +127,6 @@ function ManageUserBlood() {
                 );
                 setRejectedRequests(otherHospitalRejected);
 
-                // Requests from other hospitals
                 const otherHospRequests = response.data.filter(request =>
                     request.HospitalId !== null &&
                     request.HospitalId !== undefined &&
@@ -154,7 +151,7 @@ function ManageUserBlood() {
         })
             .then(response => {
                 toast.success('Request approved successfully');
-                fetchBloodRequests(); // Refresh all lists
+                fetchBloodRequests(); 
             })
             .catch(error => {
                 console.error('Error approving request:', error);
@@ -174,7 +171,7 @@ function ManageUserBlood() {
         })
             .then(response => {
                 toast.success('Request rejected successfully');
-                fetchBloodRequests(); // Refresh all lists
+                fetchBloodRequests(); 
             })
             .catch(error => {
                 console.error('Error rejecting request:', error);

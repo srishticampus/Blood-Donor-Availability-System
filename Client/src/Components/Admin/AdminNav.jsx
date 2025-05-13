@@ -16,9 +16,7 @@ function AdminNav({ onSearch }) {
         '/enquiries'
     ];
 
-    // Check if current path matches any of the paths where search bar should be hidden
     const shouldHideSearchBar = hideSearchBarPaths.some(path => {
-        // Handle dynamic routes like '/doner-details/:id'
         if (path.includes(':id')) {
             return location.pathname.startsWith(path.split(':id')[0]);
         }

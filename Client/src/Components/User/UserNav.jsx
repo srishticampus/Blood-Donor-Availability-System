@@ -10,7 +10,6 @@ import SearchBar from './SearchBar';
 function UserNav({ onSearch }) {
     const location = useLocation();
     
-    // Paths where SearchBar should not be shown
     const noSearchBarPaths = [
         '/UserDashboard',
         '/user-profile',
@@ -20,7 +19,6 @@ function UserNav({ onSearch }) {
         '/user-edit-profile'
     ];
     
-    // Check if current path is in the noSearchBarPaths array
     const shouldShowSearchBar = !noSearchBarPaths.includes(location.pathname);
 
     return (
