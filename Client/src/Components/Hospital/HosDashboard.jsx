@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import HosNav from './HosNav';
-import HosSidemenu from './HosSidemenu';
-import axios from 'axios';
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  PointElement, 
-  LineElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  Filler,
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
   ArcElement
 } from 'chart.js';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import axiosInstance from '../Service/BaseUrl';
+import HosNav from './HosNav';
+import HosSidemenu from './HosSidemenu';
 
 ChartJS.register(
   CategoryScale,
@@ -26,541 +25,330 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
   ArcElement
 );
 
+const CHART_WIDTH = 600;
+const CHART_HEIGHT = 350;
+
 function HosDashboard() {
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [bloodTypeCounts, setBloodTypeCounts] = useState({});
-  const [totalPending, setTotalPending] = useState(0);
-  const [approvedRequests, setApprovedRequests] = useState([]);
-  const [monthlyData, setMonthlyData] = useState({});
-  const [emergencyRequests, setEmergencyRequests] = useState([]);
-  const [acceptedRequests, setAcceptedRequests] = useState([]);
-  const [dailyAcceptedData, setDailyAcceptedData] = useState({});
+  const [dashboardData, setDashboardData] = useState({
+    pendingRequests: [],
+    approvedRequests: [],
+    emergencyRequests: [],
+    acceptedRequests: [],
+    hospitalApprovedRequests: []
+  });
 
   useEffect(() => {
-    fetchPendingRequests();
-    fetchApprovedRequests();
-    fetchEmergencyRequests();
-    fetchAcceptedRequests();
+    const fetchData = async () => {
+      try {
+        const HospitalId = localStorage.getItem('hospitalId');
+        const response = await axiosInstance.get('/ShowAllBloodRequest');
+        
+        const allRequests = response.data.filter(request => 
+          request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId
+        );
+
+        setDashboardData({
+          pendingRequests: allRequests.filter(req => req.IsDoner === "Pending" && req.IsHospital === "Pending"),
+          approvedRequests: allRequests.filter(req => req.IsHospital === "Approved" || req.IsDoner === "Fulfilled"),
+          emergencyRequests: allRequests.filter(req => req.Status === "Emergency"),
+          acceptedRequests: allRequests.filter(req => req.IsDoner === "Fulfilled"),
+          hospitalApprovedRequests: allRequests.filter(req => req.IsHospital === "Approved")
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const shortenBloodType = (bloodType) => {
-    const match = bloodType.match(/\(([^)]+)\)/); 
-    return match ? match[1] : bloodType; 
+  const shortenBloodType = (type) => type.match(/\(([^)]+)\)/)?.[1] || type;
+
+  const bloodTypeColors = {
+    'A+': '#03991F', 'A-': '#D32F2F',
+    'B+': '#1976D2', 'B-': '#7B1FA2',
+    'O+': '#FBC02D', 'O-': '#FF5722',
+    'AB+': '#0097A7', 'AB-': '#FFA500'
   };
 
-  const fetchPendingRequests = () => {
-    const HospitalId = localStorage.getItem('hospitalId');
+  const getColor = (type) => bloodTypeColors[type] || '#607D8B';
 
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
-      .then(response => {
-        const filteredRequests = response.data.filter(request => 
-          (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 
-          request.IsDoner === "Pending" && 
-          request.IsHospital === "Pending"
-        );
-        
-        setPendingRequests(filteredRequests);
-        setTotalPending(filteredRequests.length);
-        
-        const counts = filteredRequests.reduce((acc, request) => {
-          const shortType = shortenBloodType(request.BloodType);
-          acc[shortType] = (acc[shortType] || 0) + 1;
-          return acc;
-        }, {});
-        
-        setBloodTypeCounts(counts);
-      })
-      .catch(error => {
-        console.error('Error fetching pending requests:', error);
-      });
-  };
-
-  const fetchApprovedRequests = () => {
-    const HospitalId = localStorage.getItem('hospitalId');
-
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
-      .then(response => {
-        const filteredRequests = response.data.filter(request => {
-          const isHospitalMatch = request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId;
-          const isApprovedOrFulfilled = 
-            request.IsHospital === "Approved" || 
-            request.IsDoner === "Fulfilled";
-          
-          return isHospitalMatch && isApprovedOrFulfilled;
-        });
-        
-        setApprovedRequests(filteredRequests);
-        processMonthlyData(filteredRequests);
-      })
-      .catch(error => {
-        console.error('Error fetching approved requests:', error);
-      });
-  };
-
-  const fetchEmergencyRequests = () => {
-    const HospitalId = localStorage.getItem('hospitalId');
-
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
-      .then(response => {
-        const filteredRequests = response.data.filter(request => 
-          (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 
-          request.Status === "Emergency"
-        );
-        
-        setEmergencyRequests(filteredRequests);
-      })
-      .catch(error => {
-        console.error('Error fetching emergency requests:', error);
-      });
-  };
-
-  const fetchAcceptedRequests = () => {
-    const HospitalId = localStorage.getItem('hospitalId');
-
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
-      .then(response => {
-        const filteredRequests = response.data.filter(request => 
-          (request.HospitalId?._id === HospitalId || request.HospitalId === HospitalId) && 
-          request.AcceptedByDoner && 
-          request.AcceptedByDoner.length > 0
-        );
-        
-        setAcceptedRequests(filteredRequests);
-        processDailyAcceptedData(filteredRequests);
-      })
-      .catch(error => {
-        console.error('Error fetching accepted requests:', error);
-      });
-  };
-
-  const processMonthlyData = (requests) => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    
-    const monthlyCounts = months.reduce((acc, month) => {
-      acc[month] = 0;
-      return acc;
-    }, {});
-    
-    requests.forEach(request => {
-      try {
-        const date = new Date(request.createdAt);
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid date for request:', request._id, request.createdAt);
-          return;
-        }
-        
-        const monthIndex = date.getMonth();
-        const monthName = months[monthIndex];
-        monthlyCounts[monthName]++;
-      } catch (error) {
-        console.error('Error processing date:', error);
-      }
-    });
-    
-    setMonthlyData(monthlyCounts);
-  };
-
-  const processDailyAcceptedData = (requests) => {
+  const processDailyData = (requests, dateField = 'createdAt') => {
     const dailyCounts = {};
     
     requests.forEach(request => {
-      try {
-        const date = new Date(request.createdAt);
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid date for request:', request._id, request.createdAt);
-          return;
-        }
-        
-        const month = date.toLocaleString('default', { month: 'short' });
-        const day = date.getDate();
-        const dateKey = `${month} ${day}`;
-        
-        dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
-      } catch (error) {
-        console.error('Error processing date:', error);
-      }
+      const date = new Date(request[dateField] || request.createdAt);
+      if (isNaN(date.getTime())) return;
+      
+      const dateKey = `${date.toLocaleString('default', { month: 'short' })} ${date.getDate()}`;
+      dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
     });
-    
-    setDailyAcceptedData(dailyCounts);
+
+    return Object.keys(dailyCounts)
+      .sort((a, b) => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const [monthA, dayA] = a.split(' ');
+        const [monthB, dayB] = b.split(' ');
+        return months.indexOf(monthA) - months.indexOf(monthB) || parseInt(dayA) - parseInt(dayB);
+      })
+      .reduce((acc, date) => ({ ...acc, [date]: dailyCounts[date] }), {});
   };
 
-  const getBloodTypeColor = (bloodType) => {
-    const fullType = {
-      'A+': 'A Positive (A+)',
-      'A-': 'A Negative (A-)',
-      'B+': 'B Positive (B+)',
-      'B-': 'B Negative (B-)',
-      'O+': 'O Positive (O+)',
-      'O-': 'O Negative (O-)',
-      'AB+': 'AB Positive (AB+)',
-      'AB-': 'AB Negative (AB-)'
-    }[bloodType] || bloodType;
-
-    switch(fullType) {
-      case 'A Negative (A-)': return '#D32F2F'; 
-      case 'AB Negative (AB-)': return '#FFA500'; 
-      case 'A Positive (A+)': return '#03991F'; 
-      case 'B Negative (B-)': return '#7B1FA2'; 
-      case 'B Positive (B+)': return '#1976D2'; 
-      case 'O Negative (O-)': return '#FF5722'; 
-      case 'O Positive (O+)': return '#FBC02D'; 
-      case 'AB Positive (AB+)': return '#0097A7'; 
-      default: return '#607D8B'; 
-    }
+  const pendingBarData = {
+    labels: [...new Set(dashboardData.pendingRequests.map(r => shortenBloodType(r.BloodType)))],
+    datasets: [{
+      label: 'Pending Requests',
+      data: [...new Set(dashboardData.pendingRequests.map(r => shortenBloodType(r.BloodType)))].map(
+        type => dashboardData.pendingRequests.filter(r => shortenBloodType(r.BloodType) === type).length
+      ),
+      backgroundColor: [...new Set(dashboardData.pendingRequests.map(r => shortenBloodType(r.BloodType)))].map(
+        type => getColor(type)
+      ),
+      borderColor: '#ffffff',
+      borderWidth: 1
+    }]
   };
 
-  const calculateMaxYValue = (dataValues) => {
-    const maxValue = Math.max(...dataValues, 5);
-    return Math.ceil(maxValue / 5) * 5;
-  };
-
-  const getEmergencyRequestsByBloodType = () => {
-    const counts = emergencyRequests.reduce((acc, request) => {
-      const shortType = shortenBloodType(request.BloodType);
-      acc[shortType] = (acc[shortType] || 0) + 1;
-      return acc;
-    }, {});
-    
-    return {
-      labels: Object.keys(counts),
-      counts: Object.values(counts)
-    };
-  };
-
-  // Chart data and options
-  const barChartData = {
-    labels: Object.keys(bloodTypeCounts),
-    datasets: [
-      {
-        label: 'Pending Requests by Blood Type',
-        data: Object.values(bloodTypeCounts),
-        backgroundColor: Object.keys(bloodTypeCounts).map(bloodType => 
-          getBloodTypeColor(bloodType)),
-        borderColor: Object.keys(bloodTypeCounts).map(bloodType => 
-          getBloodTypeColor(bloodType)
-        ),
-        borderWidth: 1,
-      }
-    ],
-  };
-
-  const barChartOptions = {
+  const pendingBarOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false
-      },
+      legend: { display: false },
       title: {
         display: true,
-        text: 'Pending Blood Requests by Type',
-        font: {
-          size: 16
-        }
+        text: `Pending Requests (${dashboardData.pendingRequests.length})`,
+        font: { size: 16 }
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
-            return `${context.parsed.y} requests`;
-          },
-          title: function(context) {
-            return `Blood Type ${context[0].label}`;
-          }
+          label: (ctx) => `${ctx.parsed.y} request${ctx.parsed.y !== 1 ? 's' : ''}`
         }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        max: calculateMaxYValue(Object.values(bloodTypeCounts)),
-        ticks: {
-          stepSize: 1,
-          callback: function(value) {
-            return value % 1 === 0 ? value : null;
-          }
-        },
-        title: {
-          display: true,
-          text: 'Number of Requests'
-        }
+        ticks: { stepSize: 1 },
+        title: { display: true, text: 'Number of Requests' }
       },
       x: {
-        title: {
-          display: true,
-          text: 'Blood Type'
-        }
+        title: { display: true, text: 'Blood Type' }
       }
     }
   };
 
-  const areaChartData = {
-    labels: Object.keys(monthlyData),
-    datasets: [
-      {
-        label: 'Approved/Fulfilled Requests',
-        data: Object.values(monthlyData),
-        fill: true,
-        backgroundColor: 'rgba(37, 37, 37, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        tension: 0.4,
-        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
-      }
-    ],
+  const monthlyLineData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    datasets: [{
+      label: 'Approved/Fulfilled',
+      data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(
+        (month, i) => dashboardData.approvedRequests.filter(req => 
+          new Date(req.HospitalApprovedAt || req.createdAt).getMonth() === i
+        ).length
+      ),
+      fill: true,
+      backgroundColor: 'rgba(54, 162, 235, 0.2)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      tension: 0.4
+    }]
   };
 
-  const areaChartOptions = {
+  const monthlyLineOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top',
-      },
       title: {
         display: true,
-        text: 'Monthly Approved / Fulfilled Requests',
-        font: {
-          size: 16
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.parsed.y} requests`;
-          }
-        }
+        text: `Monthly Approved/Fulfilled (${dashboardData.approvedRequests.length})`,
+        font: { size: 16 }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        max: calculateMaxYValue(Object.values(monthlyData)),
-        ticks: {
-          stepSize: 1,
-          callback: function(value) {
-            return value % 1 === 0 ? value : null;
-          }
-        },
-        title: {
-          display: true,
-          text: 'Number of Requests'
-        }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Month'
-        }
-      }
-    },
-    elements: {
-      line: {
-        borderWidth: 2
-      },
-      point: {
-        radius: 4,
-        hoverRadius: 6
+        ticks: { stepSize: 1 },
+        title: { display: true, text: 'Number of Requests' }
       }
     }
   };
 
-  const sparklineData = {
-    labels: Object.keys(dailyAcceptedData).sort((a, b) => {
-      const [monthA, dayA] = a.split(' ');
-      const [monthB, dayB] = b.split(' ');
-      const dateA = new Date(`${monthA} ${dayA}, 2025`);
-      const dateB = new Date(`${monthB} ${dayB}, 2025`);
-      return dateA - dateB;
-    }),
+  const emergencyPieData = {
+    labels: [...new Set(dashboardData.emergencyRequests.map(r => shortenBloodType(r.BloodType)))],
+    datasets: [{
+      data: [...new Set(dashboardData.emergencyRequests.map(r => shortenBloodType(r.BloodType)))].map(
+        type => dashboardData.emergencyRequests.filter(r => shortenBloodType(r.BloodType) === type).length
+      ),
+      backgroundColor: [...new Set(dashboardData.emergencyRequests.map(r => shortenBloodType(r.BloodType)))].map(
+        type => getColor(type)
+      ),
+      borderWidth: 1
+    }]
+  };
+
+  const emergencyPieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: `Emergency Requests (${dashboardData.emergencyRequests.length})`,
+        font: { size: 16 }
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = Math.round((ctx.raw / total) * 100);
+            return `${ctx.label}: ${ctx.raw} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  };
+
+  const donorDailyData = processDailyData(dashboardData.acceptedRequests, 'DonerFulfilledAt');
+  const hospitalDailyData = processDailyData(dashboardData.hospitalApprovedRequests, 'HospitalApprovedAt');
+  
+  const allDates = [...new Set([
+    ...Object.keys(donorDailyData),
+    ...Object.keys(hospitalDailyData)
+  ])].sort((a, b) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const [monthA, dayA] = a.split(' ');
+    const [monthB, dayB] = b.split(' ');
+    return months.indexOf(monthA) - months.indexOf(monthB) || parseInt(dayA) - parseInt(dayB);
+  });
+
+  const dailyLineData = {
+    labels: allDates,
     datasets: [
       {
-        label: 'Daily Accepted Requests',
-        data: Object.keys(dailyAcceptedData).sort((a, b) => {
-          const [monthA, dayA] = a.split(' ');
-          const [monthB, dayB] = b.split(' ');
-          const dateA = new Date(`${monthA} ${dayA}, 2025`);
-          const dateB = new Date(`${monthB} ${dayB}, 2025`);
-          return dateA - dateB;
-        }).map(date => dailyAcceptedData[date]),
+        label: 'Donor Accepted',
+        data: allDates.map(date => donorDailyData[date] || 0),
         borderColor: '#4CAF50',
         backgroundColor: 'rgba(76, 175, 80, 0.1)',
-        borderWidth: 2,
         tension: 0.4,
-        fill: true,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        pointBackgroundColor: '#4CAF50'
+        fill: true
+      },
+      {
+        label: 'Hospital Approved',
+        data: allDates.map(date => hospitalDailyData[date] || 0),
+        borderColor: '#2196F3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        tension: 0.4,
+        fill: true
       }
     ]
   };
 
-  const sparklineOptions = {
+  const dailyLineOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false
-      },
       title: {
         display: true,
-        text: 'Daily Accepted Requests Trend',
-        font: {
-          size: 14
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.parsed.y} requests`;
-          }
-        }
+        text: 'Daily Activity',
+        font: { size: 16 }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        display: true, // ✅ Show Y-axis
-        ticks: {
-          stepSize: 1,
-          callback: function(value) {
-            return Number.isInteger(value) ? value : null;
-          }
-        },
-        title: {
-          display: true,
-          text: 'Number of Requests' // Optional Y-axis title
-        }
+        ticks: { stepSize: 1 },
+        title: { display: true, text: 'Number of Requests' }
       },
       x: {
-        display: true, // ✅ Show X-axis
-        title: {
-          display: true,
-          text: 'Date' // Optional X-axis title
-        },
         ticks: {
           maxRotation: 45,
-          minRotation: 45,
-          autoSkip: true,
-          maxTicksLimit: 7
-        },
-        grid: {
-          display: false
-        }
-      }
-    },
-    elements: {
-      line: {
-        borderWidth: 2
-      },
-      point: {
-        radius: 3,
-        hoverRadius: 5
-      }
-    },
-    maintainAspectRatio: false
-  };
-  
-  const pieChartData = {
-    labels: getEmergencyRequestsByBloodType().labels,
-    datasets: [
-      {
-        data: getEmergencyRequestsByBloodType().counts,
-        backgroundColor: getEmergencyRequestsByBloodType().labels.map(bloodType => 
-          getBloodTypeColor(bloodType)),
-        borderColor: '#fff',
-        borderWidth: 1,
-      }
-    ],
-  };
-
-  const pieChartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'right',
-      },
-      title: {
-        display: true,
-        text: 'Emergency Requests by Blood Type',
-        font: {
-          size: 16
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} (${percentage}%)`;
-          }
+          minRotation: 45
         }
       }
     }
   };
+
   return (
-    <div>
-      <HosNav/>
-      <HosSidemenu/>
-      <div className='hos-dashboard' style={{ 
-        padding: '20px', 
-        marginLeft: '250px',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px',
-        marginTop: "30px"
-      }}>
-        {/* First row with two main charts */}
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '10px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          gridColumn: '1 / -1',
+    <div className="main-container">
+      <HosNav />
+      <div className="sidemenu">
+        <HosSidemenu />
+        <div className="content-box" style={{ 
+          padding: '20px', 
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '20px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+          gap: '20px',
+          marginTop: "30px"
         }}>
-          <div style={{ height: '350px' }}>
-            <h3>Pending Requests: {totalPending}</h3>
-            <Bar data={barChartData} options={barChartOptions} />
-          </div>
-          <div style={{ height: '350px' }}>
-            <h3>Approved/Fulfilled: {approvedRequests.length}</h3>
-            <Line data={areaChartData} options={areaChartOptions} />
-          </div>
-        </div>
-        
-        {/* Second row with sparkline and pie chart side by side */}
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '10px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          gridColumn: '1 / -1',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '20px'
-        }}>
-          {/* Sparkline Chart - Left Side */}
-          
-          {/* Pie Chart - Right Side */}
-          <div style={{ height: '350px' }}>
-            <h3>Emergency Requests: {emergencyRequests.length}</h3>
-            <Pie data={pieChartData} options={pieChartOptions} />
-          </div>
-          <div style={{ height: '350px' }}>
-            <h3>Daily Accepted Requests: {acceptedRequests.length}</h3>
-            <Line data={sparklineData} options={sparklineOptions} />
+          <div style={{ 
+            background: 'white', 
+            padding: '20px', 
+            borderRadius: '10px',
+            width: `${CHART_WIDTH}px`,
+            height: `${CHART_HEIGHT}px`
+          }}>
+            <Bar 
+              data={pendingBarData} 
+              options={pendingBarOptions} 
+              width={CHART_WIDTH}
+              height={CHART_HEIGHT}
+            />
           </div>
 
+          <div style={{ 
+            background: 'white', 
+            padding: '20px', 
+            borderRadius: '10px',
+            width: `${CHART_WIDTH}px`,
+            height: `${CHART_HEIGHT}px`
+          }}>
+            <Line 
+              data={monthlyLineData} 
+              options={monthlyLineOptions} 
+              width={CHART_WIDTH}
+              height={CHART_HEIGHT}
+            />
+          </div>
+
+          <div style={{ 
+            background: 'white', 
+            padding: '20px', 
+            borderRadius: '10px',
+            width: `${CHART_WIDTH}px`,
+            height: `${CHART_HEIGHT}px`
+          }}>
+            <Pie 
+              data={emergencyPieData} 
+              options={emergencyPieOptions} 
+              width={CHART_WIDTH}
+              height={CHART_HEIGHT}
+            />
+          </div>
+
+          <div style={{ 
+            background: 'white', 
+            padding: '20px', 
+            borderRadius: '10px',
+            width: `${CHART_WIDTH}px`,
+            height: `${CHART_HEIGHT}px`
+          }}>
+            <div style={{ marginBottom: '10px' }}>
+              <strong>Daily Summary:</strong> 
+              <span style={{ color: '#4CAF50', margin: '0 15px' }}>
+                Donor Accepted: {dashboardData.acceptedRequests.length}
+              </span>
+              <span style={{ color: '#2196F3' }}>
+                Hospital Approved: {dashboardData.hospitalApprovedRequests.length}
+              </span>
+            </div>
+            <Line 
+              data={dailyLineData} 
+              options={dailyLineOptions} 
+              width={CHART_WIDTH}
+              height={CHART_HEIGHT - 30}
+            />
+          </div>
         </div>
       </div>
     </div>

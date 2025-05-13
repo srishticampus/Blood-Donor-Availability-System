@@ -5,6 +5,7 @@ const AdminController = require('./controllers/AdminController')
 const DonerController=require('./controllers/DonerController')
 const UserController=require('./controllers/UserController')
 const BloodRequestController = require('./controllers/BloodRequestController')
+const ContactUsController = require('./controllers/ContactUsController')
 
 router.post('/adminlogin',AdminController.login)
 
@@ -54,5 +55,9 @@ router.post("/Cancel/:id", BloodRequestController.donercancelBloodRequest)
 router.patch('/notifications/:requestId/admin-read', BloodRequestController.markAsReadByAdmin);
 router.patch('/notifications/:requestId/user-read', BloodRequestController.markAsReadByUser);
 router.patch('/notifications/:requestId/donor-read', BloodRequestController.markAsReadByDoner);
+
+router.post('/ContactUs',ContactUsController.createContact)
+router.post('/ShowAllContactUs',ContactUsController.getAllContacts)
+
 module.exports=router
 

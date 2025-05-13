@@ -9,7 +9,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
-
+import axiosInstance from '../Service/BaseUrl';
 function DonerDashboard() {
   const DonerId = localStorage.getItem("DonerId");
   const [donorData, setDonorData] = useState({});
@@ -31,7 +31,7 @@ function DonerDashboard() {
 
   const fetchDonorData = async () => {
     try {
-      const response = await axios.post(`http://localhost:4005/findDoner/${DonerId}`);
+      const response = await axiosInstance.post(`/findDoner/${DonerId}`);
       const data = response.data.data; 
       
       setDonorData(data);
@@ -49,7 +49,7 @@ function DonerDashboard() {
   const fetchEmergencyRequests = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4005/ShowAllBloodRequest");
+      const response = await axiosInstance.get("/ShowAllBloodRequest");
       
       if (response.data && Array.isArray(response.data)) {
         const filteredRequests = response.data.filter(request => {
@@ -155,7 +155,7 @@ function DonerDashboard() {
     : 'Now (no donation history)';
 
   const profilePhotoUrl = donorData.ProfilePhoto?.filename
-    ? `http://localhost:4005/${donorData.ProfilePhoto.filename}`
+    ? `http://localhost:4058/${donorData.ProfilePhoto.filename}`
     : dp;
 
   return (

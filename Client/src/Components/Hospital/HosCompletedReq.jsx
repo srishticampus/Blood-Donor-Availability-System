@@ -19,7 +19,7 @@ import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import axiosInstance from '../Service/BaseUrl';
 function HosCompletedReq() {
   const HospitalId = localStorage.getItem('hospitalId');
   const [completedDonations, setCompletedDonations] = useState([]);
@@ -27,12 +27,10 @@ function HosCompletedReq() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch data when component mounts
   useEffect(() => {
     fetchCompletedRequests();
   }, []);
 
-  // Filter results when search term changes
   useEffect(() => {
     if (searchTerm === '') {
       setFilteredDonations(completedDonations);
@@ -62,9 +60,8 @@ function HosCompletedReq() {
 
   const fetchCompletedRequests = () => {
     setLoading(true);
-    axios.get('http://localhost:4005/ShowAllBloodRequest')
+    axiosInstance.get('/ShowAllBloodRequest')
       .then(response => {
-        // Filter for requests approved by this hospital
         const filteredRequests = response.data.filter(request => 
           request.IsHospital === "Approved" && 
           request.AcceptedBy && 
@@ -81,7 +78,6 @@ function HosCompletedReq() {
       });
   };
 
-  // Style for different blood types
   const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
       fontWeight: 'bold',
@@ -103,7 +99,6 @@ function HosCompletedReq() {
     }
   };
 
-  // Extract just the blood type (e.g., "A+") from format like "Type (A+)"
   const formatBloodType = (bloodType) => {
     if (!bloodType) return '';
     const parts = bloodType.split('(');
@@ -113,7 +108,6 @@ function HosCompletedReq() {
     return bloodType;
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -124,7 +118,6 @@ function HosCompletedReq() {
     }
   };
 
-  // Loading state
   if (loading) {
     return (
       <Box className="main-container">

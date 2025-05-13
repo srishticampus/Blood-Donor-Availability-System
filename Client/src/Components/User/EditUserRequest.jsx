@@ -16,7 +16,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-
+import axiosInstance from '../Service/BaseUrl'
 function EditUserRequest() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -74,12 +74,11 @@ function EditUserRequest() {
     useEffect(() => {
         const fetchRequestData = async () => {
             try {
-                const response = await axios.post(`http://localhost:4005/FetchHosReq/${id}`);
+                const response = await axiosInstance.post(`/FetchHosReq/${id}`);
                 if (response.data) {
                     const requestDate = response.data.Date ? formatDate(response.data.Date) : '';
                     const today = getTodayDate();
                     
-                    // Validate the existing date - if it's in the past, set to today's date
                     const validatedDate = requestDate < today ? today : requestDate;
                     
                     setFormData({
@@ -110,16 +109,12 @@ function EditUserRequest() {
         switch (name) {
             case 'patientName':
             case 'doctorName':
-                // Only allow alphabets and spaces
                 return !/^[A-Za-z\s]+$/.test(value);
             case 'contactNumber':
-                // Only allow numbers and exactly 10 digits
                 return !/^\d{10}$/.test(value);
             case 'unitsRequired':
-                // Only allow numbers greater than 0
                 return !/^\d+$/.test(value) || parseInt(value) <= 0;
             case 'Date':
-                // Don't allow past dates
                 return value < getTodayDate();
             default:
                 return false;
@@ -129,7 +124,6 @@ function EditUserRequest() {
     const handleChange = (event) => {
         const { name, value } = event.target;
         
-        // For date field, ensure it's not in the past
         if (name === 'Date') {
             const today = getTodayDate();
             const selectedDate = value;
@@ -139,17 +133,15 @@ function EditUserRequest() {
                     ...prev,
                     [name]: true
                 }));
-                return; // Don't update the state if date is in the past
+                return; 
             }
         }
         
-        // Validate the field
         setErrors(prev => ({
             ...prev,
             [name]: validateField(name, value)
         }));
 
-        // Update form data
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -157,7 +149,6 @@ function EditUserRequest() {
     };
 
     const handleSubmit = () => {
-        // Validate all fields before submission
         const newErrors = {
             patientName: validateField('patientName', formData.patientName),
             contactNumber: validateField('contactNumber', formData.contactNumber),
@@ -168,7 +159,6 @@ function EditUserRequest() {
 
         setErrors(newErrors);
 
-        // Check if any errors exist
         if (Object.values(newErrors).some(error => error)) {
             toast.error('Please correct the errors in the form');
             return;
@@ -187,7 +177,7 @@ function EditUserRequest() {
             Time: formData.Time
         };
 
-        axios.post(`http://localhost:4005/EditHospital/BloodReq/${id}`, requestData)
+        axiosInstance.post(`/EditHospital/BloodReq/${id}`, requestData)
             .then(response => {
                 toast.success('Blood request updated successfully!');
                 navigate('/user-requests');
@@ -209,7 +199,6 @@ function EditUserRequest() {
                     <Typography variant="h5" className="sub-title">Edit Blood Request</Typography>
                     <Box className="content-box-hos">
                         <div className='edit-feilds'>
-                            {/* Patient Name */}
                             <h5>Patient Name
                                 <TextField
                                     className="edit-input"
@@ -224,7 +213,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Contact Number */}
                             <h5>Contact Number
                                 <TextField
                                     className="edit-input"
@@ -240,7 +228,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Doctor Name */}
                             <h5>Doctor Name
                                 <TextField
                                     className="edit-input"
@@ -255,7 +242,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Specialization */}
                             <h5>Specialization
                                 <Select
                                     name="specialization"
@@ -282,7 +268,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Blood Type */}
                             <h5>Blood Type
                                 <Select
                                     name="bloodType"
@@ -300,7 +285,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Units Required */}
                             <h5>Units Required
                                 <TextField
                                     className="edit-input"
@@ -318,7 +302,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Status */}
                             <h5>Status
                                 <Select
                                     name="status"
@@ -347,7 +330,6 @@ function EditUserRequest() {
                                     ))}
                                 </Select>
                             </h5>
-                            {/* Date */}
                             <h5>Date
                                 <TextField
                                     className="edit-input"
@@ -364,7 +346,6 @@ function EditUserRequest() {
                                     }}
                                 />
                             </h5>
-                            {/* Time */}
                             <h5>Time
                                 <TextField
                                     className="edit-input"
@@ -375,7 +356,6 @@ function EditUserRequest() {
                                     InputLabelProps={{ shrink: true }}
                                 />
                             </h5>
-                            {/* Buttons */}
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '40px' }}>
                                 <Button variant="contained" style={{ marginTop: '20px' }} onClick={handleSubmit}>
                                     Update

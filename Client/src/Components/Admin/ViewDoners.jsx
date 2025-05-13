@@ -12,27 +12,60 @@ import {
     Paper,
     Box,
     Typography,
-    Avatar
+    Avatar,
+    CircularProgress
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../Service/BaseUrl';
 
 function ViewDoner() {
     const [doners, setDoners] = useState([]);
+    const [filteredDoners, setFilteredDoners] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        axios.post('http://localhost:4005/ViewAllDoner')
+        axiosInstance.post('/ViewAllDoner')
             .then((result) => {
-                console.log(result.data.data);
                 setDoners(result.data.data);
+                setFilteredDoners(result.data.data);
+                setLoading(false);
             })
             .catch((err) => {
                 console.error(err);
+                setError(err.message);
+                setLoading(false);
             });
     }, []);
 
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredDoners(doners);
+        } else {
+            const lowercasedSearch = searchTerm.toLowerCase();
+            const filtered = doners.filter(donor => {
+                const name = donor.FullName ? donor.FullName.toLowerCase() : '';
+                const email = donor.Email ? donor.Email.toLowerCase() : '';
+                const phone = donor.PhoneNo ? donor.PhoneNo.toString().toLowerCase() : '';
+                const district = donor.District ? donor.District.toLowerCase() : '';
+                const gender = donor.Gender ? donor.Gender.toLowerCase() : '';
+                const dob = donor.DateOfBirth ? formatDate(donor.DateOfBirth).toLowerCase() : '';
+
+                return (
+                    name.includes(lowercasedSearch) ||
+                    email.includes(lowercasedSearch) ||
+                    phone.includes(lowercasedSearch) ||
+                    district.includes(lowercasedSearch) ||
+                    gender.includes(lowercasedSearch) ||
+                    dob.includes(lowercasedSearch)
+                );
+            });
+            setFilteredDoners(filtered);
+        }
+    }, [searchTerm, doners]);
+
     const formatDate = (dateString) => {
-        
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return 'Invalid Date';
         
@@ -43,11 +76,61 @@ function ViewDoner() {
         return `${day}/${month}/${year}`;
     };
 
+    if (loading) {
+        return (
+            <Box className="main-container">
+                <AdSidemenu />
+                <Box className="sidemenu">
+                    <AdminNav />
+                    <Box className="content-box">
+                        <Typography variant="h4" className="title">
+                            View All Donors
+                        </Typography>
+                        <Box 
+                            display="flex" 
+                            justifyContent="center" 
+                            alignItems="center" 
+                            minHeight="60vh"
+                        >
+                            <CircularProgress size={60} />
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box className="main-container">
+                <AdSidemenu />
+                <Box className="sidemenu">
+                    <AdminNav />
+                    <Box className="content-box">
+                        <Typography variant="h4" className="title">
+                            View All Donors
+                        </Typography>
+                        <Box 
+                            display="flex" 
+                            justifyContent="center" 
+                            alignItems="center" 
+                            minHeight="60vh"
+                        >
+                            <Typography color="error" variant="h6">
+                                Error: {error}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
     return (
         <Box className="main-container">
             <AdSidemenu />
             <Box className="sidemenu">
-                <AdminNav />
+                <AdminNav onSearch={setSearchTerm} />
                 <Box className="content-box">
                     <Typography variant="h4" className="title">
                         View All Donors
@@ -70,35 +153,52 @@ function ViewDoner() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {doners.map((donor) => (
-                                    <TableRow key={donor._id} hover>
-                                        <TableCell className="tableCell">
-                                            <Avatar 
-                                                alt={donor.FullName} 
-                                                src={`http://localhost:4005/${donor.ProfilePhoto?.filename}`} 
-                                                sx={{ width: 40, height: 40 }}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="tableCell">{donor.FullName}</TableCell>
-                                        <TableCell className="tableCell">{formatDate(donor.DateOfBirth)}</TableCell>
-                                        <TableCell className="tableCell">{donor.Gender}</TableCell>
-                                        <TableCell className="tableCell">{donor.PhoneNo}</TableCell>
-                                        <TableCell className="tableCell">{donor.Email}</TableCell>
-                                        <TableCell className="tableCell">{donor.District}</TableCell>
-                                        <TableCell className="tableCell">
-                                            <Link 
-                                                to={`/doner-details/${donor._id}`}
-                                                style={{
-                                                    textDecoration: 'none',
-                                                    color: '#2196F3',
-                                                    fontWeight: 500
-                                                }}
+                                {filteredDoners.length > 0 ? (
+                                    filteredDoners.map((donor) => (
+                                        <TableRow key={donor._id} hover>
+                                            <TableCell className="tableCell">
+                                                <Avatar 
+                                                    alt={donor.FullName} 
+                                                    src={`http://localhost:4058/${donor.ProfilePhoto?.filename}`} 
+                                                    sx={{ width: 40, height: 40 }}
+                                                />
+                                            </TableCell>
+                                            <TableCell className="tableCell">{donor.FullName}</TableCell>
+                                            <TableCell className="tableCell">{formatDate(donor.DateOfBirth)}</TableCell>
+                                            <TableCell className="tableCell">{donor.Gender}</TableCell>
+                                            <TableCell className="tableCell">{donor.PhoneNo}</TableCell>
+                                            <TableCell className="tableCell">{donor.Email}</TableCell>
+                                            <TableCell className="tableCell">{donor.District}</TableCell>
+                                            <TableCell className="tableCell">
+                                                <Link 
+                                                    to={`/doner-details/${donor._id}`}
+                                                    style={{
+                                                        textDecoration: 'none',
+                                                        color: '#2196F3',
+                                                        fontWeight: 500
+                                                    }}
+                                                >
+                                                    View Details
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center">
+                                            <Box 
+                                                display="flex" 
+                                                justifyContent="center" 
+                                                alignItems="center" 
+                                                height="200px"
                                             >
-                                                View Details
-                                            </Link>
+                                                <Typography variant="h6" color="textSecondary">
+                                                    {searchTerm ? 'No matching donors found' : 'No donors available'}
+                                                </Typography>
+                                            </Box>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>

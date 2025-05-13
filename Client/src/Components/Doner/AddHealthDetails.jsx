@@ -23,7 +23,7 @@ import DonerSideMenu from './DonerSideMenu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-
+import axiosInstance from '../Service/BaseUrl';
 function AddHealthDetails() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -165,17 +165,14 @@ const [inputValues, setInputValues] = useState({
     try {
       const formData = new FormData();
   
-      // Append all profile data
       for (const key in profileData) {
         if (profileData[key] !== undefined && key !== 'ProfilePhoto') {
           formData.append(key, profileData[key]);
         }
       }
   
-      // Append health data
       for (const key in healthData) {
         if (healthData[key] !== null && healthData[key] !== '') {
-          // For file fields, append the file directly
           if (key === 'ConsentForm' && healthData[key] instanceof File) {
             formData.append('ConsentForm', healthData[key]);
           } else {
@@ -184,7 +181,6 @@ const [inputValues, setInputValues] = useState({
         }
       }
   
-      // Handle profile photo
       if (profileData.ProfilePhoto instanceof File) {
         formData.append('ProfilePhoto', profileData.ProfilePhoto);
       } else if (typeof profileData.ProfilePhoto === 'string') {
@@ -193,7 +189,7 @@ const [inputValues, setInputValues] = useState({
   
       formData.append('id', donorData._id);
   
-      const response = await axios.post('http://localhost:4005/donorEditProfile', formData, {
+      const response = await axiosInstance.post('/donorEditProfile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

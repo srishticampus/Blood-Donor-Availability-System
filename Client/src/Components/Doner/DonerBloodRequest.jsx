@@ -19,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import EmergencyPopup from './EmergencyPopup';
+import axiosInstance from '../Service/BaseUrl';
 
 function DonerBloodRequest() {
     const DonerId = localStorage.getItem("DonerId");
@@ -49,7 +50,7 @@ function DonerBloodRequest() {
     };
 
     const formatDisplayDate = (date) => {
-        return date ? date.toLocaleDateString('en-US', {
+        return date && !isNaN(new Date(date)) ? new Date(date).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -93,44 +94,41 @@ function DonerBloodRequest() {
         }
 
         return nextDonationDate;
-    };;
+    };
 
     const fetchBloodRequests = () => {
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowAllBloodRequest`)
+        axiosInstance.get(`/ShowAllBloodRequest`)
             .then(response => {
-                console.log(response);
-                
                 if (response.data && Array.isArray(response.data)) {
                     const cleanDonorBloodType = donorBloodType.replace(/"/g, '').trim().toUpperCase();
                     const currentDonorId = localStorage.getItem("DonerId");
-    
+
                     const filteredRequests = response.data.filter(request => {
-                        // Skip if request is already approved by hospital
                         if (request.IsHospital === "Approved") return false;
-    
+
                         if (!request.BloodType) return false;
-    
+
                         const requestBloodType = formatBloodType(request.BloodType);
                         if (requestBloodType !== cleanDonorBloodType) return false;
-    
+
                         if (request.AcceptedByDoner && Array.isArray(request.AcceptedByDoner)) {
                             const hasAccepted = request.AcceptedByDoner.some(
-                                acceptance => acceptance.donerId._id === currentDonorId
+                                acceptance => acceptance.donerId && acceptance.donerId._id === currentDonorId
                             );
                             if (hasAccepted) return false;
                         }
-    
+
                         if (request.RejectedByDoner && Array.isArray(request.RejectedByDoner)) {
                             const hasRejected = request.RejectedByDoner.some(
                                 rejection => rejection.donerId === currentDonorId
                             );
                             if (hasRejected) return false;
                         }
-    
+
                         return request.IsDoner === "Pending";
                     });
-    
+
                     setRequests(filteredRequests);
                 } else {
                     setRequests([]);
@@ -144,13 +142,13 @@ function DonerBloodRequest() {
                 setLoading(false);
             });
     };
+
     const handleApprove = async (requestId) => {
         if (!DonerId) {
             toast.error('Donor ID not found. Please login again.');
             return;
         }
 
-        // Check donation eligibility
         const { eligible, nextDate } = checkDonationEligibility();
         if (!eligible) {
             const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
@@ -164,8 +162,8 @@ function DonerBloodRequest() {
         setApprovingId(requestId);
 
         try {
-            const response = await axios.post(
-                `http://localhost:4005/${requestId}/Donerapprove`,
+            const response = await axiosInstance.post(
+                `/${requestId}/Donerapprove`,
                 { DonerId }
             );
 
@@ -195,8 +193,8 @@ function DonerBloodRequest() {
         setRejectingId(requestId);
 
         try {
-            const response = await axios.post(
-                `http://localhost:4005/${requestId}/DonerReject`,
+            const response = await axiosInstance.post(
+                `/${requestId}/DonerReject`,
                 { donerId: DonerId }
             );
 
@@ -473,7 +471,7 @@ function DonerBloodRequest() {
             </Box>
 
             <EmergencyPopup
-                requests={requests.filter(req => req.Status === "Emergency")}
+                requests={requests.filter(req => req.Status === "Emergency" || req.Status === "Very Urgent")}
                 onClose={() => { }}
                 DonerId={DonerId}
                 onRequestUpdate={handleRequestUpdate}

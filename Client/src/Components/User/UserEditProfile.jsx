@@ -13,7 +13,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-
+import axiosInstance from '../Service/BaseUrl';
 function UserEditProfile() {
     const navigate = useNavigate();
     const userData = JSON.parse(localStorage.getItem('User') || '{}');
@@ -174,7 +174,7 @@ function UserEditProfile() {
                 formDataToSend.append('ProfilePhoto', profileImageFile);
             }
 
-            const response = await axios.post('http://localhost:4005/EditUserdata', formDataToSend, {
+            const response = await axiosInstance.post('/EditUserdata', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -232,7 +232,7 @@ function UserEditProfile() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 userData.ProfilePhoto?.path ?
-                                    `http://localhost:4005/${userData.ProfilePhoto.filename}` : ''}
+                                    `http://localhost:4058/${userData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

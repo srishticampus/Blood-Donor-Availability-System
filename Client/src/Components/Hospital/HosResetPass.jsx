@@ -7,7 +7,7 @@ import axios from 'axios';
 import { toast , ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Nav from '../common/Nav';
-
+import axiosInstance from '../Service/BaseUrl';
 function HosResetPass() {
     const navigate = useNavigate()
     const { id } = useParams();
@@ -55,7 +55,7 @@ function HosResetPass() {
             return;
         }
 
-        axios.post(`http://localhost:4005/hospital-forgot/${id}`, {Password: password})
+        axiosInstance.post(`/hospital-forgot/${id}`, {Password: password})
             .then(res => {
                 toast.success("Password reset successfully!");
                 setTimeout(() => navigate('/hosLogin'), 2000); 

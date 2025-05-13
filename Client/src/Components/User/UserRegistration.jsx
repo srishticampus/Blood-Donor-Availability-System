@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Nav from '../common/Nav';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-
+import axiosInstance from '../Service/BaseUrl';
 
 function DonerRegistration() {
     const location = useLocation();
@@ -132,7 +132,7 @@ function DonerRegistration() {
         formDataToSend.append('District', doner.District);
         formDataToSend.append('City', doner.City);
 
-        axios.post('http://localhost:4005/UserRegistration', formDataToSend, {
+        axiosInstance.post('/UserRegistration', formDataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -141,8 +141,6 @@ function DonerRegistration() {
                 console.log(response.data);
                 toast.success('Registration Successfully')
                 setTimeout(() => navigate('/UserLogin'), 2000); 
-
-                
             })
             .catch(error => {
                 console.log(error);

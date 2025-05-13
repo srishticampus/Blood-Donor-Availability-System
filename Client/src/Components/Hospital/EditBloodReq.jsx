@@ -15,7 +15,7 @@ import {
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-
+import axiosInstance from '../Service/BaseUrl';
 function EditBloodReq() {
     const { id } = useParams();
 const navigate = useNavigate()
@@ -37,7 +37,7 @@ const navigate = useNavigate()
     useEffect(() => {
         const fetchRequestData = async () => {
             try {
-                const response = await axios.post(`http://localhost:4005/FetchHosReq/${id}`);
+                const response = await axiosInstance.post(`/FetchHosReq/${id}`);
                 console.log(response.data);
                 if (response.data) {
                     setFormData({
@@ -68,7 +68,7 @@ const navigate = useNavigate()
 
     const handleSubmit = async () => {
         try {
-            await axios.post(`http://localhost:4005/EditHospital/BloodReq/${id}`, formData);
+            await axiosInstance.post(`/EditHospital/BloodReq/${id}`, formData);
             toast.success('Request updated successfully!');
             navigate("/hosEmergency")
         } catch (error) {

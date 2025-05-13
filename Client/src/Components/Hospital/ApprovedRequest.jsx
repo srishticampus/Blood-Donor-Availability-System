@@ -10,13 +10,16 @@ import {
     Paper,
     Box,
     Typography,
+    CircularProgress,
+
+    
 } from '@mui/material';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import axiosInstance from '../Service/BaseUrl';
 function ApprovedRequest() {
     const hospitalId = localStorage.getItem('hospitalId');
     console.log(hospitalId);
@@ -31,7 +34,6 @@ function ApprovedRequest() {
     }, []);
 
     useEffect(() => {
-        // Filter requests whenever searchTerm or requests change
         if (searchTerm === '') {
             setFilteredRequests(requests);
         } else {
@@ -52,16 +54,15 @@ function ApprovedRequest() {
 
     const fetchBloodRequests = () => {
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowAllBloodRequest`)
+        axiosInstance.get(`/ShowAllBloodRequest`)
             .then(response => {
-                // Filter for requests approved by this hospital
-                const approvedRequests = response.data.filter(request => 
-                    request.IsHospital === "Approved" && 
-                    request.AcceptedBy && 
-                    request.AcceptedBy._id && 
+                const approvedRequests = response.data.filter(request =>
+                    request.IsHospital === "Approved" &&
+                    request.AcceptedBy &&
+                    request.AcceptedBy._id &&
                     request.AcceptedBy._id.toString() === hospitalId
                 );
-                
+
                 setRequests(approvedRequests);
                 setFilteredRequests(approvedRequests);
                 setLoading(false);
@@ -172,7 +173,14 @@ function ApprovedRequest() {
                         <Typography variant="h4" className="title">
                             Blood Request Management
                         </Typography>
-                        <Typography>Loading...</Typography>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '200px'
+                        }}>
+                            <CircularProgress />
+                        </Box>
                     </Box>
                 </Box>
             </Box>

@@ -1,4 +1,4 @@
-name: Deploy to VPS - MERN Stack - Disabilities Support
+name: Deploy to VPS - MERN Stack - Blood Donor App
 
 on:
   push:

@@ -15,7 +15,8 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions,
+    CircularProgress
 } from '@mui/material';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
@@ -23,6 +24,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../Service/BaseUrl'
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -71,18 +73,24 @@ function AllBloodRequest() {
 
     useEffect(() => {
         const hospitalId = localStorage.getItem('hospitalId');
-
+    
         if (!hospitalId) {
             toast.error('Hospital ID not found');
             setLoading(false);
             return;
         }
-
+    
         setLoading(true);
-        axios.get(`http://localhost:4005/ShowRequest/${hospitalId}`)
+        axiosInstance.get(`/ShowRequest/${hospitalId}`)
             .then(response => {
-                setRequests(response.data);
-                setFilteredRequests(response.data);
+                console.log(response);
+                
+                const filteredData = response.data.filter(request => 
+                    request.IsHospital !== "Approved" && request.IsDoner !== "Fulfilled"
+                );
+                
+                setRequests(filteredData);
+                setFilteredRequests(filteredData);
                 setLoading(false);
             })
             .catch(error => {
@@ -91,7 +99,7 @@ function AllBloodRequest() {
                 setLoading(false);
             });
     }, []);
-
+    
     useEffect(() => {
         if (searchTerm === '') {
             setFilteredRequests(requests);
@@ -124,7 +132,7 @@ function AllBloodRequest() {
     const handleDeleteConfirm = () => {
         if (!selectedRequestId) return;
         
-        axios.post(`http://localhost:4005/bloodRequests/${selectedRequestId}`)
+        axios.post(`${baseUrl}bloodRequests/${selectedRequestId}`)
             .then(response => {
                 const updatedRequests = requests.filter(request => request._id !== selectedRequestId);
                 setRequests(updatedRequests);
@@ -174,11 +182,20 @@ function AllBloodRequest() {
                 <HosNav searchTerm={searchTerm} onSearchChange={handleSearchChange} />
                 <Box className="sidemenu">
                     <HosSidemenu />
-                    <Box className="content-box">
-                        <Typography variant="h4" className="title">
+                    <Box className="content-box" sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        height: 'calc(100vh - 200px)'
+                    }}>
+                        <Typography variant="h4" className="title" sx={{ mb: 3 }}>
                             Blood Request Management
                         </Typography>
-                        <Typography>Loading...</Typography>
+                        <CircularProgress size={60} thickness={4} />
+                        <Typography variant="h6" sx={{ mt: 3 }}>
+                            Loading blood requests...
+                        </Typography>
                     </Box>
                 </Box>
             </Box>
@@ -291,8 +308,8 @@ function AllBloodRequest() {
                 aria-describedby="alert-dialog-description"
                 style={{textAlign:"center" , borderRadius:"25px"}}
             >
-                <DialogTitle id="alert-dialog-title" style={{backgroundColor:"red" , color:"white"}}>Confirm Deletion</DialogTitle>
-                <DialogContent>
+                <DialogTitle id="alert-dialog-title" style={{backgroundColor:"#D32F2F" , color:"white"}}>Confirm Deletion</DialogTitle>
+                <DialogContent style={{marginTop:"30px"}}>
                     <DialogContentText id="alert-dialog-description">
                         Are you sure you want to delete this blood request?
                     </DialogContentText>

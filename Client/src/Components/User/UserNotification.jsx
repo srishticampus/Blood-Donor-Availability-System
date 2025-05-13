@@ -7,7 +7,7 @@ import UserSideMenu from './UserSideMenu';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import axiosInstance from '../Service/BaseUrl';
 function UserNotification() {
     const USERID = localStorage.getItem("UserId");
     const [notifications, setNotifications] = useState([]);
@@ -23,10 +23,9 @@ function UserNotification() {
 
         const fetchNotifications = async () => {
             try {
-                const response = await axios.get(`http://localhost:4005/ShowRequestUser/${USERID}`);
+                const response = await axiosInstance.get(`/ShowRequestUser/${USERID}`);
                 const requests = response.data;
                 
-                // Filter requests where ReadbyUser is "Pending" AND (donor/hospital accepted or donation fulfilled)
                 const pendingNotifications = requests.filter(request => 
                     request.ReadbyUser === "Pending" && (
                         request.IsDoner === "Accepted" || 
@@ -58,7 +57,7 @@ function UserNotification() {
                         id: request._id,
                         message: message,
                         date: new Date(request.createdAt).toLocaleDateString(),
-                        unread: true, // Since we're only showing pending notifications, all will be unread
+                        unread: true, 
                         requestData: request,
                         donorDetails: donorDetails,
                         hasDonorInfo: !!donorDetails
@@ -79,9 +78,8 @@ function UserNotification() {
 
     const markAsRead = async (id) => {
         try {
-            await axios.patch(`http://localhost:4005/notifications/${id}/user-read`);
+            await axios.patch(`${baseUrl}notifications/${id}/user-read`);
             
-            // Remove the notification from the list since we only show pending ones
             setNotifications(notifications.filter(notification => notification.id !== id));
             
             toast.success('Notification marked as read');

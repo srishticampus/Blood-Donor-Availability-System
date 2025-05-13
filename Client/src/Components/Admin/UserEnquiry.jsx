@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import '../../Styles/TableStyle.css';
@@ -13,82 +13,33 @@ import {
   Paper, 
   Button,
   Box,
-  Typography
+  Typography,
+  CircularProgress,
+  Alert
 } from '@mui/material';
-
+import axios from 'axios';
+import axiosInstance from '../Service/BaseUrl'
 function UserEnquiry() {
-  const userEnquiries = [
-    {
-      id: 1,
-      userEmail: "john.doe@example.com",
-      enquiryPreview: "Question about blood donation eligibility...",
-      date: "2023-05-15",
-      status: "Unread"
-    },
-    {
-      id: 2,
-      userEmail: "jane.smith@example.com",
-      enquiryPreview: "Need information about plasma donation...",
-      date: "2023-05-16",
-      status: "Read"
-    },
-    {
-      id: 3,
-      userEmail: "alice.brown@example.com",
-      enquiryPreview: "How often can I donate platelets?",
-      date: "2023-05-17",
-      status: "Responded"
-    },
-    {
-      id: 4,
-      userEmail: "charlie.green@example.com",
-      enquiryPreview: "Request for blood type compatibility info...",
-      date: "2023-05-18",
-      status: "Unread"
-    },
-    {
-      id: 5,
-      userEmail: "eve.white@example.com",
-      enquiryPreview: "Question about donation center hours...",
-      date: "2023-05-19",
-      status: "Read"
-    },
-    {
-      id: 6,
-      userEmail: "frank.black@example.com",
-      enquiryPreview: "Need urgent information about rare blood types",
-      date: "2023-05-20",
-      status: "Responded"
-    },
-    {
-      id: 7,
-      userEmail: "grace.blue@example.com",
-      enquiryPreview: "Inquiry about donor rewards program...",
-      date: "2023-05-21",
-      status: "Unread"
-    },
-    {
-      id: 8,
-      userEmail: "henry.yellow@example.com",
-      enquiryPreview: "Question about post-donation care...",
-      date: "2023-05-22",
-      status: "Read"
-    },
-    {
-      id: 9,
-      userEmail: "ivy.red@example.com",
-      enquiryPreview: "Request for information about blood drives...",
-      date: "2023-05-23",
-      status: "Responded"
-    },
-    {
-      id: 10,
-      userEmail: "jack.purple@example.com",
-      enquiryPreview: "Need clarification on donor requirements...",
-      date: "2023-05-24",
-      status: "Unread"
-    }
-  ];
+  const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEnquiries = async () => {
+      try {
+        const response = await axiosInstance.post('/ShowAllContactUs');
+        console.log(response)
+        setEnquiries(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch enquiries. Please try again later.');
+        setLoading(false);
+        console.error(err);
+      }
+    };
+
+    fetchEnquiries();
+  }, []);
 
   const getStatusIndicator = (status) => {
     if (status === "Unread") {
@@ -98,8 +49,44 @@ function UserEnquiry() {
     } else if (status === "Responded") {
       return <span className="status-indicator status-responded"></span>;
     }
+    return null;
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  if (loading) {
+    return (
+      <Box className="main-container">
+        <AdSidemenu />
+        <Box className="sidemenu">
+          <AdminNav />
+          <Box className="content-box" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="main-container">
+        <AdSidemenu />
+        <Box className="sidemenu">
+          <AdminNav />
+          <Box className="content-box" sx={{ padding: 3 }}>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box className="main-container">
@@ -115,31 +102,39 @@ function UserEnquiry() {
               <TableHead>
                 <TableRow className="table-head-row">
                   <TableCell className="table-head-cell">User Email</TableCell>
-                  <TableCell className="table-head-cell">Enquiry Preview</TableCell>
+                  <TableCell className="table-head-cell">Enquiry Message</TableCell>
                   <TableCell className="table-head-cell">Date</TableCell>
                   <TableCell className="table-head-cell">Status</TableCell>
-                  <TableCell className="table-head-cell">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {userEnquiries.map((enquiry) => (
-                  <TableRow key={enquiry.id} hover>
-                    <TableCell className="tableCell">{enquiry.userEmail}</TableCell>
-                    <TableCell className="tableCell">{enquiry.enquiryPreview}</TableCell>
-                    <TableCell className="tableCell">{enquiry.date}</TableCell>
-                    <TableCell className="tableCell">
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {getStatusIndicator(enquiry.status)}
-                          {enquiry.status}
-                      </Box>
-                    </TableCell>
-                    <TableCell className="tableCell">
-                      <Link to={`/enquiry-details/${enquiry.id}`}>
-                      View Details
-                      </Link>
+                {enquiries.length > 0 ? (
+                  enquiries.map((enquiry) => (
+                    <TableRow key={enquiry._id} hover>
+                      <TableCell className="tableCell">{enquiry.email}</TableCell>
+                      <TableCell className="tableCell">
+                        {enquiry.message.length > 50 
+                          ? `${enquiry.message.substring(0, 50)}...` 
+                          : enquiry.message}
+                      </TableCell>
+                      <TableCell className="tableCell">
+                        {formatDate(enquiry.createdAt)}
+                      </TableCell>
+                      <TableCell className="tableCell">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {getStatusIndicator(enquiry.status || 'Unread')}
+                          {enquiry.status || 'Unread'}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" className="tableCell">
+                      No enquiries found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>
