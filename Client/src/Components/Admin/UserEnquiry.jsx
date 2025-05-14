@@ -3,53 +3,74 @@ import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import '../../Styles/TableStyle.css';
 import { Link } from 'react-router-dom';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Button,
   Box,
   Typography,
   CircularProgress,
-  Alert
+  Alert,
+  IconButton
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
-import axiosInstance from '../Service/BaseUrl'
+import axiosInstance from '../Service/BaseUrl';
+import { toast , ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function UserEnquiry() {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchEnquiries = async () => {
-      try {
-        const response = await axiosInstance.post('/ShowAllContactUs');
-        console.log(response)
-        setEnquiries(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch enquiries. Please try again later.');
-        setLoading(false);
-        console.error(err);
-      }
-    };
-
     fetchEnquiries();
   }, []);
 
-  const getStatusIndicator = (status) => {
-    if (status === "Unread") {
-      return <span className="status-indicator status-unread"></span>;
-    } else if (status === "Read") {
-      return <span className="status-indicator status-read"></span>;
-    } else if (status === "Responded") {
-      return <span className="status-indicator status-responded"></span>;
+  const fetchEnquiries = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post('/ShowAllContactUs');
+      setEnquiries(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch enquiries. Please try again later.');
+      setLoading(false);
+      console.error(err);
     }
-    return null;
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axiosInstance.post(`/deleteContact/${id}`);
+      setEnquiries(enquiries.filter(enquiry => enquiry._id !== id));
+      toast.success('Enquiry deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (err) {
+      console.error('Error deleting enquiry:', err);
+      toast.error('Failed to delete enquiry!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
   const formatDate = (dateString) => {
@@ -90,6 +111,18 @@ function UserEnquiry() {
 
   return (
     <Box className="main-container">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ marginTop: "80px" }}
+      />
       <AdSidemenu />
       <Box className="sidemenu">
         <AdminNav />
@@ -104,7 +137,7 @@ function UserEnquiry() {
                   <TableCell className="table-head-cell">User Email</TableCell>
                   <TableCell className="table-head-cell">Enquiry Message</TableCell>
                   <TableCell className="table-head-cell">Date</TableCell>
-                  <TableCell className="table-head-cell">Status</TableCell>
+                  <TableCell className="table-head-cell">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -113,8 +146,8 @@ function UserEnquiry() {
                     <TableRow key={enquiry._id} hover>
                       <TableCell className="tableCell">{enquiry.email}</TableCell>
                       <TableCell className="tableCell">
-                        {enquiry.message.length > 50 
-                          ? `${enquiry.message.substring(0, 50)}...` 
+                        {enquiry.message.length > 50
+                          ? `${enquiry.message.substring(0, 50)}...`
                           : enquiry.message}
                       </TableCell>
                       <TableCell className="tableCell">
@@ -122,8 +155,9 @@ function UserEnquiry() {
                       </TableCell>
                       <TableCell className="tableCell">
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {getStatusIndicator(enquiry.status || 'Unread')}
-                          {enquiry.status || 'Unread'}
+                          <IconButton onClick={() => handleDelete(enquiry._id)}>
+                            <DeleteIcon style={{ color: "red" }} />
+                          </IconButton>
                         </Box>
                       </TableCell>
                     </TableRow>

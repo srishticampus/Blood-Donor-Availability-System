@@ -58,6 +58,6 @@ router.patch('/notifications/:requestId/donor-read', BloodRequestController.mark
 
 router.post('/ContactUs',ContactUsController.createContact)
 router.post('/ShowAllContactUs',ContactUsController.getAllContacts)
-
+router.post('/deleteContact/:id' , ContactUsController.deleteContact)
 module.exports=router
 

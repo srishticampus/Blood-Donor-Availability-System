@@ -31,7 +31,23 @@ const getAllContacts = (req, res) => {
         });
 };
 
+const deleteContact = (req, res) => {
+    const { id } = req.params;
+
+    ContactUs.findByIdAndDelete(id)
+        .then(deletedContact => {
+            if (!deletedContact) {
+                return res.status(404).json({ error: 'Contact not found' });
+            }
+            res.status(200).json({ message: 'Contact deleted successfully' });
+        })
+        .catch(error => {
+            res.status(500).json({ error: error.message });
+        });
+};
+
 module.exports = {
     createContact,
-    getAllContacts
+    getAllContacts,
+    deleteContact
 };
