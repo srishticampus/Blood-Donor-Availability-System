@@ -388,7 +388,7 @@ function DonerBloodRequest() {
                     {!healthInfoComplete && (
                         <Alert severity="warning" sx={{ mb: 3 }}>
                             Please complete your health information 
-                            <Link to="/doner-edit-profile" style={{ textDecoration: 'none', color: '#1976d2' , fontSize:"17px"}} className='waring-profile-incomplete'> Complete Profile</Link>
+                            <Link to="/doner-edit-profile" style={{ textDecoration: 'none', color: '#1976d2' , fontSize:"17px"}} className='waring-profile-incomplete'> Click Here</Link>
                         </Alert>
                     )}
 

@@ -8,7 +8,7 @@ function DonerSearchBar({ searchTerm, onSearchChange }) {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="Search by Patient, Contact, or Status"
+        placeholder="Search..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         sx={{

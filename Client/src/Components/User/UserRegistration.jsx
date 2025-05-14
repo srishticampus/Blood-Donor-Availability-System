@@ -317,7 +317,7 @@ function DonerRegistration() {
                             sx={{ mt: 3, mb: 2 }}
                             className='doner-req-save'
                         >
-                            Registar
+                            Register
                         </Button>
                     </form>
                     <p style={{ textAlign: "center", marginBottom: "25px" }}>Already have account ? <Link to="/UserLogin" style={{ textDecoration: "none" }}>Signup</Link> </p>

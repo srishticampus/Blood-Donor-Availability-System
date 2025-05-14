@@ -13,7 +13,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
-
+import axiosInstance from '../Service/BaseUrl'
 function DonerContactUs() {
     const donerData = JSON.parse(localStorage.getItem('Doner') || '{}');
     const donerEmail = donerData.Email || '';
@@ -55,7 +55,7 @@ function DonerContactUs() {
         setIsSubmitting(true);
 
         try {
-            const response = await axios.post('http://localhost:4005/ContactUs', formData);
+            const response = await axiosInstance.post('/ContactUs', formData);
             toast.success('Your enquiry has been submitted successfully!');
             setFormData(prev => ({ ...prev, message: '' })); 
         } catch (error) {
