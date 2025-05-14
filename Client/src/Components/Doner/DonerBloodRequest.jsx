@@ -11,29 +11,50 @@ import {
     Typography,
     Button,
     CircularProgress,
-    Tooltip
+    Tooltip,
+    Alert
 } from '@mui/material';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import EmergencyPopup from './EmergencyPopup';
 import axiosInstance from '../Service/BaseUrl';
+import { Link } from 'react-router-dom';
 
 function DonerBloodRequest() {
     const DonerId = localStorage.getItem("DonerId");
-    const donorData = JSON.parse(localStorage.getItem('Doner') || '{}');
     const donorBloodType = (localStorage.getItem('DonerBloodType') || "").replace(/"/g, '').trim().toUpperCase();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [approvingId, setApprovingId] = useState(null);
     const [rejectingId, setRejectingId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [donorData, setDonorData] = useState({});
+    const [healthInfoComplete, setHealthInfoComplete] = useState(true);
 
     useEffect(() => {
         fetchBloodRequests();
+        fetchDonorData();
     }, []);
+
+    const fetchDonorData = async () => {
+        try {
+            const response = await axiosInstance.post(`/findDoner/${DonerId}`);
+            const data = response.data.data;
+            setDonorData(data);
+            
+            const isHealthInfoComplete = 
+                data.SurgicalHistory && data.SurgicalHistory.length > 0 &&
+                data.medicines && data.medicines.length > 0 &&
+                data.vaccinationsTaken && data.vaccinationsTaken.length > 0;
+            
+            setHealthInfoComplete(isHealthInfoComplete);
+        } catch (error) {
+            console.error('Error fetching donor data:', error);
+            setHealthInfoComplete(false);
+        }
+    };
 
     const filterRequests = (requests, term) => {
         if (!term) return requests;
@@ -149,6 +170,11 @@ function DonerBloodRequest() {
             return;
         }
 
+        if (!healthInfoComplete) {
+            toast.error('Please complete your health information before accepting requests');
+            return;
+        }
+
         const { eligible, nextDate } = checkDonationEligibility();
         if (!eligible) {
             const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
@@ -187,6 +213,11 @@ function DonerBloodRequest() {
     const handleReject = async (requestId) => {
         if (!DonerId) {
             toast.error('Donor ID not found. Please login again.');
+            return;
+        }
+
+        if (!healthInfoComplete) {
+            toast.error('Please complete your health information before rejecting requests');
             return;
         }
 
@@ -354,6 +385,13 @@ function DonerBloodRequest() {
                         Available Requests Matching Your Blood Type: {donorBloodType}
                     </Typography>
 
+                    {!healthInfoComplete && (
+                        <Alert severity="warning" sx={{ mb: 3 }}>
+                            Please complete your health information 
+                            <Link to="/doner-edit-profile" style={{ textDecoration: 'none', color: '#1976d2' , fontSize:"17px"}} className='waring-profile-incomplete'> Complete Profile</Link>
+                        </Alert>
+                    )}
+
                     <TableContainer component={Paper} className="table-container">
                         <Table aria-label="blood requests table">
                             <TableHead>
@@ -382,7 +420,9 @@ function DonerBloodRequest() {
                                         const { eligible, nextDate } = checkDonationEligibility();
                                         const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
                                         const tooltipText = eligible
-                                            ? "Accept this request"
+                                            ? healthInfoComplete 
+                                                ? "Accept this request" 
+                                                : "Complete your health information to accept requests"
                                             : `You must wait ${restrictionPeriod} between donations. Next eligible date: ${nextDate}`;
 
                                         return (
@@ -426,7 +466,7 @@ function DonerBloodRequest() {
                                                                     variant="contained"
                                                                     color="primary"
                                                                     onClick={() => handleApprove(request._id)}
-                                                                    disabled={approvingId === request._id || !eligible}
+                                                                    disabled={approvingId === request._id || !eligible || !healthInfoComplete}
                                                                     size="small"
                                                                 >
                                                                     {approvingId === request._id ? (
@@ -439,7 +479,7 @@ function DonerBloodRequest() {
                                                             variant="outlined"
                                                             color="error"
                                                             onClick={() => handleReject(request._id)}
-                                                            disabled={rejectingId === request._id}
+                                                            disabled={rejectingId === request._id || !healthInfoComplete}
                                                             size="small"
                                                         >
                                                             {rejectingId === request._id ? (
@@ -470,12 +510,14 @@ function DonerBloodRequest() {
                 </Box>
             </Box>
 
-            <EmergencyPopup
-                requests={requests.filter(req => req.Status === "Emergency" || req.Status === "Very Urgent")}
-                onClose={() => { }}
-                DonerId={DonerId}
-                onRequestUpdate={handleRequestUpdate}
-            />
+            {healthInfoComplete && (
+                <EmergencyPopup
+                    requests={requests.filter(req => req.Status === "Emergency" || req.Status === "Very Urgent")}
+                    onClose={() => { }}
+                    DonerId={DonerId}
+                    onRequestUpdate={handleRequestUpdate}
+                />
+            )}
         </Box>
     );
 }
