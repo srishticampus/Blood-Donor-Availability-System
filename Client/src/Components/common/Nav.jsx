@@ -95,10 +95,12 @@ function Nav() {
                 About Us
               </Button>
             </Link>
+            <Link to='/ContactUs'>
+              <Button onClick={handleCloseNavMenu} className='nav-options'>
+                Contact
+              </Button>
+            </Link>
 
-            <Button onClick={handleCloseNavMenu} className='nav-options'>
-              Contact
-            </Button>
 
             <div>
               <Button

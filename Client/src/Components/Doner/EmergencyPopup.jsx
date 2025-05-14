@@ -12,9 +12,7 @@ import {
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   const [open, setOpen] = useState(false);
   const [emergencyRequest, setEmergencyRequest] = useState(null);
@@ -106,7 +104,6 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
 
-    // Check eligibility before approving
     const { eligible, nextDate } = checkDonationEligibility();
     if (!eligible) {
       const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
@@ -121,8 +118,8 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
     setIsApproving(true);
 
     try {
-      const response = await axios.post(
-        `${baseUrl}${emergencyRequest._id}/Donerapprove`,
+      const response = await axiosInstance.post(
+        `/${emergencyRequest._id}/Donerapprove`,
         { DonerId }
       );
 

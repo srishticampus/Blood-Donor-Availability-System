@@ -9,14 +9,12 @@ import DonationRequest from './Components/User/DonationRequest';
 import AdminLogin from './Components/Admin/AdminLogin';
 import HospitalReqt from './Components/Admin/HospitalReqt';
 import ApprovedHospitals from './Components/Admin/ApprovedHospitals';
-import ViewMembers from './Components/Admin/ViewMembers';
 import EmergencyAlert from './Components/Admin/EmergencyAlert';
 import CompletedRequests from './Components/Admin/CompletedRequests';
 import UserEnquiry from './Components/Admin/UserEnquiry';
 import ViewDoner from './Components/Admin/ViewDoners';
 import Notification from './Components/Admin/Notification';
 import BloodRequests from './Components/Admin/BloodRequests';
-import OrganizationMembers from './Components/Admin/OrganzizationMembers';
 import DonerDetails from './Components/Admin/DonerDetails';
 import HosRegistration from './Components/Hospital/HosRegistration';
 import HosLogin from './Components/Hospital/HosLogin';
@@ -24,15 +22,11 @@ import Forgot from './Components/Hospital/Forgot';
 import HosResetPass from './Components/Hospital/HosResetPass';
 import EditHospital from './Components/Hospital/EditHospital';
 import HospitalProfile from './Components/Hospital/HospitalProfile';
-import HosPatManagement from './Components/Hospital/HosPatManagement';
-import HosPatDetails from './Components/Hospital/HosPatDetails';
-import EditHosPatDetails from './Components/Hospital/EditHosPatDetails';
 import BloodRequestHos from './Components/Hospital/BloodRequestHos';
 import EditBloodReq from './Components/Hospital/EditBloodReq';
 import WilligDoners from './Components/Hospital/WillingDoners';
 import HosCompletedReq from './Components/Hospital/HosCompletedReq';
 import AllBloodRequest from './Components/Hospital/AllBloodRequest';
-import AdminDashboard from './Components/Admin/AdminDashboard';
 import DonerDashboard from './Components/Doner/DonerDashboard';
 import Registration from './Components/common/Registration';
 import HospitalInfo from './Components/Hospital/HospitalInfo';
@@ -61,6 +55,11 @@ import Approving from './Components/Doner/Approving';
 import DonerDonationHistory from './Components/Doner/DonerDonationHistory';
 import ViewRequests from './Components/User/ViewRequests';
 import UserNotification from './Components/User/UserNotification';
+import AdminDashboard from './Components/Admin/AdminDashboard';
+import ContactUs from './Components/common/ContactUs';
+import DonerContactUs from './Components/Doner/DonerContactus';
+import DonerAboutUs from './Components/Doner/DonerAboutUs';
+import ViewAllUsers from './Components/Admin/ViewAllUsers';
 
 function App() {
   return (
@@ -70,6 +69,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path='/ContactUs' element={<ContactUs/>} />
 
           {/* Doner route */}
           <Route path="/login" element={<Login />} />
@@ -83,23 +83,23 @@ function App() {
           <Route path="/doner-Profile" element={<DonerProfile />} />
           <Route path="/doner-edit-profile" element={<DonerEditProfile />} />
           <Route path="/doner-completed-requests" element={<DonerDonationHistory />} />
-          <Route path="/doner-details/:id" element={<DonerDetails />} />
           <Route path="/doner-FullFilled" element={<Approving />} />
+          <Route path="/doner-ContactUs" element={<DonerContactUs />} />
+          <Route path="/doner-aboutus" element={<DonerAboutUs />} />
 
           {/* Admin route */}
           <Route path="/AdminLogin" element={<AdminLogin />} />
-          <Route path="/AdminDashBord" element={<AdminDashboard />} />
-
+          <Route path="/AdminDashBord" element={< AdminDashboard/>} />
+          <Route path="/doner-details/:id" element={<DonerDetails />} />
           <Route path="/Hospital-req" element={<HospitalReqt />} />
           <Route path="/approved-hospitals" element={<ApprovedHospitals />} />
-          <Route path="/view-members" element={<ViewMembers />} />
           <Route path="/view-doners" element={<ViewDoner />} />
           <Route path="/emergency-alerts" element={<EmergencyAlert />} />
           <Route path="/completed-requests" element={<CompletedRequests />} />
           <Route path="/enquiries" element={<UserEnquiry />} />
           <Route path="/notifications" element={<Notification />} />
           <Route path="/blood-requests" element={<BloodRequests />} />
-          <Route path="/member-details" element={<OrganizationMembers />} />
+          <Route path="/ViewAllUsers" element={<ViewAllUsers />} />
 
 
           {/* Hospital route */}
@@ -113,9 +113,6 @@ function App() {
           <Route path="/resetPass/:id" element={<HosResetPass />} />
           <Route path="/hosProfile" element={<HospitalProfile />} />
           <Route path="/hosEditProfile" element={<EditHospital />} />
-          <Route path="/hospatManagement" element={<HosPatManagement />} />
-          <Route path="/hosPatDetails" element={<HosPatDetails />} />
-          <Route path="/edithospatDetails" element={<EditHosPatDetails />} />
           <Route path="/bloodrequesthos" element={<BloodRequestHos />} />
           <Route path="/editBloodReq/:id" element={<EditBloodReq />} />
           <Route path="/willingDoners" element={<WilligDoners />} />

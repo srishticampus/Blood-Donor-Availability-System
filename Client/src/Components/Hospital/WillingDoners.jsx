@@ -19,18 +19,20 @@ import {
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function WilligDoners() {
     const [donors, setDonors] = useState([]);
+    const [filteredDonors, setFilteredDonors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchDonors = async () => {
             try {
-                const response = await axios.post(`${baseUrl}ViewAllDoner`);
+                const response = await axiosInstance.post('/ViewAllDoner');
                 const processedDonors = processDonors(response.data.data);
                 setDonors(processedDonors);
+                setFilteredDonors(processedDonors); 
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching donors:', error);
@@ -41,6 +43,20 @@ function WilligDoners() {
         fetchDonors();
     }, []);
 
+    useEffect(() => {
+        if (searchTerm === '') {
+            setFilteredDonors(donors);
+        } else {
+            const filtered = donors.filter(donor => 
+                donor.FullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                donor.PhoneNo.includes(searchTerm) ||
+                donor.bloodgrp.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                donor.Healthstatus.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredDonors(filtered);
+        }
+    }, [searchTerm, donors]);
+
     const processDonors = (donorData) => {
         const currentDate = new Date();
         
@@ -49,16 +65,15 @@ function WilligDoners() {
                 return { ...donor, Healthstatus: 'Healthy' };
             }
 
-            // Get the most recent donation date
             const lastDonationDate = new Date(donor.donationHistory[0]);
             const timeDiff = currentDate - lastDonationDate;
             const monthsDiff = timeDiff / (1000 * 60 * 60 * 24 * 30);
             
             let requiredGap;
             if (donor.Gender === 'Male') {
-                requiredGap = 3; // 3 months for males
+                requiredGap = 3; 
             } else {
-                requiredGap = 4; // 4 months for females
+                requiredGap = 4; 
             }
 
             if (monthsDiff < requiredGap) {
@@ -96,13 +111,17 @@ function WilligDoners() {
         }
     };
 
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
         <Box className="main-container">
-            <HosNav />
+            <HosNav searchTerm={searchTerm} onSearchChange={handleSearchChange} />
             <Box className="sidemenu">
                 <HosSidemenu />
                 <Box className="content-box">
@@ -125,7 +144,7 @@ function WilligDoners() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {donors.map((donor) => (
+                                {filteredDonors.map((donor) => (
                                     <TableRow key={donor._id}>
                                         <TableCell className='tableCell'>{donor.FullName}</TableCell>
                                         <TableCell className='tableCell'>{donor.PhoneNo}</TableCell>

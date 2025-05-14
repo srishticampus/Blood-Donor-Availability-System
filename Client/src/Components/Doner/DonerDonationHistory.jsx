@@ -11,13 +11,13 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography
+  Typography,
+  CircularProgress 
 } from '@mui/material';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
 import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function DonerDonationHistory() {
   const DonerId = localStorage.getItem("DonerId");
   const [completedDonations, setCompletedDonations] = useState([]);
@@ -28,17 +28,19 @@ function DonerDonationHistory() {
   useEffect(() => {
     const fetchDonationHistory = async () => {
       try {
-        const response = await axios.get(`${baseUrl}ShowAllBloodRequest`);
+        const response = await axiosInstance.get('/ShowAllBloodRequest');
         console.log(response)
-        const filteredData = response.data.filter(request => 
-          request.AcceptedByDoner.some(donor => 
-            donor.donerId && 
+        const filteredData = response.data.filter(request =>
+          request.AcceptedByDoner.some(donor =>
+            donor.donerId &&
             donor.donerId._id.toString() === DonerId &&
-            donor.donationStatus === "Fulfilled" 
+            donor.donationStatus === "Fulfilled"
           )
         );
+        console.log(filteredData);
+
         setCompletedDonations(filteredData);
-        setFilteredDonations(filteredData); 
+        setFilteredDonations(filteredData);
       } catch (error) {
         console.error('Error fetching donation history:', error);
       } finally {
@@ -53,9 +55,10 @@ function DonerDonationHistory() {
     if (searchTerm.trim() === '') {
       setFilteredDonations(completedDonations);
     } else {
-      const filtered = completedDonations.filter(donation => 
+      const filtered = completedDonations.filter(donation =>
         donation.PatientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        String(donation.ContactNumber).toLowerCase().includes(searchTerm)      );
+        String(donation.ContactNumber).toLowerCase().includes(searchTerm)
+      );
       setFilteredDonations(filtered);
     }
   }, [searchTerm, completedDonations]);
@@ -80,6 +83,20 @@ function DonerDonationHistory() {
   const handleSearchChange = (term) => {
     setSearchTerm(term);
   };
+
+  if (loading) {
+    return (
+      <Box className="main-container">
+        <DonerNav searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+        <Box className="sidemenu">
+          <DonerSideMenu />
+          <Box className="content-box" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress size={60} />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box className="main-container">
@@ -117,10 +134,10 @@ function DonerDonationHistory() {
                         </Box>
                       </TableCell>
                       <TableCell className="tableCell">
-                        {new Date(request.Date).toLocaleDateString()} 
+                        {new Date(request.Date).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="tableCell">{request.UnitsRequired} Units</TableCell>
-                      <TableCell style={{display:"flex",justifyContent:"center"}}>
+                      <TableCell style={{ display: "flex", justifyContent: "center" }}>
                         <Box className="statusPill">
                           <CheckIcon className="statusIcon" />
                           Fulfilled
@@ -130,9 +147,21 @@ function DonerDonationHistory() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      {loading ? 'Loading...' : 
-                       searchTerm ? 'No matching donations found' : 'No fulfilled donation history found'}
+                    <TableCell colSpan={8} align="center" className="tableCell">
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        height="300px"
+                        flexDirection="column"
+                      >
+                        <Typography variant="h6" color="textSecondary" gutterBottom>
+                          {searchTerm ?
+                            'No matching requests found' :
+                            'Not Available Donations History'}
+                        </Typography>
+
+                      </Box>
                     </TableCell>
                   </TableRow>
                 )}

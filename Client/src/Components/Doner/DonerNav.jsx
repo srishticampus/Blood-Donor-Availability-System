@@ -10,14 +10,14 @@ import DonerSearchBar from './DonerSearchBar';
 function DonerNav({ searchTerm, onSearchChange }) {
     const location = useLocation();
     
-    // Paths where search bar should be hidden
     const hideSearchPaths = [
         '/doner-dashboard',
         '/doner-Profile',
-        '/doner-edit-profile'
+        '/doner-edit-profile',
+        '/healthDetails',
+        '/doner-ContactUs'
     ];
     
-    // Check if current path should hide search
     const shouldHideSearch = hideSearchPaths.some(path => 
         location.pathname.startsWith(path)
     );

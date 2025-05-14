@@ -10,8 +10,7 @@ import { IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function UserLogin() {
     const navigator = useNavigate();
     const [login, setLogin] = useState({
@@ -34,9 +33,8 @@ function UserLogin() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post(`${baseUrl}UserLogin`, login)
+        axiosInstance.post('/UserLogin', login)
             .then((result) => {
-                // console.log(result.data.data._id);
                 
                 const { data } = result;
                 if (data.message === "Login successful") {

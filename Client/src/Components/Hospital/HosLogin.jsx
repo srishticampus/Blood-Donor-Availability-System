@@ -11,8 +11,7 @@ import { IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function HosLogin() {
     const navigate = useNavigate();
     const [login, setLogin] = useState({
@@ -35,7 +34,7 @@ function HosLogin() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post(`${baseUrl}hospital-login`, login)
+        axiosInstance.post('/hospital-login', login)
             .then((result) => {
                
                 if (result.data.message === "Login successful") {

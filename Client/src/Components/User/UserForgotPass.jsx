@@ -6,8 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import Nav from '../common/Nav';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function UserForgotPass() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -21,7 +20,7 @@ function UserForgotPass() {
             return;
         }
 
-        axios.post(`${baseUrl}FindUserEmail`, { Email: email })
+        axiosInstance.post('/FindUserEmail', { Email: email })
             .then((response) => {
                 console.log(response);
                 navigate(`/resetPassuser/${response.data.data.Email}`);

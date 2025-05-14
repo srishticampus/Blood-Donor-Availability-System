@@ -9,8 +9,7 @@ import '../../Styles/HospitalInfo.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function HospitalInfo() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -68,7 +67,7 @@ function HospitalInfo() {
 
         console.log('Submitting hospital data:', hospital);
 
-        axios.post(`${baseUrl}hospital-registration`, formDataToSend)
+        axiosInstance.post('/hospital-registration', formDataToSend)
         .then(response => {
             const { message } = response.data;
 
@@ -170,23 +169,7 @@ function HospitalInfo() {
                             )
                         }}
                     />
-                    {/* <TextField
-                        placeholder="Confirm Password"
-                        type={showPassword ? "text" : "password"}
-                        variant="outlined"
-                        style={{ width: "300px" }}
-                        size="small"
-                        className="hospitalInfo-textField"
-                        value={hospital.Password || ''}
-                        InputProps={{
-                            readOnly: true,
-                            endAdornment: (
-                                <IconButton onClick={togglePasswordVisibility}>
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            )
-                        }}
-                    /> */}
+                   
                 </div>
 
                 <div className='hospitalInfo-buttonContainer'>

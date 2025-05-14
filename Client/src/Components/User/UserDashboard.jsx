@@ -6,15 +6,14 @@ import UserNav from './UserNav';
 import axios from 'axios';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function UserDashboard() {
     const [doners, setDoners] = useState([]);
     const [eligibleCount, setEligibleCount] = useState(0);
     const [monthlyDonations, setMonthlyDonations] = useState([]);
 
     useEffect(() => {
-        axios.post(`${baseUrl}ViewAllDoner`)
+        axiosInstance.post('/ViewAllDoner')
             .then((result) => {
                 const donorData = result.data.data;
                 setDoners(donorData);
@@ -76,7 +75,6 @@ function UserDashboard() {
                 flexDirection: 'column',
                 gap: '20px'
             }}>
-                {/* Top Row - Summary Cards */}
                 <div style={{
                    display:"flex",
                    flexDirection:"row",
@@ -85,7 +83,6 @@ function UserDashboard() {
                    marginTop:"80px",
                    gap:"130px"
                 }}>
-                    {/* Total Donors Card */}
                     <Card sx={{ borderRadius: 2, width:"280px" }}>
                         <CardContent sx={{ textAlign: 'center', py: 3 }}>
                             <Typography variant="h2" sx={{ color: '#1E90FF', mb: 1 }}>
@@ -98,7 +95,6 @@ function UserDashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Eligible Donors Card */}
                     <Card elevation={3} sx={{ borderRadius: 2, width:"280px" }}>
                         <CardContent sx={{ textAlign: 'center', py: 3 }}>
                             <Typography variant="h2" sx={{ color: '#1E90FF', mb: 1 }}>
@@ -112,7 +108,6 @@ function UserDashboard() {
                     </Card>
                 </div>
 
-                {/* Bottom - Full Width Chart */}
                 <Card elevation={3} sx={{ borderRadius: 2 }}>
                     <CardContent>
                         <Typography variant="h5" align="center" gutterBottom>
@@ -132,7 +127,6 @@ function UserDashboard() {
                                     <Bar 
                                         dataKey="donations" 
                                         fill="#1E90FF" 
-                                        // name="Donor Count"
                                         radius={[4, 4, 0, 0]}
                                     />
                                 </BarChart>

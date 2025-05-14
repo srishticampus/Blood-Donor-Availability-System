@@ -10,14 +10,15 @@ import {
     Paper,
     Box,
     Typography,
-    Chip
+    Chip,
+    CircularProgress,
+    Skeleton
 } from '@mui/material';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../Service/BaseUrl';
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -73,11 +74,11 @@ function RequestHistory() {
         }
 
         setLoading(true);
-        axios.get(`${baseUrl}ShowRequestUser/${USERID}`)
+        axiosInstance.get(`/ShowRequestUser/${USERID}`)
             .then(response => {
                 console.log(response);
                 setRequests(response.data);
-                setFilteredRequests(response.data); // Initialize filtered requests with all requests
+                setFilteredRequests(response.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -97,7 +98,7 @@ function RequestHistory() {
                 const contactNumber = String(request.ContactNumber || '').toLowerCase();
                 const bloodType = String(formatBloodType(request.BloodType) || '').toLowerCase();
                 const status = String(getRequestStatus(request) || '').toLowerCase();
-                
+
                 return (
                     patientName.includes(searchLower) ||
                     contactNumber.includes(searchLower) ||
@@ -108,6 +109,7 @@ function RequestHistory() {
             setFilteredRequests(filtered);
         }
     }, [searchTerm, requests]);
+
     const handleSearch = (term) => {
         setSearchTerm(term);
     };
@@ -139,10 +141,34 @@ function RequestHistory() {
     };
 
     const getRequestStatus = (request) => {
-        if (request.IsDoner === "Accepted" || request.IsHospital === "Accepted") {
+        if (request.IsDoner === "Accepted" || request.IsHospital === "Approved") {
             return "Fulfilled";
         }
         return "Pending";
+    };
+
+    const isDonorAccepted = (request) => {
+        return request.AcceptedByDoner &&
+            request.AcceptedByDoner.length > 0 &&
+            request.AcceptedByDoner.some(donor => donor.donationStatus === "Accepted");
+    };
+
+    const renderSkeletonRows = () => {
+        return Array(5).fill().map((_, index) => (
+            <TableRow key={index}>
+                <TableCell><Skeleton variant="text" /></TableCell>
+                <TableCell><Skeleton variant="text" /></TableCell>
+                <TableCell><Skeleton variant="text" /></TableCell>
+                <TableCell><Skeleton variant="text" /></TableCell>
+                <TableCell><Skeleton variant="text" /></TableCell>
+                <TableCell>
+                    <Box sx={{ display: 'flex', gap: '5px', flexDirection: 'column' }}>
+                        <Skeleton variant="rounded" width={100} height={24} />
+                        <Skeleton variant="rounded" width={100} height={24} />
+                    </Box>
+                </TableCell>
+            </TableRow>
+        ));
     };
 
     if (loading) {
@@ -153,9 +179,19 @@ function RequestHistory() {
                     <UserSideMenu />
                     <Box className="content-box">
                         <Typography variant="h4" className="title">
-                            Blood Request History
+                            <Skeleton variant="text" width={300} />
                         </Typography>
-                        <Typography>Loading...</Typography>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '60vh',
+                            flexDirection: 'column',
+                            gap: 2
+                        }}>
+                            <CircularProgress size={60} thickness={4} />
+                            <Typography variant="h6">Loading your request history...</Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
@@ -199,13 +235,15 @@ function RequestHistory() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredRequests.length > 0 ? (
+                                {loading ? (
+                                    renderSkeletonRows()
+                                ) : filteredRequests.length > 0 ? (
                                     filteredRequests.map((request) => {
                                         const formattedBloodType = formatBloodType(request.BloodType);
                                         const bloodTypeStyle = getBloodTypeStyle(formattedBloodType);
                                         const status = getRequestStatus(request);
-                                        const isDonorAccepted = request.IsDoner === "Accepted";
-                                        const isHospitalAccepted = request.IsHospital === "Accepted";
+                                        const donorAccepted = isDonorAccepted(request);
+                                        const isHospitalAccepted = request.IsHospital === "Approved";
 
                                         return (
                                             <TableRow key={request._id} hover>
@@ -221,23 +259,41 @@ function RequestHistory() {
                                                 <TableCell className="tableCell">
                                                     {request.UnitsRequired} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
                                                 </TableCell>
-                                                <TableCell className="tableCell" >
+                                                <TableCell className="tableCell">
                                                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
                                                         {getStatusIndicator(status)}
                                                         {status}
                                                     </Box>
                                                 </TableCell>
-                                                <TableCell className="tableCell" style={{width:"100px"}}>
+                                                <TableCell className="tableCell" style={{ width: "100px" }}>
                                                     <Box sx={{ display: 'flex', gap: '5px', flexDirection: 'column' }}>
-                                                        {isDonorAccepted ? (
-                                                            <Chip label="Donor Accepted" color="success" size="small" />
+                                                        {donorAccepted ? (
+                                                            <Chip
+                                                                label="Donor Accepted"
+                                                                color="success"
+                                                                size="small"
+                                                                sx={{ fontWeight: 'bold' }}
+                                                            />
                                                         ) : (
-                                                            <Chip label="Donor Pending" color="default" size="small" />
+                                                            <Chip
+                                                                label="Donor Pending"
+                                                                color="default"
+                                                                size="small"
+                                                            />
                                                         )}
                                                         {isHospitalAccepted ? (
-                                                            <Chip label="Hospital Accepted" color="success" size="small" />
+                                                            <Chip
+                                                                label="Hospital Accepted"
+                                                                color="success"
+                                                                size="small"
+                                                                sx={{ fontWeight: 'bold' }}
+                                                            />
                                                         ) : (
-                                                            <Chip label="Hospital Pending" color="default" size="small" />
+                                                            <Chip
+                                                                label="Hospital Pending"
+                                                                color="default"
+                                                                size="small"
+                                                            />
                                                         )}
                                                     </Box>
                                                 </TableCell>

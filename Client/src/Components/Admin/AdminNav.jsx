@@ -3,12 +3,25 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../Assets/logo.png';
 import SearchBar from './SearchBar';
 
-function AdminNav() {
+function AdminNav({ onSearch }) {
+    const location = useLocation();
+    const hideSearchBarPaths = [
+        '/AdminDashBord',
+        '/doner-details/:id',
+        '/notifications',
+        '/enquiries'
+    ];
 
+    const shouldHideSearchBar = hideSearchBarPaths.some(path => {
+        if (path.includes(':id')) {
+            return location.pathname.startsWith(path.split(':id')[0]);
+        }
+        return location.pathname === path;
+    });
 
     return (
         <AppBar position="fixed" sx={{ backgroundColor: 'white', color: 'black', boxShadow: 1 }}>
@@ -37,9 +50,11 @@ function AdminNav() {
                             }}
                         />
                     </Box>
-                    <Box>
-                        <SearchBar />
-                    </Box>
+                    {!shouldHideSearchBar && (
+                        <Box>
+                            <SearchBar onSearch={onSearch} />
+                        </Box>
+                    )}
                 </Toolbar>
             </Container>
         </AppBar>

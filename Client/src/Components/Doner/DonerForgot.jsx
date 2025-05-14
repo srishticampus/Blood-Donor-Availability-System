@@ -7,7 +7,7 @@ import '../../Styles/Forgot.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Nav from '../common/Nav';
-import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../Service/BaseUrl';
 
 function DonerForgot() {
     const navigate = useNavigate()
@@ -22,7 +22,7 @@ function DonerForgot() {
             return;
         }
 
-        axios.post(`${baseUrl}FindDonerEmail`, { Email: email })
+        axiosInstance.post('/FindDonerEmail', { Email: email })
             .then((response) => {
                 console.log(response);
                 navigate(`/resetPassDoner/${response.data.data.Email}`)

@@ -13,13 +13,16 @@ import {
     Button,
     Modal,
     TextField,
-    CircularProgress} from '@mui/material';
+    CircularProgress,
+    Tabs,
+    Tab
+} from '@mui/material';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../Service/BaseUrl';
 
 function RejectionModal({ open, onClose, onConfirm }) {
     const [reason, setReason] = useState('');
@@ -80,10 +83,12 @@ function RejectionModal({ open, onClose, onConfirm }) {
 function ManageUserBlood() {
     const [requests, setRequests] = useState([]);
     const [rejectedRequests, setRejectedRequests] = useState([]);
+    const [otherHospitalRequests, setOtherHospitalRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [tabValue, setTabValue] = useState(0);
     const HOSPITAL_ID = localStorage.getItem("hospitalId");
 
     useEffect(() => {
@@ -92,7 +97,7 @@ function ManageUserBlood() {
 
     const fetchBloodRequests = () => {
         setLoading(true);
-        axios.get(`${baseUrl}ShowAllBloodRequest`)
+        axiosInstance.get(`/ShowAllBloodRequest`)
             .then(response => {
                 console.log(response);
 
@@ -122,6 +127,15 @@ function ManageUserBlood() {
                 );
                 setRejectedRequests(otherHospitalRejected);
 
+                const otherHospRequests = response.data.filter(request =>
+                    request.HospitalId !== null &&
+                    request.HospitalId !== undefined &&
+                    request.HospitalId._id.toString() !== HOSPITAL_ID &&
+                    request.IsHospital === "Pending" &&
+                    request.IsDoner !== "Accepted"
+                );
+                setOtherHospitalRequests(otherHospRequests);
+
                 setLoading(false);
             })
             .catch(error => {
@@ -132,13 +146,12 @@ function ManageUserBlood() {
     };
 
     const handleApprove = (requestId) => {
-        axios.post(`h${baseUrl}${requestId}/approve`, {
+        axiosInstance.post(`/${requestId}/approve`, {
             hospitalId: HOSPITAL_ID
         })
             .then(response => {
                 toast.success('Request approved successfully');
-                setRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
-                setRejectedRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
+                fetchBloodRequests(); 
             })
             .catch(error => {
                 console.error('Error approving request:', error);
@@ -152,16 +165,13 @@ function ManageUserBlood() {
     };
 
     const handleConfirmRejection = (reason) => {
-        axios.post(`${baseUrl}${selectedRequestId}/reject`, {
+        axiosInstance.post(`/${selectedRequestId}/reject`, {
             hospitalId: HOSPITAL_ID,
             reason: reason
         })
             .then(response => {
                 toast.success('Request rejected successfully');
-                setRequests(prevRequests =>
-                    prevRequests.filter(request => request._id !== selectedRequestId)
-                );
-                fetchBloodRequests();
+                fetchBloodRequests(); 
             })
             .catch(error => {
                 console.error('Error rejecting request:', error);
@@ -258,39 +268,253 @@ function ManageUserBlood() {
         return status === 'Planned' || status === 'Very Urgent' || status === 'Emergency';
     };
 
-    // Filter requests based on search term
-// Update the filter functions in your ManageUserBlood component:
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
 
-const filteredRequests = requests.filter(request => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    const formattedBloodType = formatBloodType(request.BloodType || '').toLowerCase();
-    
-    return (
-        (request.PatientName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (request.ContactNumber?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (formattedBloodType.includes(lowerCaseSearchTerm)) ||
-        (request.UnitsRequired?.toString().includes(searchTerm)) ||
-        (request.Status?.toString().toLowerCase().includes(lowerCaseSearchTerm))
-    );
-});
+    const filterRequests = (requestList) => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        return requestList.filter(request => {
+            const formattedBloodType = formatBloodType(request.BloodType || '').toLowerCase();
+            
+            return (
+                (request.PatientName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (request.ContactNumber?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (formattedBloodType.includes(lowerCaseSearchTerm)) ||
+                (request.UnitsRequired?.toString().includes(searchTerm)) ||
+                (request.Status?.toString().toLowerCase().includes(lowerCaseSearchTerm))
+            );
+        });
+    };
 
-const filteredRejectedRequests = rejectedRequests.filter(request => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    const formattedBloodType = formatBloodType(request.BloodType || '').toLowerCase();
-    const rejectionInfo = request.RejectedBy?.find(
-        r => r.hospitalId && r.hospitalId._id && r.hospitalId._id.toString() !== HOSPITAL_ID
-    );
-    
-    return (
-        (request.PatientName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (request.ContactNumber?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (formattedBloodType.includes(lowerCaseSearchTerm)) ||
-        (request.UnitsRequired?.toString().includes(searchTerm)) ||
-        (request.Status?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (rejectionInfo?.hospitalId?.FullName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (rejectionInfo?.reason?.toString().toLowerCase().includes(lowerCaseSearchTerm))
-    );
-});
+    const filterRejectedRequests = (requestList) => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        return requestList.filter(request => {
+            const formattedBloodType = formatBloodType(request.BloodType || '').toLowerCase();
+            const rejectionInfo = request.RejectedBy?.find(
+                r => r.hospitalId && 
+                     r.hospitalId._id && 
+                     r.hospitalId._id.toString() !== HOSPITAL_ID
+            );
+            
+            return (
+                (request.PatientName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (request.ContactNumber?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (formattedBloodType.includes(lowerCaseSearchTerm)) ||
+                (request.UnitsRequired?.toString().includes(searchTerm)) ||
+                (request.Status?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (rejectionInfo?.hospitalId?.FullName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (rejectionInfo?.reason?.toString().toLowerCase().includes(lowerCaseSearchTerm))
+            );
+        });
+    };
+
+    const filterOtherHospitalRequests = (requestList) => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        return requestList.filter(request => {
+            const formattedBloodType = formatBloodType(request.BloodType || '').toLowerCase();
+            
+            return (
+                (request.PatientName?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (request.ContactNumber?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (formattedBloodType.includes(lowerCaseSearchTerm)) ||
+                (request.UnitsRequired?.toString().includes(searchTerm)) ||
+                (request.Status?.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (request.HospitalId?.FullName?.toString().toLowerCase().includes(lowerCaseSearchTerm))
+            );
+        });
+    };
+
+    const renderRequestTable = (requestList, showHospitalColumn = false) => {
+        return (
+            <TableContainer component={Paper} className="table-container">
+                <Table aria-label="emergency requests table">
+                    <TableHead>
+                        <TableRow className="table-head-row">
+                            {showHospitalColumn && <TableCell className="table-head-cell">Hospital</TableCell>}
+                            <TableCell className="table-head-cell">Name</TableCell>
+                            <TableCell className="table-head-cell">Contact</TableCell>
+                            <TableCell className="table-head-cell">Blood Type</TableCell>
+                            <TableCell className="table-head-cell">Units</TableCell>
+                            <TableCell className="table-head-cell">Date</TableCell>
+                            <TableCell className="table-head-cell">Time</TableCell>
+                            <TableCell className="table-head-cell">Status</TableCell>
+                            <TableCell className="table-head-cell">Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {requestList.length > 0 ? (
+                            requestList.map((request) => {
+                                const formattedBloodType = formatBloodType(request.BloodType);
+                                return (
+                                    <TableRow key={request._id} hover>
+                                        {showHospitalColumn && (
+                                            <TableCell className="tableCell">
+                                                {request.HospitalId?.FullName || 'N/A'}
+                                            </TableCell>
+                                        )}
+                                        <TableCell className="tableCell">
+                                            {request.PatientName || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {request.ContactNumber || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            <span style={getBloodTypeStyle(formattedBloodType)}>
+                                                {formattedBloodType || 'N/A'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {request.UnitsRequired || 0} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {formatDate(request.Date) || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {formatTime(request.Time) || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
+                                                {getStatusIndicator(request.Status)}
+                                                {request.Status || 'N/A'}
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell className="tableCell" style={{ display: "flex", justifyContent: "center" }}>
+                                            {isActionAllowed(request.Status) ? (
+                                                <Box sx={{ display: 'flex', gap: '10px' }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="success"
+                                                        size="small"
+                                                        onClick={() => handleApprove(request._id)}
+                                                        disabled={request.Status === 'Approved'}
+                                                    >
+                                                        Approve
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() => handleRejectClick(request._id)}
+                                                        disabled={request.Status === 'Rejected'}
+                                                    >
+                                                        Reject
+                                                    </Button>
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary">
+                                                    No actions available
+                                                </Typography>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={showHospitalColumn ? 9 : 8} align="center" className="tableCell">
+                                    No matching requests found
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        );
+    };
+
+    const renderRejectedRequestsTable = (requestList) => {
+        return (
+            <TableContainer component={Paper} className="table-container">
+                <Table aria-label="rejected requests table">
+                    <TableHead>
+                        <TableRow className="table-head-row">
+                            <TableCell className="table-head-cell">Name</TableCell>
+                            <TableCell className="table-head-cell">Contact</TableCell>
+                            <TableCell className="table-head-cell">Blood Type</TableCell>
+                            <TableCell className="table-head-cell">Units</TableCell>
+                            <TableCell className="table-head-cell">Status</TableCell>
+                            <TableCell className="table-head-cell">Rejected By</TableCell>
+                            <TableCell className="table-head-cell">Reason</TableCell>
+                            <TableCell className="table-head-cell">Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {requestList.length > 0 ? (
+                            requestList.map((request) => {
+                                const formattedBloodType = formatBloodType(request.BloodType);
+                                const rejectionInfo = request.RejectedBy.find(
+                                    r => r.hospitalId && 
+                                         r.hospitalId._id && 
+                                         r.hospitalId._id.toString() !== HOSPITAL_ID
+                                );
+
+                                return (
+                                    <TableRow key={request._id + '-rejected'} hover>
+                                        <TableCell className="tableCell">
+                                            {request.PatientName || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {request.ContactNumber || 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            <span style={getBloodTypeStyle(formattedBloodType)}>
+                                                {formattedBloodType || 'N/A'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {request.UnitsRequired || 0} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
+                                                {getStatusIndicator(request.Status)}
+                                                {request.Status || 'N/A'}
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {rejectionInfo?.hospitalId?.FullName || 'Unknown Hospital'}
+                                        </TableCell>
+                                        <TableCell className="tableCell">
+                                            {rejectionInfo?.reason || 'No reason provided'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Box sx={{ display: 'flex', gap: '10px' }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="success"
+                                                    size="small"
+                                                    onClick={() => handleApprove(request._id)}
+                                                    disabled={request.Status === 'Approved'}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => handleRejectClick(request._id)}
+                                                    disabled={request.Status === 'Rejected'}
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={8} align="center" className="tableCell">
+                                    No matching requests found
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        );
+    };
+
     if (loading) {
         return (
             <Box className="main-container">
@@ -340,182 +564,39 @@ const filteredRejectedRequests = rejectedRequests.filter(request => {
                     <Typography variant="h4" className="title">
                         Blood Request Management
                     </Typography>
-                    <Typography variant="h5" className="sub-title">
-                        Pending User Blood Requests
-                    </Typography>
-                    <TableContainer component={Paper} className="table-container">
-                        <Table aria-label="emergency requests table">
-                            <TableHead>
-                                <TableRow className="table-head-row">
-                                    <TableCell className="table-head-cell">Name</TableCell>
-                                    <TableCell className="table-head-cell">Contact</TableCell>
-                                    <TableCell className="table-head-cell">Blood Type</TableCell>
-                                    <TableCell className="table-head-cell">Units</TableCell>
-                                    <TableCell className="table-head-cell">Date</TableCell>
-                                    <TableCell className="table-head-cell">Time</TableCell>
-                                    <TableCell className="table-head-cell">Status</TableCell>
-                                    <TableCell className="table-head-cell">Action</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredRequests.length > 0 ? (
-                                    filteredRequests.map((request) => {
-                                        const formattedBloodType = formatBloodType(request.BloodType);
-                                        return (
-                                            <TableRow key={request._id} hover>
-                                                <TableCell className="tableCell">
-                                                    {request.PatientName || 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    {request.ContactNumber || 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    <span style={getBloodTypeStyle(formattedBloodType)}>
-                                                        {formattedBloodType || 'N/A'}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    {request.UnitsRequired || 0} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    {formatDate(request.Date) || 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    {formatTime(request.Time) || 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="tableCell">
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
-                                                        {getStatusIndicator(request.Status)}
-                                                        {request.Status || 'N/A'}
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell className="tableCell" style={{ display: "flex", justifyContent: "center" }}>
-                                                    {isActionAllowed(request.Status) ? (
-                                                        <Box sx={{ display: 'flex', gap: '10px' }}>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="success"
-                                                                size="small"
-                                                                onClick={() => handleApprove(request._id)}
-                                                                disabled={request.Status === 'Approved'}
-                                                            >
-                                                                Approve
-                                                            </Button>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="error"
-                                                                size="small"
-                                                                onClick={() => handleRejectClick(request._id)}
-                                                                disabled={request.Status === 'Rejected'}
-                                                            >
-                                                                Reject
-                                                            </Button>
-                                                        </Box>
-                                                    ) : (
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            No actions available
-                                                        </Typography>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={8} align="center" className="tableCell">
-                                            No matching requests found
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                        <Tabs value={tabValue} onChange={handleTabChange} aria-label="blood request tabs">
+                            <Tab label="Pending User Requests" />
+                            <Tab label="Rejected by Other Hospitals" />
+                            <Tab label="Other Hospital Requests" />
+                        </Tabs>
+                    </Box>
 
-                    {filteredRejectedRequests.length > 0 && (
+                    {tabValue === 0 && (
                         <>
-                            <Typography variant="h5" className="sub-title" sx={{ mt: 4 }}>
+                            <Typography variant="h5" className="sub-title">
+                                Pending User Blood Requests
+                            </Typography>
+                            {renderRequestTable(filterRequests(requests))}
+                        </>
+                    )}
+
+                    {tabValue === 1 && (
+                        <>
+                            <Typography variant="h5" className="sub-title">
                                 Requests Rejected by Other Hospitals
                             </Typography>
-                            <TableContainer component={Paper} className="table-container" sx={{ mt: 2 }}>
-                                <Table aria-label="rejected requests table">
-                                    <TableHead>
-                                        <TableRow className="table-head-row">
-                                            <TableCell className="table-head-cell">Name</TableCell>
-                                            <TableCell className="table-head-cell">Contact</TableCell>
-                                            <TableCell className="table-head-cell">Blood Type</TableCell>
-                                            <TableCell className="table-head-cell">Units</TableCell>
-                                            <TableCell className="table-head-cell">Status</TableCell>
-                                            <TableCell className="table-head-cell">Rejected By</TableCell>
-                                            <TableCell className="table-head-cell">Reason</TableCell>
-                                            <TableCell className="table-head-cell">Action</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {filteredRejectedRequests.map((request) => {
-                                            const formattedBloodType = formatBloodType(request.BloodType);
-                                            const rejectionInfo = request.RejectedBy.find(
-                                                r => r.hospitalId && 
-                                                     r.hospitalId._id && 
-                                                     r.hospitalId._id.toString() !== HOSPITAL_ID
-                                            );
+                            {renderRejectedRequestsTable(filterRejectedRequests(rejectedRequests))}
+                        </>
+                    )}
 
-                                            return (
-                                                <TableRow key={request._id + '-rejected'} hover>
-                                                    <TableCell className="tableCell">
-                                                        {request.PatientName || 'N/A'}
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        {request.ContactNumber || 'N/A'}
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        <span style={getBloodTypeStyle(formattedBloodType)}>
-                                                            {formattedBloodType || 'N/A'}
-                                                        </span>
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        {request.UnitsRequired || 0} {request.UnitsRequired === 1 ? 'Unit' : 'Units'}
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
-                                                            {getStatusIndicator(request.Status)}
-                                                            {request.Status || 'N/A'}
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        {rejectionInfo?.hospitalId?.FullName || 'Unknown Hospital'}
-                                                    </TableCell>
-                                                    <TableCell className="tableCell">
-                                                        {rejectionInfo?.reason || 'No reason provided'}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Box sx={{ display: 'flex', gap: '10px' }}>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="success"
-                                                                size="small"
-                                                                onClick={() => handleApprove(request._id)}
-                                                                disabled={request.Status === 'Approved'}
-                                                            >
-                                                                Approve
-                                                            </Button>
-
-                                                            <Button
-                                                                variant="contained"
-                                                                color="error"
-                                                                size="small"
-                                                                onClick={() => handleRejectClick(request._id)}
-                                                                disabled={request.Status === 'Rejected'}
-                                                            >
-                                                                Reject
-                                                            </Button>
-                                                        </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                            );
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                    {tabValue === 2 && (
+                        <>
+                            <Typography variant="h5" className="sub-title">
+                                Requests from Other Hospitals
+                            </Typography>
+                            {renderRequestTable(filterOtherHospitalRequests(otherHospitalRequests), true)}
                         </>
                     )}
                 </Box>

@@ -9,31 +9,34 @@ import {
   TableRow, 
   Box,
   Typography,
-  Paper
+  CircularProgress
 } from '@mui/material';
-import axios from 'axios';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../Service/BaseUrl';
 
 function HospitalList() {
   const [hospital, setHospital] = useState([]);
   const [filteredHospitals, setFilteredHospitals] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.post(`${baseUrl}viewAllHos`)
+    setLoading(true);
+    axiosInstance.post('/viewAllHos')
       .then((result) => {
-        console.log(result);
-        
         const approvedHospitals = result.data.data.filter(
           hospital => hospital.isAdminApprove === true
         );
         setHospital(approvedHospitals);
-        setFilteredHospitals(approvedHospitals); // Initialize filtered hospitals
+        setFilteredHospitals(approvedHospitals);
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching hospitals:', error);
+        setError(error.message);
+        setLoading(false);
       });
   }, []);
 
@@ -41,20 +44,22 @@ function HospitalList() {
     if (searchTerm.trim() === '') {
       setFilteredHospitals(hospital);
     } else {
-      const filtered = hospital.filter(hospital => {
-        const searchLower = searchTerm.toLowerCase();
-        const fullName = String(hospital.FullName || '').toLowerCase();
-        const city = String(hospital.City || '').toLowerCase();
-        const phoneNo = String(hospital.PhoneNo || '').toLowerCase();
-        const email = String(hospital.Email || '').toLowerCase();
-        const district = String(hospital.District || '').toLowerCase();
-        
+      const lowercasedSearch = searchTerm.toLowerCase();
+      const filtered = hospital.filter(h => {
+        const name = h.FullName ? h.FullName.toString().toLowerCase() : '';
+        const regNumber = h.RegistrationNumber ? h.RegistrationNumber.toString().toLowerCase() : '';
+        const phone = h.PhoneNo ? h.PhoneNo.toString().toLowerCase() : '';
+        const email = h.Email ? h.Email.toString().toLowerCase() : '';
+        const city = h.City ? h.City.toString().toLowerCase() : '';
+        const district = h.District ? h.District.toString().toLowerCase() : '';
+
         return (
-          fullName.includes(searchLower) ||
-          city.includes(searchLower) ||
-          phoneNo.includes(searchLower) ||
-          email.includes(searchLower) ||
-          district.includes(searchLower)
+          name.includes(lowercasedSearch) ||
+          regNumber.includes(lowercasedSearch) ||
+          phone.includes(lowercasedSearch) ||
+          email.includes(lowercasedSearch) ||
+          city.includes(lowercasedSearch) ||
+          district.includes(lowercasedSearch)
         );
       });
       setFilteredHospitals(filtered);
@@ -64,6 +69,44 @@ function HospitalList() {
   const handleSearch = (term) => {
     setSearchTerm(term);
   };
+
+  if (loading) {
+    return (
+      <Box className="main-container">
+        <UserNav onSearch={handleSearch} />
+        <Box className="sidemenu">
+          <UserSideMenu />
+          <Box className="content-box" sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh' 
+          }}>
+            <CircularProgress size={60} />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="main-container">
+        <UserNav onSearch={handleSearch} />
+        <Box className="sidemenu">
+          <UserSideMenu />
+          <Box className="content-box" sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '70vh' 
+          }}>
+            <Typography color="error">Error: {error}</Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box className="main-container">
@@ -77,7 +120,7 @@ function HospitalList() {
           <Typography variant="h5" className="sub-title">
             View Hospitals
           </Typography>
-          <TableContainer component={Paper} className="table-container">
+          <TableContainer className="table-container">
             <Table aria-label="approved hospitals table">
               <TableHead>
                 <TableRow className="table-head-row">
@@ -105,8 +148,17 @@ function HospitalList() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" className="tableCell">
-                      {hospital.length === 0 ? 'No hospitals found' : 'No matching hospitals found'}
+                    <TableCell colSpan={7} align="center" sx={{ height: '300px' }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '100%' 
+                      }}>
+                        <Typography variant="h6" color="textSecondary">
+                          {searchTerm ? 'No matching hospitals found' : 'No hospitals available'}
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 )}

@@ -1,108 +1,129 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminNav from './AdminNav';
 import AdSidemenu from './AdSidemenu';
 import '../../Styles/TableStyle.css';
 import { Link } from 'react-router-dom';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Button,
   Box,
-  Typography
+  Typography,
+  CircularProgress,
+  Alert,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import axios from 'axios';
+import axiosInstance from '../Service/BaseUrl';
+import { toast , ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function UserEnquiry() {
-  const userEnquiries = [
-    {
-      id: 1,
-      userEmail: "john.doe@example.com",
-      enquiryPreview: "Question about blood donation eligibility...",
-      date: "2023-05-15",
-      status: "Unread"
-    },
-    {
-      id: 2,
-      userEmail: "jane.smith@example.com",
-      enquiryPreview: "Need information about plasma donation...",
-      date: "2023-05-16",
-      status: "Read"
-    },
-    {
-      id: 3,
-      userEmail: "alice.brown@example.com",
-      enquiryPreview: "How often can I donate platelets?",
-      date: "2023-05-17",
-      status: "Responded"
-    },
-    {
-      id: 4,
-      userEmail: "charlie.green@example.com",
-      enquiryPreview: "Request for blood type compatibility info...",
-      date: "2023-05-18",
-      status: "Unread"
-    },
-    {
-      id: 5,
-      userEmail: "eve.white@example.com",
-      enquiryPreview: "Question about donation center hours...",
-      date: "2023-05-19",
-      status: "Read"
-    },
-    {
-      id: 6,
-      userEmail: "frank.black@example.com",
-      enquiryPreview: "Need urgent information about rare blood types",
-      date: "2023-05-20",
-      status: "Responded"
-    },
-    {
-      id: 7,
-      userEmail: "grace.blue@example.com",
-      enquiryPreview: "Inquiry about donor rewards program...",
-      date: "2023-05-21",
-      status: "Unread"
-    },
-    {
-      id: 8,
-      userEmail: "henry.yellow@example.com",
-      enquiryPreview: "Question about post-donation care...",
-      date: "2023-05-22",
-      status: "Read"
-    },
-    {
-      id: 9,
-      userEmail: "ivy.red@example.com",
-      enquiryPreview: "Request for information about blood drives...",
-      date: "2023-05-23",
-      status: "Responded"
-    },
-    {
-      id: 10,
-      userEmail: "jack.purple@example.com",
-      enquiryPreview: "Need clarification on donor requirements...",
-      date: "2023-05-24",
-      status: "Unread"
-    }
-  ];
+  const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const getStatusIndicator = (status) => {
-    if (status === "Unread") {
-      return <span className="status-indicator status-unread"></span>;
-    } else if (status === "Read") {
-      return <span className="status-indicator status-read"></span>;
-    } else if (status === "Responded") {
-      return <span className="status-indicator status-responded"></span>;
+  useEffect(() => {
+    fetchEnquiries();
+  }, []);
+
+  const fetchEnquiries = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post('/ShowAllContactUs');
+      setEnquiries(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch enquiries. Please try again later.');
+      setLoading(false);
+      console.error(err);
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await axiosInstance.post(`/deleteContact/${id}`);
+      setEnquiries(enquiries.filter(enquiry => enquiry._id !== id));
+      toast.success('Enquiry deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (err) {
+      console.error('Error deleting enquiry:', err);
+      toast.error('Failed to delete enquiry!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  if (loading) {
+    return (
+      <Box className="main-container">
+        <AdSidemenu />
+        <Box className="sidemenu">
+          <AdminNav />
+          <Box className="content-box" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="main-container">
+        <AdSidemenu />
+        <Box className="sidemenu">
+          <AdminNav />
+          <Box className="content-box" sx={{ padding: 3 }}>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box className="main-container">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ marginTop: "80px" }}
+      />
       <AdSidemenu />
       <Box className="sidemenu">
         <AdminNav />
@@ -115,31 +136,44 @@ function UserEnquiry() {
               <TableHead>
                 <TableRow className="table-head-row">
                   <TableCell className="table-head-cell">User Email</TableCell>
-                  <TableCell className="table-head-cell">Enquiry Preview</TableCell>
+                  <TableCell className="table-head-cell">Enquiry Message</TableCell>
                   <TableCell className="table-head-cell">Date</TableCell>
-                  <TableCell className="table-head-cell">Status</TableCell>
                   <TableCell className="table-head-cell">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {userEnquiries.map((enquiry) => (
-                  <TableRow key={enquiry.id} hover>
-                    <TableCell className="tableCell">{enquiry.userEmail}</TableCell>
-                    <TableCell className="tableCell">{enquiry.enquiryPreview}</TableCell>
-                    <TableCell className="tableCell">{enquiry.date}</TableCell>
-                    <TableCell className="tableCell">
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {getStatusIndicator(enquiry.status)}
-                          {enquiry.status}
-                      </Box>
-                    </TableCell>
-                    <TableCell className="tableCell">
-                      <Link to={`/enquiry-details/${enquiry.id}`}>
-                      View Details
-                      </Link>
+                {enquiries.length > 0 ? (
+                  enquiries.map((enquiry) => (
+                    <TableRow key={enquiry._id} hover>
+                      <TableCell className="tableCell">{enquiry.email}</TableCell>
+                      <TableCell className="tableCell">
+                        <Tooltip title={enquiry.message} placement="top" arrow>
+                          <span>
+                            {enquiry.message.length > 50
+                              ? `${enquiry.message.substring(0, 50)}...`
+                              : enquiry.message}
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="tableCell">
+                        {formatDate(enquiry.createdAt)}
+                      </TableCell>
+                      <TableCell className="tableCell">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IconButton onClick={() => handleDelete(enquiry._id)}>
+                            <DeleteIcon style={{ color: "red" }} />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" className="tableCell">
+                      No enquiries found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>

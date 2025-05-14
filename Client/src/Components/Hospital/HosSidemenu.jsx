@@ -28,7 +28,7 @@ function HosSidemenu() {
 
 console.log(hospitalData);
   const hospitalProfile = hospitalData.ProfilePhoto?.filename 
-    ? `http://localhost:4005/${hospitalData.ProfilePhoto.filename}`
+    ? `http://localhost:4058/${hospitalData.ProfilePhoto.filename}`
     : dp; 
 
 

@@ -12,8 +12,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Nav from '../common/Nav';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 
 function DonerRegistration() {
     const location = useLocation();
@@ -133,7 +132,7 @@ function DonerRegistration() {
         formDataToSend.append('District', doner.District);
         formDataToSend.append('City', doner.City);
 
-        axios.post(`${baseUrl}UserRegistration`, formDataToSend, {
+        axiosInstance.post('/UserRegistration', formDataToSend, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -142,8 +141,6 @@ function DonerRegistration() {
                 console.log(response.data);
                 toast.success('Registration Successfully')
                 setTimeout(() => navigate('/UserLogin'), 2000); 
-
-                
             })
             .catch(error => {
                 console.log(error);
@@ -320,7 +317,7 @@ function DonerRegistration() {
                             sx={{ mt: 3, mb: 2 }}
                             className='doner-req-save'
                         >
-                            Registar
+                            Register
                         </Button>
                     </form>
                     <p style={{ textAlign: "center", marginBottom: "25px" }}>Already have account ? <Link to="/UserLogin" style={{ textDecoration: "none" }}>Signup</Link> </p>

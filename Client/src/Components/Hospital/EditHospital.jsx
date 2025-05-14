@@ -14,8 +14,7 @@ import '../../Styles/EditHospital.css';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { baseUrl } from '../../baseUrl';
-
+import axiosInstance from '../Service/BaseUrl';
 function EditHospital() {
     const navigate = useNavigate();
     const hospitalData = JSON.parse(localStorage.getItem('Hospital') || '{}');
@@ -175,7 +174,7 @@ function EditHospital() {
                 formDataToSend.append('ProfilePhoto', profileImageFile);
             }
 
-            const response = await axios.post(`${baseUrl}hosEditProfile`, formDataToSend, {
+            const response = await axiosInstance.post('/hosEditProfile', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -232,7 +231,7 @@ function EditHospital() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 hospitalData.ProfilePhoto?.filename ?
-                                    `${baseUrl}${hospitalData.ProfilePhoto.filename}` : ''}
+                                    `http://localhost:4058/${hospitalData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

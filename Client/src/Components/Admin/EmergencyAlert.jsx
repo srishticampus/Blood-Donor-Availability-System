@@ -11,26 +11,26 @@ import {
     TableRow,
     Paper,
     Box,
-    Typography
+    Typography,
+    CircularProgress
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import axiosInstance from '../Service/BaseUrl';
 
 function EmergencyAlert() {
     const [emergencyRequests, setEmergencyRequests] = useState([]);
+    const [filteredRequests, setFilteredRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:4005/ShowAllBloodRequest')
+        axiosInstance.get('/ShowAllBloodRequest')
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch emergency requests');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const emergencyOnly = data.filter(request => request.Status === "Emergency");
+                console.log(response.data);
+                
+                const emergencyOnly = response.data.filter(request => request.Status === "Emergency");
                 setEmergencyRequests(emergencyOnly);
+                setFilteredRequests(emergencyOnly);
                 setLoading(false);
             })
             .catch(err => {
@@ -38,6 +38,32 @@ function EmergencyAlert() {
                 setLoading(false);
             });
     }, []);
+
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredRequests(emergencyRequests);
+        } else {
+            const lowercasedSearch = searchTerm.toLowerCase();
+            const filtered = emergencyRequests.filter(request => {
+                const patientName = request.PatientName ? request.PatientName.toString().toLowerCase() : '';
+                const contact = request.ContactNumber ? request.ContactNumber.toString().toLowerCase() : '';
+                const bloodType = request.BloodType ? request.BloodType.toString().toLowerCase() : '';
+                const units = request.UnitsRequired ? request.UnitsRequired.toString().toLowerCase() : '';
+                const doctor = request.doctorName ? request.doctorName.toString().toLowerCase() : '';
+                const specialization = request.specialization ? request.specialization.toString().toLowerCase() : '';
+
+                return (
+                    patientName.includes(lowercasedSearch) ||
+                    contact.includes(lowercasedSearch) ||
+                    bloodType.includes(lowercasedSearch) ||
+                    units.includes(lowercasedSearch) ||
+                    doctor.includes(lowercasedSearch) ||
+                    specialization.includes(lowercasedSearch)
+                );
+            });
+            setFilteredRequests(filtered);
+        }
+    }, [searchTerm, emergencyRequests]);
 
     const getStatusIndicator = (status) => {
         if (status === "Pending") {
@@ -61,7 +87,18 @@ function EmergencyAlert() {
                         <Typography variant="h4" className="title">
                             Emergency Alerts
                         </Typography>
-                        <Typography>Loading emergency requests...</Typography>
+                        <Box 
+                            display="flex" 
+                            flexDirection="column" 
+                            alignItems="center" 
+                            justifyContent="center" 
+                            minHeight="60vh"
+                        >
+                            <CircularProgress size={60} />
+                            <Typography variant="h6" mt={2}>
+                                Loading emergency requests...
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
@@ -76,9 +113,19 @@ function EmergencyAlert() {
                     <AdminNav />
                     <Box className="content-box">
                         <Typography variant="h4" className="title">
-                         Emergency Alerts
+                            Emergency Alerts
                         </Typography>
-                        <Typography color="error">Error: {error}</Typography>
+                        <Box 
+                            display="flex" 
+                            flexDirection="column" 
+                            alignItems="center" 
+                            justifyContent="center" 
+                            minHeight="60vh"
+                        >
+                            <Typography color="error" variant="h6">
+                                Error: {error}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
@@ -89,7 +136,7 @@ function EmergencyAlert() {
         <Box className="main-container">
             <AdSidemenu />
             <Box className="sidemenu">
-                <AdminNav />
+                <AdminNav onSearch={setSearchTerm} placeholder="Search emergency requests..." />
                 <Box className="content-box">
                     <Typography variant="h4" className="title">
                         Emergency Alerts
@@ -108,12 +155,11 @@ function EmergencyAlert() {
                                     <TableCell className="table-head-cell">Doctor</TableCell>
                                     <TableCell className="table-head-cell">Specialization</TableCell>
                                     <TableCell className="table-head-cell">Status</TableCell>
-                                    {/* <TableCell className="table-head-cell">View More</TableCell> */}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {emergencyRequests.length > 0 ? (
-                                    emergencyRequests.map((request) => (
+                                {filteredRequests.length > 0 ? (
+                                    filteredRequests.map((request) => (
                                         <TableRow key={request._id} hover>
                                             <TableCell className="tableCell">
                                                 {request.PatientName}
@@ -129,27 +175,21 @@ function EmergencyAlert() {
                                                     {request.Status}
                                                 </Box>
                                             </TableCell>
-                                            {/* <TableCell className="tableCell">
-                                                <Link 
-                                                    to={`/emergency-alerts/${request._id}`}
-                                                    style={{
-                                                        textDecoration: 'none',
-                                                        color: '#2196F3',
-                                                        fontWeight: 500,
-                                                        '&:hover': {
-                                                            textDecoration: 'underline'
-                                                        }
-                                                    }}
-                                                >
-                                                    View Details
-                                                </Link>
-                                            </TableCell> */}
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center">
-                                            No emergency requests found
+                                        <TableCell colSpan={7} align="center" className="tableCell">
+                                            <Box 
+                                                display="flex" 
+                                                alignItems="center" 
+                                                justifyContent="center" 
+                                                height="200px"
+                                            >
+                                                <Typography variant="h6" color="textSecondary">
+                                                    {searchTerm ? 'No matching emergency requests found' : 'No emergency requests found'}
+                                                </Typography>
+                                            </Box>
                                         </TableCell>
                                     </TableRow>
                                 )}

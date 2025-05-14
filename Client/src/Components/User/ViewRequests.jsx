@@ -11,18 +11,14 @@ import {
     Box,
     Button,
     Typography,
-    TextField,
-    InputAdornment,
-    IconButton
+    CircularProgress
 } from '@mui/material';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
-import SearchIcon from '@mui/icons-material/Search';
-import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../Service/BaseUrl';
 
 const getBloodTypeStyle = (bloodType) => {
     const baseStyle = {
@@ -65,6 +61,7 @@ function ViewRequests() {
     const [requests, setRequests] = useState([]);
     const [filteredRequests, setFilteredRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -72,25 +69,27 @@ function ViewRequests() {
         console.log(USERID);
 
         if (!USERID) {
-            toast.error('User ID not found');
+            setError('User ID not found');
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        axios.get(`${baseUrl}ShowRequestUser/${USERID}`)
+        axiosInstance.get(`/ShowRequestUser/${USERID}`)
             .then(response => {
                 console.log(response);
                 const filteredRequests = response.data.filter(request => 
                     request.IsDoner === "Pending" && request.IsHospital === "Pending"
                 );
+                console.log(filteredRequests);
+                
                 setRequests(filteredRequests);
                 setFilteredRequests(filteredRequests);
                 setLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching blood requests:', error);
-                toast.error('Failed to fetch blood requests');
+                setError(error.message || 'Failed to fetch blood requests');
                 setLoading(false);
             });
     }, []);
@@ -102,12 +101,13 @@ function ViewRequests() {
             const lowercasedSearch = searchTerm.toLowerCase();
             const filtered = requests.filter(request => 
                 request.PatientName.toLowerCase().includes(lowercasedSearch) ||
-                String(request.ContactNumber).toLowerCase().includes(lowercasedSearch) ||  // Convert to string
+                String(request.ContactNumber).toLowerCase().includes(lowercasedSearch) || 
                 request.Status.toLowerCase().includes(lowercasedSearch)
             );
             setFilteredRequests(filtered);
         }
     }, [searchTerm, requests]);
+
     const getStatusIndicator = (status) => {
         switch (status) {
             case "Planned":
@@ -138,11 +138,32 @@ function ViewRequests() {
                 <UserNav onSearch={setSearchTerm} />
                 <Box className="sidemenu">
                     <UserSideMenu />
-                    <Box className="content-box">
-                        <Typography variant="h4" className="title">
-                            Blood Request Management
-                        </Typography>
-                        <Typography>Loading...</Typography>
+                    <Box className="content-box" sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '100vh' 
+                    }}>
+                        <CircularProgress size={60} />
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box className="main-container">
+                <UserNav onSearch={setSearchTerm} />
+                <Box className="sidemenu">
+                    <UserSideMenu />
+                    <Box className="content-box" sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '70vh' 
+                    }}>
+                        <Typography color="error">Error: {error}</Typography>
                     </Box>
                 </Box>
             </Box>
@@ -196,7 +217,8 @@ function ViewRequests() {
                                                 <TableCell className="tableCell">
                                                     {request.PatientName}
                                                 </TableCell>
-                                                <TableCell className="tableCell">{String(request.ContactNumber)}</TableCell>                                                <TableCell className="tableCell">
+                                                <TableCell className="tableCell">{String(request.ContactNumber)}</TableCell>
+                                                <TableCell className="tableCell">
                                                     <Box sx={bloodTypeStyle}>
                                                         {formattedBloodType}
                                                     </Box>
@@ -228,8 +250,17 @@ function ViewRequests() {
                                     })
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={6} align="center" className="tableCell">
-                                            {searchTerm ? 'No matching requests found' : 'No pending blood requests found'}
+                                        <TableCell colSpan={6} align="center" sx={{ height: '300px' }}>
+                                            <Box sx={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'center', 
+                                                alignItems: 'center', 
+                                                height: '100%' 
+                                            }}>
+                                                <Typography variant="h6" color="textSecondary">
+                                                    {searchTerm ? 'No matching requests found' : 'No pending blood requests found'}
+                                                </Typography>
+                                            </Box>
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -243,17 +274,3 @@ function ViewRequests() {
 }
 
 export default ViewRequests;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
