@@ -215,5 +215,21 @@ const editUserProfile = async (req, res) => {
     });
   }
 };
+const ViewAllUsers = (req, res) => {
+    UserSchema.find()
+        .then(donors => {
+            res.status(200).json({
+                data: donors,
+                message: 'Users retrieved successfully'
+            });
+        })
+        .catch(error => {
+            console.error(error);
+            res.status(500).json({
+                message: 'Error retrieving donors',
+                error: error.message
+            });
+        });
+};
 
-module.exports = { UserRegistration, upload, UserLogin, FindEmail, ForgotPassword ,editUserProfile }
+module.exports = { UserRegistration, upload, UserLogin, FindEmail, ForgotPassword ,editUserProfile,ViewAllUsers }

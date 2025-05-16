@@ -36,6 +36,7 @@ router.post('/UserLogin',UserController.UserLogin)
 router.post('/FindUserEmail',UserController.FindEmail)
 router.post('/ForgotPass-user/:Email',UserController.ForgotPassword)
 router.post('/EditUserdata',UserController.upload,UserController.editUserProfile)
+router.post('/viewAllUsers',UserController.ViewAllUsers)
 
 
 router.post('/AddBloodRequest',BloodRequestController.createBloodRequest)

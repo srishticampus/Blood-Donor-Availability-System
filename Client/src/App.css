@@ -8,3 +8,14 @@ input[type="number"]::-webkit-inner-spin-button{
     width: 0px; 
     background: transparent; 
   }
+
+/* * {
+  -webkit-user-select: none; 
+  -moz-user-select: none; 
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+img {
+  pointer-events: none; 
+} */

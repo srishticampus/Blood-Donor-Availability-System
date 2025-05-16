@@ -16,7 +16,8 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
@@ -146,9 +147,13 @@ function UserEnquiry() {
                     <TableRow key={enquiry._id} hover>
                       <TableCell className="tableCell">{enquiry.email}</TableCell>
                       <TableCell className="tableCell">
-                        {enquiry.message.length > 50
-                          ? `${enquiry.message.substring(0, 50)}...`
-                          : enquiry.message}
+                        <Tooltip title={enquiry.message} placement="top" arrow>
+                          <span>
+                            {enquiry.message.length > 50
+                              ? `${enquiry.message.substring(0, 50)}...`
+                              : enquiry.message}
+                          </span>
+                        </Tooltip>
                       </TableCell>
                       <TableCell className="tableCell">
                         {formatDate(enquiry.createdAt)}
