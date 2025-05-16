@@ -163,7 +163,7 @@ function ViewRequests() {
                         alignItems: 'center', 
                         height: '70vh' 
                     }}>
-                        <Typography color="error">Error: {error}</Typography>
+                        {/* <Typography color="error">Error: {error}</Typography> */}
                     </Box>
                 </Box>
             </Box>
