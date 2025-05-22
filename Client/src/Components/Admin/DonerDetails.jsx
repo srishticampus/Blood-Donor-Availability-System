@@ -169,7 +169,7 @@ function DonerDetails() {
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Health Status</TableCell>
                                     <TableCell className="tableCell">
-                                        {donor.eligibility ? "Healthy" : "Not Healthy"}
+                                       Healthy
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
