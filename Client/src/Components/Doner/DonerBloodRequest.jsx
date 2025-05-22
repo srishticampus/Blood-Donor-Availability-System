@@ -397,11 +397,12 @@ function DonerBloodRequest() {
                             <TableHead>
                                 <TableRow className="table-head-row">
                                     <TableCell className="table-head-cell">Patient</TableCell>
-                                    <TableCell className="table-head-cell">Doctor</TableCell>
+                                    {/* <TableCell className="table-head-cell">Doctor</TableCell> */}
                                     <TableCell className="table-head-cell">Contact</TableCell>
                                     <TableCell className="table-head-cell">Blood Type</TableCell>
                                     <TableCell className="table-head-cell">Units</TableCell>
                                     <TableCell className="table-head-cell">When Needed</TableCell>
+                                    <TableCell className="table-head-cell" >Address</TableCell>
                                     <TableCell className="table-head-cell">Status</TableCell>
                                     <TableCell className="table-head-cell">Actions</TableCell>
                                 </TableRow>
@@ -430,9 +431,9 @@ function DonerBloodRequest() {
                                                 <TableCell className="tableCell">
                                                     {request.PatientName || 'N/A'}
                                                 </TableCell>
-                                                <TableCell className="tableCell">
+                                                {/* <TableCell className="tableCell">
                                                     {request.doctorName || 'N/A'}
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell className="tableCell">
                                                     {String(request.ContactNumber) || "N/A"}
                                                 </TableCell>
@@ -450,6 +451,11 @@ function DonerBloodRequest() {
                                                         <Typography variant="body2">
                                                             {formatTime(request.Time)}
                                                         </Typography>
+                                                    </Box>
+                                                </TableCell>
+                                                 <TableCell className="tableCell" >
+                                                    <Box>
+                                                        <Typography>{request.address}</Typography>
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell className="tableCell">

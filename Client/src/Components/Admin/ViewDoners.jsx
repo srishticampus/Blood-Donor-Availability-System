@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
 
 function ViewDoner() {
     const [doners, setDoners] = useState([]);
@@ -159,7 +160,7 @@ function ViewDoner() {
                                             <TableCell className="tableCell">
                                                 <Avatar 
                                                     alt={donor.FullName} 
-                                                    src={`http://localhost:4058/${donor.ProfilePhoto?.filename}`} 
+                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}`|| "" }
                                                     sx={{ width: 40, height: 40 }}
                                                 />
                                             </TableCell>

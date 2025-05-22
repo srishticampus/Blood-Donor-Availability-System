@@ -13,7 +13,8 @@ exports.createBloodRequest = (req, res) => {
     specialization,
     doctorName,
     Date,
-    Time
+    Time,
+    address
   } = req.body;
 
   const newRequest = new BloodRequest({
@@ -27,7 +28,8 @@ exports.createBloodRequest = (req, res) => {
     Date,
     specialization,
     doctorName,
-    Time
+    Time,
+    address
   });
 
   newRequest.save()

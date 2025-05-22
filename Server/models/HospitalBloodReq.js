@@ -8,6 +8,7 @@ const HospitalBloodReq = new mongoose.Schema({
   UnitsRequired: { type: Number, required: true },
   Status: { type: String, required: true },
   specialization: { type: String },
+  address: { type: String },
   doctorName: { type: String },
   HospitalId: { type: Schema.Types.ObjectId, ref: 'Hospital' },
   USERID: { type: Schema.Types.ObjectId, ref: 'Users' },

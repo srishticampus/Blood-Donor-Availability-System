@@ -10,6 +10,7 @@ import '../../Styles/EditHospital.css';
 import { Link } from 'react-router-dom';
 import DonerNav from './DonerNav';
 import DonerSideMenu from './DonerSideMenu';
+import {baseUrl} from '../../baseUrl';
 
 function DonerProfile() {
     const donorData = JSON.parse(localStorage.getItem('Doner') || '{}');
@@ -36,7 +37,7 @@ function DonerProfile() {
                         }}>
                         <Avatar
                             src={donorData.ProfilePhoto?.filename ? 
-                                `http://localhost:4058/${donorData.ProfilePhoto.filename}` : ''}
+                                `${baseUrl}/${donorData.ProfilePhoto.filename}` : ''}
                             sx={{ width: 120, height: 120, marginBottom: 2 }}
                             alt="Donor Profile"
                         />
