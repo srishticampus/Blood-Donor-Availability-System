@@ -4,6 +4,7 @@ import { TextField, Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
+import {baseUrl} from '../../baseUrl';
 
 function UserProfile() {
     const UserData = JSON.parse(localStorage.getItem('User') || '{}');
@@ -30,7 +31,7 @@ function UserProfile() {
                         }}>
                         <Avatar
                             src={UserData.ProfilePhoto?.path ? 
-                                `http://localhost:4058/${UserData.ProfilePhoto.filename}` : ''}
+                                `${baseUrl}${UserData.ProfilePhoto.filename}` : ''}
                             sx={{ width: 120, height: 120, marginBottom: 2 }}
                             alt="User Profile"
                         />

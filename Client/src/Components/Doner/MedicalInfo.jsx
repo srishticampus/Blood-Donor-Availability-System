@@ -12,6 +12,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../Service/BaseUrl';
+
 function MedicalInfo() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ function MedicalInfo() {
     issues: [],
     weight: ''
   });
-  console.log(medicalInfo);
 
   const [error, setError] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
@@ -65,8 +65,21 @@ function MedicalInfo() {
     const inputWeight = event.target.value;
     setMedicalInfo(prev => ({ ...prev, weight: inputWeight }));
 
-    if (inputWeight < 45) {
+    if (inputWeight === '') {
+      setError('');
+      return;
+    }
+
+    const weightNum = Number(inputWeight);
+    if (isNaN(weightNum)) {
+      setError('* Please enter a valid number');
+      return;
+    }
+
+    if (weightNum < 45) {
       setError('* Weight must be equal to or greater than 45');
+    } else if (weightNum > 100) {
+      setError('* Weight must be less than or equal to 100');
     } else {
       setError('');
     }
@@ -87,7 +100,8 @@ function MedicalInfo() {
       return;
     }
 
-    if (medicalInfo.weight < 45 || !medicalInfo.bloodgrp) return;
+    const weightNum = Number(medicalInfo.weight);
+    if (weightNum < 45 || weightNum > 100 || !medicalInfo.bloodgrp) return;
 
     const completeData = new FormData();
     completeData.append('ProfilePhoto', medicalInfo.ProfilePhoto);
@@ -108,15 +122,12 @@ function MedicalInfo() {
     axiosInstance.post('/registration', completeData)
       .then(response => {
         console.log('Registration successful:', response.data);
-
-                toast.success('Registration successfully');
-                setTimeout(() => navigate('/login'), 2000); 
-
+        toast.success('Registration successfully');
+        setTimeout(() => navigate('/login'), 2000); 
       })
       .catch(error => {
         if (error.response) {
           setTimeout(() => navigate('/register'), 2000);
-          toast.success("Registration Successfully")
           const { data } = error.response;
           if (data.message === 'Email already exists') {
             toast.error('This email is already registered');
@@ -235,7 +246,11 @@ function MedicalInfo() {
           onChange={handleWeightChange}
           error={!!error}
           helperText={error}
-          inputProps={{ min: 50 }}
+          inputProps={{ 
+            min: 45,
+            max: 100,
+            step: "0.1"
+          }}
         />
 
         <Button
@@ -245,7 +260,8 @@ function MedicalInfo() {
           disabled={
             !!error ||
             !medicalInfo.weight ||
-            medicalInfo.weight < 45 ||
+            Number(medicalInfo.weight) < 45 ||
+            Number(medicalInfo.weight) > 100 ||
             !medicalInfo.bloodgrp
           }
         >
@@ -300,7 +316,6 @@ function MedicalInfo() {
             </IconButton>
           </DialogActions>
         </Dialog>
-
       </div>
     </div>
   );

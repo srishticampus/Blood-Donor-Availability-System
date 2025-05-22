@@ -12,6 +12,7 @@ import {
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Nav from './Nav';
+import axiosInstance from '../Service/BaseUrl';
 
 function ContactUs() {
     const [formData, setFormData] = useState({
@@ -76,7 +77,7 @@ function ContactUs() {
         setIsSubmitting(true);
 
         try {
-            const response = await axios.post('http://localhost:4005/ContactUs', formData);
+            const response = await axiosInstance.post('/ContactUs', formData);
             toast.success('Your enquiry has been submitted successfully!');
             setFormData({ email: '', message: '' });
         } catch (error) {

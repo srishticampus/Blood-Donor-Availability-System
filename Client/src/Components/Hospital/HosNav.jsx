@@ -9,7 +9,7 @@ import SearchBar from './SearchBar';
 
 function HosNav({ searchTerm, onSearchChange }) {
     const location = useLocation();
-    const hideSearchPaths = ['/hosProfile', '/hosEditProfile'];
+    const hideSearchPaths = ['/hosProfile', '/hosEditProfile','/Hospital-Dashboard'];
     const shouldHideSearch = hideSearchPaths.includes(location.pathname);
 
     return (

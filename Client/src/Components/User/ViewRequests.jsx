@@ -32,28 +32,15 @@ const getBloodTypeStyle = (bloodType) => {
     };
 
     switch (bloodType) {
-        case "A+":
-            return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFEBEB" };
-        case "A-":
-            return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFD5D5" };
-        case "B+":
-            return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#DBF0FF" };
-        case "B-":
-            return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#C4E4FF" };
-        case "AB+":
-            return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#E9DDFF" };
-        case "AB-":
-            return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#D8C7FF" };
-        case "O+":
-            return { ...baseStyle, color: "#D32F84", backgroundColor: "#FFD9ED" };
-        case "O-":
-            return { ...baseStyle, color: "#ADD32F", backgroundColor: "#F3FFCA" };
-        default:
-            return {
-                ...baseStyle,
-                color: "#666",
-                backgroundColor: "#f0f0f0"
-            };
+        case "A+": return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFEBEB" };
+        case "A-": return { ...baseStyle, color: "#D32F2F", backgroundColor: "#FFD5D5" };
+        case "B+": return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#DBF0FF" };
+        case "B-": return { ...baseStyle, color: "#2F8FD3", backgroundColor: "#C4E4FF" };
+        case "AB+": return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#E9DDFF" };
+        case "AB-": return { ...baseStyle, color: "#6B2FD3", backgroundColor: "#D8C7FF" };
+        case "O+": return { ...baseStyle, color: "#D32F84", backgroundColor: "#FFD9ED" };
+        case "O-": return { ...baseStyle, color: "#ADD32F", backgroundColor: "#F3FFCA" };
+        default: return { ...baseStyle, color: "#666", backgroundColor: "#f0f0f0" };
     }
 };
 
@@ -66,8 +53,7 @@ function ViewRequests() {
 
     useEffect(() => {
         const USERID = localStorage.getItem('UserId');
-        console.log(USERID);
-
+        
         if (!USERID) {
             setError('User ID not found');
             setLoading(false);
@@ -77,19 +63,20 @@ function ViewRequests() {
         setLoading(true);
         axiosInstance.get(`/ShowRequestUser/${USERID}`)
             .then(response => {
-                console.log(response);
                 const filteredRequests = response.data.filter(request => 
                     request.IsDoner === "Pending" && request.IsHospital === "Pending"
                 );
-                console.log(filteredRequests);
-                
                 setRequests(filteredRequests);
                 setFilteredRequests(filteredRequests);
                 setLoading(false);
             })
             .catch(error => {
-                console.error('Error fetching blood requests:', error);
-                setError(error.message || 'Failed to fetch blood requests');
+                if (error.response && error.response.status === 404) {
+                    setRequests([]);
+                    setFilteredRequests([]);
+                } else {
+                    setError(error.message || 'Failed to fetch blood requests');
+                }
                 setLoading(false);
             });
     }, []);
@@ -110,26 +97,18 @@ function ViewRequests() {
 
     const getStatusIndicator = (status) => {
         switch (status) {
-            case "Planned":
-                return <span className="status-indicator status-pending"></span>;
-            case "Very Urgent":
-                return <span className="status-indicator status-urgent"></span>;
-            case "Emergency":
-                return <span className="status-indicator status-emergency"></span>;
-            case "Fulfilled":
-                return <span className="status-indicator status-fulfilled"></span>;
-            default:
-                return <span className="status-indicator status-pending"></span>;
+            case "Planned": return <span className="status-indicator status-pending"></span>;
+            case "Very Urgent": return <span className="status-indicator status-urgent"></span>;
+            case "Emergency": return <span className="status-indicator status-emergency"></span>;
+            case "Fulfilled": return <span className="status-indicator status-fulfilled"></span>;
+            default: return <span className="status-indicator status-pending"></span>;
         }
     };
 
     const formatBloodType = (bloodType) => {
         if (!bloodType) return '';
         const parts = bloodType.split('(');
-        if (parts.length > 1) {
-            return parts[1].replace(')', '').trim();
-        }
-        return bloodType;
+        return parts.length > 1 ? parts[1].replace(')', '').trim() : bloodType;
     };
 
     if (loading) {
@@ -145,25 +124,6 @@ function ViewRequests() {
                         height: '100vh' 
                     }}>
                         <CircularProgress size={60} />
-                    </Box>
-                </Box>
-            </Box>
-        );
-    }
-
-    if (error) {
-        return (
-            <Box className="main-container">
-                <UserNav onSearch={setSearchTerm} />
-                <Box className="sidemenu">
-                    <UserSideMenu />
-                    <Box className="content-box" sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        height: '70vh' 
-                    }}>
-                        {/* <Typography color="error">Error: {error}</Typography> */}
                     </Box>
                 </Box>
             </Box>
@@ -217,7 +177,9 @@ function ViewRequests() {
                                                 <TableCell className="tableCell">
                                                     {request.PatientName}
                                                 </TableCell>
-                                                <TableCell className="tableCell">{String(request.ContactNumber)}</TableCell>
+                                                <TableCell className="tableCell">
+                                                    {String(request.ContactNumber)}
+                                                </TableCell>
                                                 <TableCell className="tableCell">
                                                     <Box sx={bloodTypeStyle}>
                                                         {formattedBloodType}
@@ -258,7 +220,8 @@ function ViewRequests() {
                                                 height: '100%' 
                                             }}>
                                                 <Typography variant="h6" color="textSecondary">
-                                                    {searchTerm ? 'No matching requests found' : 'No pending blood requests found'}
+                                                    {error=="Request failed with status code 404" ? `No pending blood requests found` : 
+                                                    (searchTerm ? 'No matching requests found' : 'No pending blood requests found')}
                                                 </Typography>
                                             </Box>
                                         </TableCell>

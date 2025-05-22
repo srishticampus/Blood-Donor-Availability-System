@@ -22,6 +22,7 @@ import AdSidemenu from './AdSidemenu';
 import { useParams } from 'react-router-dom';
 import dp from '../../Assets/dp.jpg';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
 
 function DonerDetails() {
     const { id } = useParams();
@@ -33,7 +34,7 @@ function DonerDetails() {
     const [consentError, setConsentError] = useState(null);
 
     const profilePhotoUrl = donor?.ProfilePhoto?.filename 
-        ? `http://localhost:4058/${donor?.ProfilePhoto?.filename}`
+        ? `${baseUrl}${donor?.ProfilePhoto?.filename}`
         : dp; 
     
     useEffect(() => {

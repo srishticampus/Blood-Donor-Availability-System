@@ -1,19 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
     Avatar, 
     Button,
     TextField,
     Box, 
     Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    IconButton
 } from '@mui/material';
 import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
-import { Description } from '@mui/icons-material';
+import { Description, Close } from '@mui/icons-material';
 import '../../Styles/EditHospital.css';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
+
 function HospitalProfile() {
     const hospitalData = JSON.parse(localStorage.getItem('Hospital') || '{}');
+    const [openDocument, setOpenDocument] = useState(false);
+    const [documentType, setDocumentType] = useState('');
+
+    const handleViewDocument = () => {
+        const filename = hospitalData.Document?.filename;
+        if (filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            setDocumentType(extension === 'pdf' ? 'pdf' : 'image');
+            setOpenDocument(true);
+        }
+    };
 
     return (
         <Box className="main-container">
@@ -37,7 +53,7 @@ function HospitalProfile() {
                         }}>
                         <Avatar
                             src={hospitalData.ProfilePhoto?.filename ? 
-                                `http://localhost:4058/${hospitalData.ProfilePhoto.filename}` : ''}
+                                `${baseUrl}${hospitalData.ProfilePhoto.filename}` : ''}
                             sx={{ width: 120, height: 120, marginBottom: 2 }}
                             alt="Hospital Profile"
                         />
@@ -119,14 +135,11 @@ function HospitalProfile() {
                             {hospitalData.Document?.filename && (
                                 <div className='document-upload'>
                                     <h5>Document Verification</h5>
-                                    <Box sx={{ mt: 1 }}>
+                                    <Box style={{ display: 'flex', justifyContent: 'end', marginTop: '-50px' }}>
                                         <Button
                                             variant="outlined"
                                             startIcon={<Description />}
-                                            component="a"
-                                            href={`http://localhost:4058/${hospitalData.Document.filename}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            onClick={handleViewDocument}
                                         >
                                             View Document
                                         </Button>
@@ -147,6 +160,51 @@ function HospitalProfile() {
                             </div>
                         </div>
                     </Box>
+
+                    {/* Document Preview Dialog */}
+                    <Dialog
+                        open={openDocument}
+                        onClose={() => setOpenDocument(false)}
+                        fullWidth
+                        maxWidth="md"
+                        scroll="paper"
+                    >
+                        <DialogTitle sx={{ m: 0, p: 2 }}>
+                            <Typography variant="h6">Document Preview</Typography>
+                            <IconButton
+                                aria-label="close"
+                                onClick={() => setOpenDocument(false)}
+                                sx={{
+                                    position: 'absolute',
+                                    right: 8,
+                                    top: 8,
+                                    color: (theme) => theme.palette.grey[500],
+                                }}
+                            >
+                                <Close />
+                            </IconButton>
+                        </DialogTitle>
+                        <DialogContent dividers>
+                            {documentType === 'pdf' ? (
+                                <embed
+                                    src={`${baseUrl}${hospitalData.Document.filename}`}
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="600px"
+                                />
+                            ) : (
+                                <img
+                                    src={`${baseUrl}${hospitalData.Document.filename}`}
+                                    alt="Verification Document"
+                                    style={{ 
+                                        width: '100%', 
+                                        height: 'auto',
+                                        objectFit: 'contain' 
+                                    }}
+                                />
+                            )}
+                        </DialogContent>
+                    </Dialog>
                 </Box>
             </Box>
         </Box>

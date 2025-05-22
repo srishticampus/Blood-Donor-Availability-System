@@ -141,16 +141,18 @@ function RequestHistory() {
     };
 
     const getRequestStatus = (request) => {
-        if (request.IsDoner === "Accepted" || request.IsHospital === "Approved") {
+        if (request.IsDoner === "Fulfilled" || request.IsHospital === "Approved") {
             return "Fulfilled";
         }
         return "Pending";
     };
 
     const isDonorAccepted = (request) => {
-        return request.AcceptedByDoner &&
-            request.AcceptedByDoner.length > 0 &&
-            request.AcceptedByDoner.some(donor => donor.donationStatus === "Accepted");
+        return request.AcceptedByDoner && 
+               request.AcceptedByDoner.length > 0 &&
+               request.AcceptedByDoner.some(donor => 
+                   donor.donationStatus === "Accepted" || donor.donationStatus === "Fulfilled"
+               );
     };
 
     const renderSkeletonRows = () => {
@@ -272,7 +274,11 @@ function RequestHistory() {
                                                                 label="Donor Accepted"
                                                                 color="success"
                                                                 size="small"
-                                                                sx={{ fontWeight: 'bold' }}
+                                                                sx={{ 
+                                                                    fontWeight: 'bold',
+                                                                    backgroundColor: '#4CAF50',
+                                                                    color: 'white'
+                                                                }}
                                                             />
                                                         ) : (
                                                             <Chip
@@ -286,7 +292,11 @@ function RequestHistory() {
                                                                 label="Hospital Accepted"
                                                                 color="success"
                                                                 size="small"
-                                                                sx={{ fontWeight: 'bold' }}
+                                                                sx={{ 
+                                                                    fontWeight: 'bold',
+                                                                    backgroundColor: '#4CAF50',
+                                                                    color: 'white'
+                                                                }}
                                                             />
                                                         ) : (
                                                             <Chip

@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
 
 function ViewAllUsers() {
     const [doners, setDoners] = useState([]);
@@ -159,7 +160,7 @@ function ViewAllUsers() {
                                             <TableCell className="tableCell" style={{display: 'flex', alignItems: 'center'}}>
                                                 <Avatar
                                                     alt={donor.FullName}
-                                                    src={`http://localhost:4058/${donor.ProfilePhoto?.filename}`}
+                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}`}
                                                     sx={{ width: 40, height: 40 }}
                                                 />
                                             </TableCell>

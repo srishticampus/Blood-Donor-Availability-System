@@ -49,7 +49,7 @@ function Approving() {
                 const patientMatch = request.PatientName?.toString().toLowerCase().includes(searchTerm.toLowerCase());
                 const contactMatch = request.ContactNumber?.toString().toLowerCase().includes(searchTerm.toLowerCase());
                 const statusMatch = request.Status?.toString().toLowerCase().includes(searchTerm.toLowerCase());
-                
+
                 return patientMatch || contactMatch || statusMatch;
             });
             setFilteredRequests(filtered);
@@ -57,10 +57,10 @@ function Approving() {
     }, [searchTerm, requests]);
 
     const formatDisplayDate = (date) => {
-        return date ? date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        return date ? date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         }) : '';
     };
 
@@ -104,7 +104,7 @@ function Approving() {
 
         const lastDonationDate = new Date(donorData.donationHistory[donorData.donationHistory.length - 1]);
         const nextDonationDate = new Date(lastDonationDate);
-        
+
         if (donorData.Gender === "Male") {
             nextDonationDate.setDate(nextDonationDate.getDate() + 90);
         } else {
@@ -114,47 +114,47 @@ function Approving() {
         return nextDonationDate;
     };
 
-const fetchBloodRequests = () => {
-    return new Promise((resolve, reject) => {
-        setLoading(true);
-        axiosInstance.get(`/ShowAllBloodRequest`)
-            .then(response => {
-                console.log(response);
+    const fetchBloodRequests = () => {
+        return new Promise((resolve, reject) => {
+            setLoading(true);
+            axiosInstance.get(`/ShowAllBloodRequest`)
+                .then(response => {
+                    console.log(response);
 
-                if (response.data && Array.isArray(response.data)) {
-                    const currentDonorId = localStorage.getItem("DonerId");
+                    if (response.data && Array.isArray(response.data)) {
+                        const currentDonorId = localStorage.getItem("DonerId");
 
-                    const filteredRequests = response.data.filter(request => {
-                        const hasAccepted = request.AcceptedByDoner?.some(
-                            a => a?.donerId && a.donerId._id === currentDonorId
-                        );
+                        const filteredRequests = response.data.filter(request => {
+                            const hasAccepted = request.AcceptedByDoner?.some(
+                                a => a?.donerId && a.donerId._id === currentDonorId
+                            );
 
-                        const hasFulfilled = request.AcceptedByDoner?.some(
-                            a => a?.donerId && a.donerId._id === currentDonorId && a.donationStatus === "Fulfilled"
-                        );
+                            const hasFulfilled = request.AcceptedByDoner?.some(
+                                a => a?.donerId && a.donerId._id === currentDonorId && a.donationStatus === "Fulfilled"
+                            );
 
-                        return hasAccepted && !hasFulfilled;
-                    });
+                            return hasAccepted && !hasFulfilled;
+                        });
 
-                    setRequests(filteredRequests);
-                    setFilteredRequests(filteredRequests);
-                    resolve(filteredRequests);
-                } else {
-                    setRequests([]);
-                    setFilteredRequests([]);
-                    resolve([]);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                toast.error('Failed to fetch requests');
-                reject(error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    });
-};
+                        setRequests(filteredRequests);
+                        setFilteredRequests(filteredRequests);
+                        resolve(filteredRequests);
+                    } else {
+                        setRequests([]);
+                        setFilteredRequests([]);
+                        resolve([]);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toast.error('Failed to fetch requests');
+                    reject(error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        });
+    };
     const handleApprove = (requestId) => {
         if (!DonerId || isProcessing) {
             toast.error('Donor ID not found');
@@ -164,7 +164,7 @@ const fetchBloodRequests = () => {
         if (hasDonated) {
             const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
             toast.error(
-                `You can only donate blood once every ${restrictionPeriod}. ` + 
+                `You can only donate blood once every ${restrictionPeriod}. ` +
                 `Your next eligible donation date is ${formatDisplayDate(nextDonationDate)}.`
             );
             return;
@@ -323,11 +323,12 @@ const fetchBloodRequests = () => {
                                 <TableHead>
                                     <TableRow className="table-head-row">
                                         <TableCell className="table-head-cell">Patient</TableCell>
-                                        <TableCell className="table-head-cell">Doctor</TableCell>
+                                        {/* <TableCell className="table-head-cell">Doctor</TableCell> */}
                                         <TableCell className="table-head-cell">Contact</TableCell>
                                         <TableCell className="table-head-cell">Blood Type</TableCell>
                                         <TableCell className="table-head-cell">Units</TableCell>
                                         <TableCell className="table-head-cell">When Needed</TableCell>
+                                        <TableCell className="table-head-cell">Address</TableCell>
                                         <TableCell className="table-head-cell">Status</TableCell>
                                         <TableCell className="table-head-cell">Actions</TableCell>
                                     </TableRow>
@@ -343,8 +344,8 @@ const fetchBloodRequests = () => {
                                             if (rejectedByCurrentDonor) return null;
 
                                             const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
-                                            const tooltipText = hasDonated 
-                                                ? `You must wait ${restrictionPeriod} between donations. Next eligible date: ${formatDisplayDate(nextDonationDate)}` 
+                                            const tooltipText = hasDonated
+                                                ? `You must wait ${restrictionPeriod} between donations. Next eligible date: ${formatDisplayDate(nextDonationDate)}`
                                                 : "Mark this donation as fulfilled";
 
                                             return (
@@ -352,9 +353,9 @@ const fetchBloodRequests = () => {
                                                     <TableCell className="tableCell">
                                                         {request.PatientName || 'N/A'}
                                                     </TableCell>
-                                                    <TableCell className="tableCell">
+                                                    {/* <TableCell className="tableCell">
                                                         {request.doctorName || 'N/A'}
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell className="tableCell">
                                                         {request.ContactNumber || 'N/A'}
                                                     </TableCell>
@@ -374,6 +375,11 @@ const fetchBloodRequests = () => {
                                                             </Typography>
                                                         </Box>
                                                     </TableCell>
+                                                    <TableCell className="tableCell" >
+                                                        <Box>
+                                                            <Typography>{request.address}</Typography>
+                                                        </Box>
+                                                    </TableCell>
                                                     <TableCell className="tableCell">
                                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
                                                             {getStatusIndicator(request.Status)}
@@ -390,7 +396,7 @@ const fetchBloodRequests = () => {
                                                                         onClick={() => {
                                                                             if (hasDonated) {
                                                                                 toast.error(
-                                                                                    `You can only donate blood once every ${restrictionPeriod}. ` + 
+                                                                                    `You can only donate blood once every ${restrictionPeriod}. ` +
                                                                                     `Your next eligible donation date is ${formatDisplayDate(nextDonationDate)}.`
                                                                                 );
                                                                             } else {
@@ -425,16 +431,16 @@ const fetchBloodRequests = () => {
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={8} align="center" className="tableCell">
-                                                <Box 
-                                                    display="flex" 
-                                                    justifyContent="center" 
-                                                    alignItems="center" 
+                                                <Box
+                                                    display="flex"
+                                                    justifyContent="center"
+                                                    alignItems="center"
                                                     height="300px"
                                                     flexDirection="column"
                                                 >
                                                     <Typography variant="h6" color="textSecondary" gutterBottom>
-                                                        {searchTerm ? 
-                                                            'No matching requests found' : 
+                                                        {searchTerm ?
+                                                            'No matching requests found' :
                                                             'No available blood requests matching your blood type'}
                                                     </Typography>
                                                     {/* {!searchTerm && (

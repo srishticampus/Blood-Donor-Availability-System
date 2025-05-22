@@ -21,9 +21,11 @@ import icon10 from '../../Assets/SidemenuIcon/manageBloodReq.png'
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import dp from '../../Assets/dp.jpg'
-
+import {baseUrl} from '../../baseUrl';
 
 function DonerSideMenu() {
+    console.log(baseUrl);
+    
     useEffect(() => {
         if (localStorage.getItem("Doner") == null) {
           navigate("/");
@@ -37,7 +39,7 @@ function DonerSideMenu() {
 
     const donorData = JSON.parse(localStorage.getItem('Doner') || '{}');
   const profilePhotoUrl = donorData.ProfilePhoto?.filename 
-    ? `http://localhost:4058/${donorData.ProfilePhoto.filename}`
+    ? `${baseUrl}/${donorData.ProfilePhoto.filename}`
     : dp; 
 
     const menuItems = [

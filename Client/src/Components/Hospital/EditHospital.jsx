@@ -15,6 +15,8 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
+
 function EditHospital() {
     const navigate = useNavigate();
     const hospitalData = JSON.parse(localStorage.getItem('Hospital') || '{}');
@@ -231,7 +233,7 @@ function EditHospital() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 hospitalData.ProfilePhoto?.filename ?
-                                    `http://localhost:4058/${hospitalData.ProfilePhoto.filename}` : ''}
+                                    `${baseUrl}${hospitalData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

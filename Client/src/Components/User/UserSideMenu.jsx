@@ -12,43 +12,44 @@ import icon7 from '../../Assets/SidemenuIcon/Docs.png';
 import icon8 from '../../Assets/SidemenuIcon/Local Hos.png';
 import icon9 from '../../Assets/SidemenuIcon/Send.png';
 import dp from '../../Assets/dp.jpg'
+import { baseUrl } from '../../baseUrl';
 
 
 function UserSideMenu() {
     const navigate = useNavigate()
-        useEffect(() => {
-            if (localStorage.getItem("User") == null) {
-              navigate("/");
-            }
-          });
-    
+    useEffect(() => {
+        if (localStorage.getItem("User") == null) {
+            navigate("/");
+        }
+    });
+
     const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
     const location = useLocation();
 
     const UserData = JSON.parse(localStorage.getItem('User') || '{}');
 
-console.log(UserData);
-  const UserProfile = UserData.ProfilePhoto?.filename 
-    ? `http://localhost:4058/${UserData.ProfilePhoto.filename}`
-    : dp; 
+    console.log(UserData);
+    const UserProfile = UserData.ProfilePhoto?.filename
+        ? `${baseUrl}${UserData.ProfilePhoto.filename}`
+        : dp;
 
 
-    
+
 
     const menuItems = [
         { name: 'Dashboard', icon: icon3, path: '/UserDashboard' },
         { name: 'Profile', icon: icon2, path: '/user-profile' },
+        { name: 'Send Request', icon: icon9, path: '/user-blood-request' },
         { name: 'Blood Donation Request', icon: icon4, path: '/user-view-requests' },
         { name: 'Notification', icon: icon5, path: '/user-view-notifications' },
         { name: 'History', icon: icon7, path: '/user-requests' },
         { name: 'Hospitals', icon: icon8, path: '/user-HospitalList' },
-        { name: 'Send Request', icon: icon9, path: '/user-blood-request' },
         { name: 'Logout', icon: icon1, action: () => setOpenLogoutDialog(true) }
     ];
 
     const isActive = (path) => {
-        return location.pathname === path || 
-               (path !== '/' && location.pathname.startsWith(path));
+        return location.pathname === path ||
+            (path !== '/' && location.pathname.startsWith(path));
     };
 
     const handleLogout = () => {
