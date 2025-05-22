@@ -77,7 +77,7 @@ function UserLogin() {
             <div className='login-form-container'>
                 <div className='form-background-overlay'></div>
                 <div className='form-content'>
-                    <h1 className='login-title' style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Login</h1>
+                    <h1 className='login-title' style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>User Login</h1>
                     <div className='form-group'>
                         <label htmlFor="username" className='form-label' style={{ fontSize: '0.85rem' }}>Email</label>
                         <TextField

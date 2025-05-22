@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
 import {baseUrl} from '../../baseUrl';
 
-function ViewDoner() {
+function ViewAllUsers() {
     const [doners, setDoners] = useState([]);
     const [filteredDoners, setFilteredDoners] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,8 +27,10 @@ function ViewDoner() {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        axiosInstance.post('/ViewAllDoner')
+        axiosInstance.post('/viewAllUsers')
             .then((result) => {
+                console.log(result);
+
                 setDoners(result.data.data);
                 setFilteredDoners(result.data.data);
                 setLoading(false);
@@ -69,11 +71,11 @@ function ViewDoner() {
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return 'Invalid Date';
-        
+
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        
+
         return `${day}/${month}/${year}`;
     };
 
@@ -85,12 +87,12 @@ function ViewDoner() {
                     <AdminNav />
                     <Box className="content-box">
                         <Typography variant="h4" className="title">
-                            View All Donors
+                            View All Users
                         </Typography>
-                        <Box 
-                            display="flex" 
-                            justifyContent="center" 
-                            alignItems="center" 
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
                             minHeight="60vh"
                         >
                             <CircularProgress size={60} />
@@ -109,12 +111,12 @@ function ViewDoner() {
                     <AdminNav />
                     <Box className="content-box">
                         <Typography variant="h4" className="title">
-                            View All Donors
+                            View All Users
                         </Typography>
-                        <Box 
-                            display="flex" 
-                            justifyContent="center" 
-                            alignItems="center" 
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
                             minHeight="60vh"
                         >
                             <Typography color="error" variant="h6">
@@ -134,10 +136,10 @@ function ViewDoner() {
                 <AdminNav onSearch={setSearchTerm} />
                 <Box className="content-box">
                     <Typography variant="h4" className="title">
-                        View All Donors
+                        View All Users
                     </Typography>
                     <Typography variant="h5" className="sub-title">
-                        Donors Table
+                        Users Table
                     </Typography>
                     <TableContainer component={Paper} className="table-container">
                         <Table aria-label="donors table">
@@ -145,52 +147,39 @@ function ViewDoner() {
                                 <TableRow className="table-head-row">
                                     <TableCell className="table-head-cell">Profile</TableCell>
                                     <TableCell className="table-head-cell">Name</TableCell>
-                                    <TableCell className="table-head-cell">DOB</TableCell>
-                                    <TableCell className="table-head-cell">Gender</TableCell>
                                     <TableCell className="table-head-cell">Mobile</TableCell>
                                     <TableCell className="table-head-cell">Email</TableCell>
-                                    <TableCell className="table-head-cell">Address</TableCell>
-                                    <TableCell className="table-head-cell">View More</TableCell>
+                                    <TableCell className="table-head-cell">District</TableCell>
+                                    <TableCell className="table-head-cell">City</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {filteredDoners.length > 0 ? (
                                     filteredDoners.map((donor) => (
                                         <TableRow key={donor._id} hover>
-                                            <TableCell className="tableCell">
-                                                <Avatar 
-                                                    alt={donor.FullName} 
-                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}`|| "" }
+                                            <TableCell className="tableCell" style={{display: 'flex', alignItems: 'center'}}>
+                                                <Avatar
+                                                    alt={donor.FullName}
+                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}`}
                                                     sx={{ width: 40, height: 40 }}
                                                 />
                                             </TableCell>
                                             <TableCell className="tableCell">{donor.FullName}</TableCell>
-                                            <TableCell className="tableCell">{formatDate(donor.DateOfBirth)}</TableCell>
-                                            <TableCell className="tableCell">{donor.Gender}</TableCell>
                                             <TableCell className="tableCell">{donor.PhoneNo}</TableCell>
                                             <TableCell className="tableCell">{donor.Email}</TableCell>
                                             <TableCell className="tableCell">{donor.District}</TableCell>
-                                            <TableCell className="tableCell">
-                                                <Link 
-                                                    to={`/doner-details/${donor._id}`}
-                                                    style={{
-                                                        textDecoration: 'none',
-                                                        color: '#2196F3',
-                                                        fontWeight: 500
-                                                    }}
-                                                >
-                                                    View Details
-                                                </Link>
-                                            </TableCell>
+                                            <TableCell className="tableCell">{donor.City}</TableCell>
+
+                                            
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={8} align="center">
-                                            <Box 
-                                                display="flex" 
-                                                justifyContent="center" 
-                                                alignItems="center" 
+                                            <Box
+                                                display="flex"
+                                                justifyContent="center"
+                                                alignItems="center"
                                                 height="200px"
                                             >
                                                 <Typography variant="h6" color="textSecondary">
@@ -209,4 +198,4 @@ function ViewDoner() {
     );
 }
 
-export default ViewDoner;
+export default ViewAllUsers;

@@ -12,6 +12,7 @@ import icon9 from '../../Assets/SidemenuIcon/dashboard.png';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import dp from '../../Assets/dp.jpg'
+import {baseUrl} from '../../baseUrl';
 
 function HosSidemenu() {
     useEffect(() => {
@@ -28,7 +29,7 @@ function HosSidemenu() {
 
 console.log(hospitalData);
   const hospitalProfile = hospitalData.ProfilePhoto?.filename 
-    ? `http://localhost:4058/${hospitalData.ProfilePhoto.filename}`
+    ? `${baseUrl}${hospitalData.ProfilePhoto.filename}`
     : dp; 
 
 

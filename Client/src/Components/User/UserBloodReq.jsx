@@ -36,7 +36,7 @@ function UserBloodReq() {
         "Other"
     ];
 
-    const [formData, setFormData] = React.useState({
+ const [formData, setFormData] = React.useState({
         patientName: '',
         contactNumber: '',
         doctorName: '',
@@ -46,15 +46,17 @@ function UserBloodReq() {
         status: '',
         USERID: USERID,
         Date: '',
-        Time: ''
+        Time: '',
+        address: ''
     });
 
-    const [errors, setErrors] = React.useState({
+const [errors, setErrors] = React.useState({
         patientName: '',
         contactNumber: '',
         doctorName: '',
         unitsRequired: '',
-        Date: ''
+        Date: '',
+        address: ''
     });
 
     const getTodayDate = () => {
@@ -64,7 +66,11 @@ function UserBloodReq() {
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
-
+const validateAddress = (address) => {
+        if (!address) return 'Address is required';
+        if (address.length < 10) return 'Address should be at least 10 characters';
+        return '';
+    };
     const validatePatientName = (name) => {
         if (!name) return 'Patient name is required';
         const regex = /^[a-zA-Z\s]+$/;
@@ -148,6 +154,9 @@ function UserBloodReq() {
             case 'Date':
                 error = validateDate(value);
                 break;
+            case 'address':  // Add address case
+                error = validateAddress(value);
+                break;
             default:
                 break;
         }
@@ -178,6 +187,9 @@ function UserBloodReq() {
             case 'Date':
                 error = validateDate(value);
                 break;
+            case 'address':  
+                error = validateAddress(value);
+                break;
             default:
                 break;
         }
@@ -186,14 +198,14 @@ function UserBloodReq() {
             ...prev,
             [name]: error
         }));
-    };
-
+    }
     const handleSubmit = () => {
         const newErrors = {
             patientName: validatePatientName(formData.patientName),
             doctorName: validateDoctorName(formData.doctorName),
             contactNumber: validateContactNumber(formData.contactNumber),
             unitsRequired: validateUnitsRequired(formData.unitsRequired),
+            address: validateAddress(formData.address),
             Date: validateDate(formData.Date)
         };
 
@@ -203,7 +215,7 @@ function UserBloodReq() {
         const isEmptyField = !formData.patientName || !formData.doctorName ||
             !formData.contactNumber || !formData.specialization ||
             !formData.bloodType || !formData.unitsRequired ||
-            !formData.status || !formData.Date || !formData.Time;
+            !formData.status || !formData.Date || !formData.Time || !formData.address;
 
         if (hasErrors || isEmptyField) {
             toast.error('Please fill all required fields correctly.');
@@ -220,7 +232,8 @@ function UserBloodReq() {
             Status: formData.status,
             USERID: formData.USERID,
             Date: formData.Date,
-            Time: formData.Time
+            Time: formData.Time,
+            address: formData.address
         };
 
         axiosInstance.post('/AddBloodRequest', requestData)
@@ -237,7 +250,8 @@ function UserBloodReq() {
                     status: '',
                     USERID: USERID,
                     Date: '',
-                    Time: ''
+                    Time: '',
+                    address: ''
                 });
             })
             .catch(error => {
@@ -378,6 +392,7 @@ function UserBloodReq() {
                                     inputProps={{ min: 1, step: 1 }}
                                 />
                             </h5>
+                             
                             <h5>Status
                                 <Select
                                     name="status"
@@ -463,7 +478,19 @@ function UserBloodReq() {
                                     InputLabelProps={{ shrink: true }}
                                 />
                             </h5>
-
+<h5>Address
+                                <TextField
+                                    className="edit-input"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={!!errors.address}
+                                    helperText={errors.address}
+                                    multiline
+                                    rows={3}
+                                />
+                            </h5>
                             <Button
                                 variant="contained"
                                 color="primary"

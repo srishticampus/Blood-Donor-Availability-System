@@ -59,6 +59,7 @@ import AdminDashboard from './Components/Admin/AdminDashboard';
 import ContactUs from './Components/common/ContactUs';
 import DonerContactUs from './Components/Doner/DonerContactus';
 import DonerAboutUs from './Components/Doner/DonerAboutUs';
+import ViewAllUsers from './Components/Admin/ViewAllUsers';
 
 function App() {
   return (
@@ -98,6 +99,7 @@ function App() {
           <Route path="/enquiries" element={<UserEnquiry />} />
           <Route path="/notifications" element={<Notification />} />
           <Route path="/blood-requests" element={<BloodRequests />} />
+          <Route path="/ViewAllUsers" element={<ViewAllUsers />} />
 
 
           {/* Hospital route */}

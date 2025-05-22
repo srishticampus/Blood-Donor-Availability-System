@@ -16,7 +16,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import '../../Styles/DonerRegistration.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Nav from '../common/Nav';
-import { toast , ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import axiosInstance from '../Service/BaseUrl';
 
 function DonerRegistration() {
@@ -148,6 +148,7 @@ function DonerRegistration() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
+            // In the DateOfBirth validation block within validateForm()
             if (selectedDate > today) {
                 newErrors.DateOfBirth = 'Date of Birth cannot be in the future';
                 valid = false;
@@ -158,8 +159,12 @@ function DonerRegistration() {
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
                 age--;
             }
+
             if (age < 18) {
                 newErrors.DateOfBirth = 'You must be at least 18 years old';
+                valid = false;
+            } else if (age > 65) {  
+                newErrors.DateOfBirth = 'You must be 65 years old or younger';
                 valid = false;
             }
         }
@@ -414,7 +419,7 @@ function DonerRegistration() {
                                     error={!!errors.City}
                                     helperText={errors.City}
                                     inputProps={{
-                                        pattern: "[A-Za-z\\s]*", 
+                                        pattern: "[A-Za-z\\s]*",
                                     }}
                                 />                            </div>
                         </div>

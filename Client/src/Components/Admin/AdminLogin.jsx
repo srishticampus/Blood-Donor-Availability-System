@@ -90,7 +90,7 @@ function AdminLogin() {
             <div className='login-form-container'>
                 <div className='form-background-overlay'></div>
                 <div className='form-content'>
-                    <h1 className='login-title' style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Login</h1>
+                    <h1 className='login-title' style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Admin Login</h1>
                     {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                     <div className='form-group'>
                         <label htmlFor="userid" className='form-label' style={{ fontSize: '0.85rem' }}>Email</label>

@@ -17,6 +17,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
 import axiosInstance from '../Service/BaseUrl'
+import {baseUrl} from '../../baseUrl';
+
 function EditUserRequest() {
     const { id } = useParams();
     const navigate = useNavigate();

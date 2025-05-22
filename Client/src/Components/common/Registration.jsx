@@ -27,9 +27,10 @@ function Registration() {
     PhoneNo: '',
     Password: '',
     confirmPassword: '',
-    Category: ''
+    Category: '',
+    ProfilePhoto: '' 
   });
-  const [ProfilePhoto, setProfilePhoto] = useState();
+  const [ProfilePhoto, setProfilePhoto] = useState(null);
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
@@ -48,14 +49,14 @@ function Registration() {
 
   const validatePassword = (password) => {
     if (!password) return { isValid: false, message: 'Password is required' };
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#]{8,}$/;
     const messages = [];
     
     if (password.length < 8) messages.push('At least 8 characters');
     if (!/[A-Z]/.test(password)) messages.push('One uppercase letter');
     if (!/[a-z]/.test(password)) messages.push('One lowercase letter');
     if (!/\d/.test(password)) messages.push('One number');
-    if (!/[@$!%*?&]/.test(password)) messages.push('One special character (@$!%*?&)');
+    if (!/[@$!%*?&#]/.test(password)) messages.push('One special character (@$!%*?&)');
 
     return {
       isValid: passwordRegex.test(password),
@@ -107,7 +108,9 @@ function Registration() {
   };
 
   const handleFileChange = (event) => {
-    setProfilePhoto(event.target.files[0] || null);
+    const file = event.target.files[0];
+    setProfilePhoto(file || null);
+    setErrors(prev => ({ ...prev, ProfilePhoto: '' }));
   };
 
   const validateForm = () => {
@@ -117,7 +120,8 @@ function Registration() {
       PhoneNo: validatePhoneNumber(formData.PhoneNo),
       Password: validatePassword(formData.Password).message,
       confirmPassword: formData.confirmPassword === formData.Password ? '' : 'Passwords do not match',
-      Category: formData.Category ? '' : 'Please select a category'
+      Category: formData.Category ? '' : 'Please select a category',
+      ProfilePhoto: !ProfilePhoto ? 'Profile image is required' : ''
     };
 
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm password';
@@ -168,16 +172,20 @@ function Registration() {
                 type="file"
                 id="profile-upload"
                 className='file-upload'
-                name=''
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
                 accept="image/*"
               />
               <label htmlFor="profile-upload">
                 <Button variant="contained" component="span" className='upload-label'>
-                  Choose Profile
+                  choose Photo
                 </Button>
               </label>
+              {errors.ProfilePhoto && (
+                <div className="profile-error" >
+                  {errors.ProfilePhoto}
+                </div>
+              )}
             </div>
 
             <div className='form-group'>

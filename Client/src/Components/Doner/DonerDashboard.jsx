@@ -10,6 +10,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
+
 function DonerDashboard() {
   const DonerId = localStorage.getItem("DonerId");
   const [donorData, setDonorData] = useState({});
@@ -155,7 +157,7 @@ function DonerDashboard() {
     : 'Now (no donation history)';
 
   const profilePhotoUrl = donorData.ProfilePhoto?.filename
-    ? `http://localhost:4058/${donorData.ProfilePhoto.filename}`
+    ? `${baseUrl}/${donorData.ProfilePhoto.filename}`
     : dp;
 
   return (

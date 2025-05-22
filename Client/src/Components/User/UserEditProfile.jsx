@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import UserNav from './UserNav';
 import UserSideMenu from './UserSideMenu';
 import axiosInstance from '../Service/BaseUrl';
+import {baseUrl} from '../../baseUrl';
+
 function UserEditProfile() {
     const navigate = useNavigate();
     const userData = JSON.parse(localStorage.getItem('User') || '{}');
@@ -232,7 +234,7 @@ function UserEditProfile() {
                             src={profileImageFile ?
                                 URL.createObjectURL(profileImageFile) :
                                 userData.ProfilePhoto?.path ?
-                                    `http://localhost:4058/${userData.ProfilePhoto.filename}` : ''}
+                                    `${baseUrl}${userData.ProfilePhoto.filename}` : ''}
                             sx={{
                                 width: 120,
                                 height: 120,

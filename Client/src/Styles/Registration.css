@@ -107,3 +107,9 @@
     padding: 20px;
   }
 }
+.profile-error {
+  color: #f44336;
+  font-size: 0.90rem;
+  margin-top: 4px;
+  text-align: center;
+}

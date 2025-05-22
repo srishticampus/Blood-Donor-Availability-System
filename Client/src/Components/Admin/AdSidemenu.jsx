@@ -11,6 +11,8 @@ import icon6 from '../../Assets/SidemenuIcon/settings.png';
 import icon7 from '../../Assets/SidemenuIcon/verified.png';
 import icon8 from '../../Assets/SidemenuIcon/warning.png';
 import icon9 from '../../Assets/SidemenuIcon/dashboard.png';
+import icon10 from '../../Assets/SidemenuIcon/Person.png';
+
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 
@@ -32,6 +34,7 @@ function AdSidemenu() {
             ]
         },
         { name: 'Donor Management', icon: icon6, path: '/view-doners' },
+        { name: 'View All Users', icon: icon10, path: '/ViewAllUsers' },
         { name: 'Emergency Alert', icon: icon8, path: '/emergency-alerts' },
         { name: 'Blood Requests', icon: icon2, path: '/blood-requests' },
         { name: 'Notifications', icon: icon5, path: '/notifications' },
