@@ -12,7 +12,13 @@ import {
     Button,
     CircularProgress,
     Tooltip,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Chip,
+    TextField
 } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,6 +38,16 @@ function DonerBloodRequest() {
     const [searchTerm, setSearchTerm] = useState('');
     const [donorData, setDonorData] = useState({});
     const [healthInfoComplete, setHealthInfoComplete] = useState(true);
+    const [predictionDialogOpen, setPredictionDialogOpen] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [predictionData, setPredictionData] = useState({
+        recency: '',
+        frequency: '',
+        monetary: '',
+        time: ''
+    });
+    const [predictionResult, setPredictionResult] = useState(null);
+    const [predictionLoading, setPredictionLoading] = useState(false);
 
     useEffect(() => {
         fetchBloodRequests();
@@ -43,12 +59,12 @@ function DonerBloodRequest() {
             const response = await axiosInstance.post(`/findDoner/${DonerId}`);
             const data = response.data.data;
             setDonorData(data);
-            
-            const isHealthInfoComplete = 
+
+            const isHealthInfoComplete =
                 data.SurgicalHistory && data.SurgicalHistory.length > 0 &&
                 data.medicines && data.medicines.length > 0 &&
                 data.vaccinationsTaken && data.vaccinationsTaken.length > 0;
-            
+
             setHealthInfoComplete(isHealthInfoComplete);
         } catch (error) {
             console.error('Error fetching donor data:', error);
@@ -164,40 +180,71 @@ function DonerBloodRequest() {
             });
     };
 
-    const handleApprove = async (requestId) => {
-        if (!DonerId) {
-            toast.error('Donor ID not found. Please login again.');
-            return;
+    const handlePredictionOpen = (request) => {
+        setSelectedRequest(request);
+        setPredictionDialogOpen(true);
+        setPredictionResult(null);
+        setPredictionData({
+            recency: '',
+            frequency: '',
+            monetary: '',
+            time: ''
+        });
+    };
+
+    const handlePredictionClose = () => {
+        setPredictionDialogOpen(false);
+        setSelectedRequest(null);
+        setPredictionResult(null);
+    };
+
+    const handlePredictionInputChange = (e) => {
+        const { name, value } = e.target;
+        setPredictionData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handlePredictionSubmit = async () => {
+        setPredictionLoading(true);
+        try {
+            const response = await axiosInstance.post('/predict', {
+                recency: parseInt(predictionData.recency),
+                frequency: parseInt(predictionData.frequency),
+                monetary: parseInt(predictionData.monetary),
+                time: parseInt(predictionData.time)
+            });
+
+            if (response.data && response.data.data) {
+                setPredictionResult(response.data.data);
+            } else {
+                throw new Error('Invalid prediction response');
+            }
+        } catch (error) {
+            console.error('Prediction error:', error);
+            toast.error('Failed to get prediction');
+        } finally {
+            setPredictionLoading(false);
         }
+    };
 
-        if (!healthInfoComplete) {
-            toast.error('Please complete your health information before accepting requests');
-            return;
-        }
+    const handleConfirmAccept = async () => {
+        if (!selectedRequest) return;
 
-        const { eligible, nextDate } = checkDonationEligibility();
-        if (!eligible) {
-            const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
-            toast.error(
-                `You can only donate blood once every ${restrictionPeriod}. ` +
-                `Your next eligible donation date is ${nextDate}.`
-            );
-            return;
-        }
-
-        setApprovingId(requestId);
-
+        setApprovingId(selectedRequest._id);
         try {
             const response = await axiosInstance.post(
-                `/${requestId}/Donerapprove`,
+                `/${selectedRequest._id}/Donerapprove`,
                 { DonerId }
             );
 
             if (response.data) {
                 toast.success('Request approved successfully');
                 setRequests(prevRequests =>
-                    prevRequests.filter(request => request._id !== requestId)
+                    prevRequests.filter(request => request._id !== selectedRequest._id)
                 );
+                handlePredictionClose();
             }
         } catch (error) {
             console.error('Error approving request:', error);
@@ -387,8 +434,8 @@ function DonerBloodRequest() {
 
                     {!healthInfoComplete && (
                         <Alert severity="warning" sx={{ mb: 3 }}>
-                            Please complete your health information 
-                            <Link to="/doner-edit-profile" style={{ textDecoration: 'none', color: '#1976d2' , fontSize:"17px"}} className='waring-profile-incomplete'> Click Here</Link>
+                            Please complete your health information
+                            <Link to="/doner-edit-profile" style={{ textDecoration: 'none', color: '#1976d2', fontSize: "17px" }} className='waring-profile-incomplete'> Click Here</Link>
                         </Alert>
                     )}
 
@@ -397,7 +444,6 @@ function DonerBloodRequest() {
                             <TableHead>
                                 <TableRow className="table-head-row">
                                     <TableCell className="table-head-cell">Patient</TableCell>
-                                    {/* <TableCell className="table-head-cell">Doctor</TableCell> */}
                                     <TableCell className="table-head-cell">Contact</TableCell>
                                     <TableCell className="table-head-cell">Blood Type</TableCell>
                                     <TableCell className="table-head-cell">Units</TableCell>
@@ -421,8 +467,8 @@ function DonerBloodRequest() {
                                         const { eligible, nextDate } = checkDonationEligibility();
                                         const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
                                         const tooltipText = eligible
-                                            ? healthInfoComplete 
-                                                ? "Accept this request" 
+                                            ? healthInfoComplete
+                                                ? "Accept this request"
                                                 : "Complete your health information to accept requests"
                                             : `You must wait ${restrictionPeriod} between donations. Next eligible date: ${nextDate}`;
 
@@ -431,9 +477,6 @@ function DonerBloodRequest() {
                                                 <TableCell className="tableCell">
                                                     {request.PatientName || 'N/A'}
                                                 </TableCell>
-                                                {/* <TableCell className="tableCell">
-                                                    {request.doctorName || 'N/A'}
-                                                </TableCell> */}
                                                 <TableCell className="tableCell">
                                                     {String(request.ContactNumber) || "N/A"}
                                                 </TableCell>
@@ -453,7 +496,7 @@ function DonerBloodRequest() {
                                                         </Typography>
                                                     </Box>
                                                 </TableCell>
-                                                 <TableCell className="tableCell" >
+                                                <TableCell className="tableCell" >
                                                     <Box>
                                                         <Typography>{request.address}</Typography>
                                                     </Box>
@@ -471,7 +514,7 @@ function DonerBloodRequest() {
                                                                 <Button
                                                                     variant="contained"
                                                                     color="primary"
-                                                                    onClick={() => handleApprove(request._id)}
+                                                                    onClick={() => handlePredictionOpen(request)}
                                                                     disabled={approvingId === request._id || !eligible || !healthInfoComplete}
                                                                     size="small"
                                                                 >
@@ -516,6 +559,169 @@ function DonerBloodRequest() {
                 </Box>
             </Box>
 
+            <Dialog
+                open={predictionDialogOpen}
+                onClose={handlePredictionClose}
+                maxWidth="sm"
+                fullWidth
+                style={{ padding: '16px' }}
+            >
+                <DialogTitle style={{ padding: '24px 24px 8px' }}>
+                    <Typography variant="h5" style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
+                        Donation Prediction
+                    </Typography>
+                    <Typography variant="subtitle2" style={{ color: 'rgba(0, 0, 0, 0.6)', textAlign: 'center' }}>
+                        Please provide your donation history to help predict your donation likelihood
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    {!predictionResult ? (
+                        <>
+                            <Box style={{ margin: '16px 0' }}>
+                                <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                    Patient: <strong>{selectedRequest?.PatientName || 'N/A'}</strong>
+                                </Typography>
+                                <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                    Blood Type: <strong>{selectedRequest ? formatBloodType(selectedRequest.BloodType) : 'N/A'}</strong>
+                                </Typography>
+                                <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                    Units Required: <strong>{selectedRequest?.UnitsRequired || 0}</strong>
+                                </Typography>
+                            </Box>
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Months since last donation"
+                                name="recency"
+                                type="number"
+                                value={predictionData.recency}
+                                onChange={handlePredictionInputChange}
+                                inputProps={{ min: 0 }}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Total number of donations"
+                                name="frequency"
+                                type="number"
+                                value={predictionData.frequency}
+                                onChange={handlePredictionInputChange}
+                                inputProps={{ min: 0 }}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Total blood donated (c.c.)"
+                                name="monetary"
+                                type="number"
+                                value={predictionData.monetary}
+                                onChange={handlePredictionInputChange}
+                                inputProps={{ min: 0 }}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Months since first donation"
+                                name="time"
+                                type="number"
+                                value={predictionData.time}
+                                onChange={handlePredictionInputChange}
+                                inputProps={{ min: 0 }}
+                            />
+                        </>
+                    ) : (
+                        <Box style={{ margin: '16px 0' }}>
+                            <Alert
+                                severity={predictionResult.class === 1 ? 'success' : 'warning'}
+                                style={{ marginBottom: '16px' }}
+                            >
+                                <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+                                    Prediction: {predictionResult.class === 1 ? 'Likely to donate' : 'Unlikely to donate'}
+                                </Typography>
+                                <Typography variant="body2">
+                                    Probability: {(predictionResult.probability * 100).toFixed(2)}%
+                                </Typography>
+                                {predictionResult.message && (
+                                    <Typography variant="body2" style={{ marginTop: '8px' }}>
+                                        {predictionResult.message}
+                                    </Typography>
+                                )}
+                            </Alert>
+                            <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                Patient: <strong>{selectedRequest?.PatientName || 'N/A'}</strong>
+                            </Typography>
+                            <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                Blood Type: <strong>{selectedRequest ? formatBloodType(selectedRequest.BloodType) : 'N/A'}</strong>
+                            </Typography>
+                            <Typography variant="body1" style={{ marginBottom: '12px' }}>
+                                Units Required: <strong>{selectedRequest?.UnitsRequired || 0}</strong>
+                            </Typography>
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions style={{ padding: '16px 24px' }}>
+                    {!predictionResult ? (
+                        <>
+                            <Button
+                                onClick={handlePredictionClose}
+                                color="secondary"
+                                variant="outlined"
+                                style={{ marginRight: '8px' }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handlePredictionSubmit}
+                                color="primary"
+                                variant="contained"
+                                disabled={predictionLoading ||
+                                    !predictionData.recency ||
+                                    !predictionData.frequency ||
+                                    !predictionData.monetary ||
+                                    !predictionData.time}
+                                startIcon={predictionLoading ? <CircularProgress size={20} /> : null}
+                                style={{ textTransform: 'none' }}
+                            >
+                                {predictionLoading ? 'Predicting...' : 'Predict'}
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            {predictionResult.class === 1 ? (
+                                <>
+                                    <Button
+                                        onClick={() => setPredictionResult(null)}
+                                        color="secondary"
+                                        variant="outlined"
+                                        style={{ marginRight: '8px' }}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Button
+                                        onClick={handleConfirmAccept}
+                                        color="primary"
+                                        variant="contained"
+                                        disabled={approvingId === selectedRequest?._id}
+                                        startIcon={approvingId === selectedRequest?._id ? <CircularProgress size={20} /> : null}
+                                        style={{ textTransform: 'none' }}
+                                    >
+                                        {approvingId === selectedRequest?._id ? 'Approving...' : 'Confirm Donation'}
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button
+                                    onClick={handlePredictionClose}
+                                    color="secondary"
+                                    variant="outlined"
+                                    style={{ textTransform: 'none' }}
+                                >
+                                    Close
+                                </Button>
+                            )}
+                        </>
+                    )}
+                </DialogActions>
+            </Dialog>
             {healthInfoComplete && (
                 <EmergencyPopup
                     requests={requests.filter(req => req.Status === "Emergency" || req.Status === "Very Urgent")}

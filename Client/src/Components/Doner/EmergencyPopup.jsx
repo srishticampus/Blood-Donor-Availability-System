@@ -8,21 +8,33 @@ import {
   Button,
   Box,
   Chip,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  Alert
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../Service/BaseUrl';
+
 function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   const [open, setOpen] = useState(false);
   const [emergencyRequest, setEmergencyRequest] = useState(null);
   const [lastShownRequestId, setLastShownRequestId] = useState(null);
   const [isApproving, setIsApproving] = useState(false);
-  const donorData = JSON.parse(localStorage.getItem('Doner')) || '{}';
+  const [showPredictionForm, setShowPredictionForm] = useState(false);
+  const [predictionData, setPredictionData] = useState({
+    recency: '',
+    frequency: '',
+    monetary: '',
+    time: ''
+  });
+  const [predictionResult, setPredictionResult] = useState(null);
+  const [predictionLoading, setPredictionLoading] = useState(false);
+  const donorData = JSON.parse(localStorage.getItem('Doner')) || {};
 
   const checkDonationEligibility = () => {
     if (!donorData || !donorData.donationHistory || donorData.donationHistory.length === 0) {
-        return { eligible: true, nextDate: null };
+      return { eligible: true, nextDate: null };
     }
 
     const lastDonationDate = new Date(donorData.donationHistory[donorData.donationHistory.length - 1]);
@@ -34,9 +46,9 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
     const formattedNextDate = formatDisplayDate(nextDonationDate);
 
     if (donorData.Gender === "Male" && daysDiff < 90) {
-        return { eligible: false, nextDate: formattedNextDate };
+      return { eligible: false, nextDate: formattedNextDate };
     } else if (donorData.Gender === "Female" && daysDiff < 120) {
-        return { eligible: false, nextDate: formattedNextDate };
+      return { eligible: false, nextDate: formattedNextDate };
     }
 
     return { eligible: true, nextDate: null };
@@ -44,16 +56,16 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
 
   const calculateNextDonationDate = () => {
     if (!donorData || !donorData.donationHistory || donorData.donationHistory.length === 0) {
-        return null;
+      return null;
     }
 
     const lastDonationDate = new Date(donorData.donationHistory[donorData.donationHistory.length - 1]);
     const nextDonationDate = new Date(lastDonationDate);
     
     if (donorData.Gender === "Male") {
-        nextDonationDate.setDate(nextDonationDate.getDate() + 90);
+      nextDonationDate.setDate(nextDonationDate.getDate() + 90);
     } else {
-        nextDonationDate.setDate(nextDonationDate.getDate() + 120);
+      nextDonationDate.setDate(nextDonationDate.getDate() + 120);
     }
 
     return nextDonationDate;
@@ -61,9 +73,9 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
 
   const formatDisplayDate = (date) => {
     return date ? date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     }) : '';
   };
 
@@ -95,6 +107,8 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
     setOpen(false);
+    setShowPredictionForm(false);
+    setPredictionResult(null);
     if (onClose) onClose();
   };
 
@@ -115,8 +129,42 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
 
-    setIsApproving(true);
+    setShowPredictionForm(true);
+  };
 
+  const handlePredictionInputChange = (e) => {
+    const { name, value } = e.target;
+    setPredictionData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePredictionSubmit = async () => {
+    setPredictionLoading(true);
+    try {
+      const response = await axiosInstance.post('/predict', {
+        recency: parseInt(predictionData.recency),
+        frequency: parseInt(predictionData.frequency),
+        monetary: parseInt(predictionData.monetary),
+        time: parseInt(predictionData.time)
+      });
+      
+      if (response.data && response.data.data) {
+        setPredictionResult(response.data.data);
+      } else {
+        throw new Error('Invalid prediction response');
+      }
+    } catch (error) {
+      console.error('Prediction error:', error);
+      toast.error('Failed to get prediction');
+    } finally {
+      setPredictionLoading(false);
+    }
+  };
+
+  const handleConfirmAccept = async () => {
+    setIsApproving(true);
     try {
       const response = await axiosInstance.post(
         `/${emergencyRequest._id}/Donerapprove`,
@@ -126,6 +174,8 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       if (response.data) {
         toast.success('Blood request approved successfully!');
         setOpen(false);
+        setShowPredictionForm(false);
+        setPredictionResult(null);
 
         if (onRequestUpdate) {
           onRequestUpdate(emergencyRequest._id);
@@ -144,8 +194,22 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
     }
   };
 
+  const handleBackToRequest = () => {
+    setShowPredictionForm(false);
+    setPredictionResult(null);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+    setShowPredictionForm(false);
+    setPredictionResult(null);
+    if (onClose) onClose();
+  };
+
   const handleReject = () => {
     setOpen(false);
+    setShowPredictionForm(false);
+    setPredictionResult(null);
     if (onClose) onClose();
   };
 
@@ -203,103 +267,284 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
         }
       }}
     >
-      <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
-        <Typography variant="h5" fontWeight="bold" color="error">
-          {emergencyRequest.Status === "Emergency"
-            ? "🚨 EMERGENCY 🚨"
-            : "⚠️ URGENT REQUEST ⚠️"}
-        </Typography>
-        <Typography variant="subtitle2">
-          Urgent requests for blood donation near you
-        </Typography>
-      </DialogTitle>
+      {!showPredictionForm ? (
+        <>
+          <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+            <Typography variant="h5" fontWeight="bold" color="error">
+              {emergencyRequest.Status === "Emergency"
+                ? "🚨 EMERGENCY 🚨"
+                : "⚠️ URGENT REQUEST ⚠️"}
+            </Typography>
+            <Typography variant="subtitle2">
+              Urgent requests for blood donation near you
+            </Typography>
+          </DialogTitle>
 
-      <DialogContent sx={{ px: 3, py: 1 }}>
-        <DetailRow label="Patient Name" value={emergencyRequest.PatientName} />
-        <DetailRow label="Contact Number" value={emergencyRequest.ContactNumber} />
-        <DetailRow label="Blood Type" value={
-          <Chip
-            label={formattedBloodType || 'N/A'}
-            size="small"
-            sx={{
-              backgroundColor: '#D32F2F',
-              color: 'white',
-              padding: "15px",
-              fontWeight: 'bold',
-              border: '1px solid #ef9a9a'
-            }}
-          />
-        } />
-        <DetailRow
-          label="Units Required"
-          value={`${emergencyRequest.UnitsRequired || 0} ${emergencyRequest.UnitsRequired === 1 ? 'unit' : 'units'}`}
-        />
-        <DetailRow label="Status" value={
-          <Chip
-            label={emergencyRequest.Status}
-            size="small"
-            sx={{
-              backgroundColor: emergencyRequest.Status === "Emergency" ? '#D32F2F' : '#FF9800',
-              color: 'white',
-              padding: "15px",
-              fontWeight: 'bold',
-              border: '1px solid #ef9a9a'
-            }}
-          />
-        } />
-        <DetailRow label="Date" value={formatDate(emergencyRequest.Date)} />
-        <DetailRow label="Time" value={formatTime(emergencyRequest.Time)} />
+          <DialogContent sx={{ px: 3, py: 1 }}>
+            <DetailRow label="Patient Name" value={emergencyRequest.PatientName} />
+            <DetailRow label="Contact Number" value={emergencyRequest.ContactNumber} />
+            <DetailRow label="Blood Type" value={
+              <Chip
+                label={formattedBloodType || 'N/A'}
+                size="small"
+                sx={{
+                  backgroundColor: '#D32F2F',
+                  color: 'white',
+                  padding: "15px",
+                  fontWeight: 'bold',
+                  border: '1px solid #ef9a9a'
+                }}
+              />
+            } />
+            <DetailRow
+              label="Units Required"
+              value={`${emergencyRequest.UnitsRequired || 0} ${emergencyRequest.UnitsRequired === 1 ? 'unit' : 'units'}`}
+            />
+            <DetailRow label="Status" value={
+              <Chip
+                label={emergencyRequest.Status}
+                size="small"
+                sx={{
+                  backgroundColor: emergencyRequest.Status === "Emergency" ? '#D32F2F' : '#FF9800',
+                  color: 'white',
+                  padding: "15px",
+                  fontWeight: 'bold',
+                  border: '1px solid #ef9a9a'
+                }}
+              />
+            } />
+            <DetailRow label="Date" value={formatDate(emergencyRequest.Date)} />
+            <DetailRow label="Time" value={formatTime(emergencyRequest.Time)} />
 
-        <Typography 
-          variant="body2" 
-          sx={{
-            color: eligible ? '#4caf50' : '#f44336',
-            textAlign: 'center',
-            mt: 2,
-            mb: 1,
-            fontWeight: '500'
-          }}
-        >
-          {eligible 
-            ? "You are eligible to donate"
-            : `You must wait ${restrictionPeriod} between donations. Next eligible date: ${nextDate}`}
-        </Typography>
-      </DialogContent>
+            <Typography 
+              variant="body2" 
+              sx={{
+                color: eligible ? '#4caf50' : '#f44336',
+                textAlign: 'center',
+                mt: 2,
+                mb: 1,
+                fontWeight: '500'
+              }}
+            >
+              {eligible 
+                ? "You are eligible to donate"
+                : `You must wait ${restrictionPeriod} between donations. Next eligible date: ${nextDate}`}
+            </Typography>
+          </DialogContent>
 
-      <DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAccept}
-          disabled={isApproving || !eligible}
-          sx={{
-            mr: 2,
-            px: 3,
-            borderRadius: '8px',
-            textTransform: 'none',
-            fontWeight: 'bold',
-            minWidth: '120px'
-          }}
-          startIcon={isApproving ? <CircularProgress size={20} /> : null}
-        >
-          {isApproving ? 'Approving...' : 'Accept'}
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={handleReject}
-          disabled={isApproving}
-          sx={{
-            px: 3,
-            borderRadius: '8px',
-            textTransform: 'none',
-            fontWeight: 'bold',
-            minWidth: '120px'
-          }}
-        >
-          Later
-        </Button>
-      </DialogActions>
+          <DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAccept}
+              disabled={isApproving || !eligible}
+              sx={{
+                mr: 2,
+                px: 3,
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                minWidth: '120px'
+              }}
+            >
+              Accept
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleReject}
+              disabled={isApproving}
+              sx={{
+                px: 3,
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                minWidth: '120px'
+              }}
+            >
+              Later
+            </Button>
+          </DialogActions>
+        </>
+      ) : (
+        <>
+          <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+            <Typography variant="h5" fontWeight="bold">
+              Donation Prediction
+            </Typography>
+            <Typography variant="subtitle2">
+              Please provide your donation history
+            </Typography>
+          </DialogTitle>
+
+          <DialogContent sx={{ px: 3, py: 1 }}>
+            {!predictionResult ? (
+              <>
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Months since last donation"
+                  name="recency"
+                  type="number"
+                  value={predictionData.recency}
+                  onChange={handlePredictionInputChange}
+                  inputProps={{ min: 0 }}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Total number of donations"
+                  name="frequency"
+                  type="number"
+                  value={predictionData.frequency}
+                  onChange={handlePredictionInputChange}
+                  inputProps={{ min: 0 }}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Total blood donated (c.c.)"
+                  name="monetary"
+                  type="number"
+                  value={predictionData.monetary}
+                  onChange={handlePredictionInputChange}
+                  inputProps={{ min: 0 }}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Months since first donation"
+                  name="time"
+                  type="number"
+                  value={predictionData.time}
+                  onChange={handlePredictionInputChange}
+                  inputProps={{ min: 0 }}
+                />
+              </>
+            ) : (
+              <>
+                <Alert 
+                  severity={predictionResult.class === 1 ? 'success' : 'warning'}
+                  sx={{ mb: 2 }}
+                >
+                  <Typography variant="body1" fontWeight="bold">
+                    Prediction: {predictionResult.class === 1 ? 'Likely to donate' : 'Unlikely to donate'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Probability: {(predictionResult.probability * 100).toFixed(2)}%
+                  </Typography>
+                  {predictionResult.message && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {predictionResult.message}
+                    </Typography>
+                  )}
+                </Alert>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Patient: {emergencyRequest.PatientName || 'N/A'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Blood Type: {formattedBloodType || 'N/A'}
+                </Typography>
+              </>
+            )}
+          </DialogContent>
+
+<DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
+    {!predictionResult ? (
+        <>
+            <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancel}
+                disabled={predictionLoading}
+                sx={{
+                    mr: 2,
+                    px: 3,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                    minWidth: '120px'
+                }}
+            >
+                Cancel
+            </Button>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handlePredictionSubmit}
+                disabled={predictionLoading || 
+                    !predictionData.recency || 
+                    !predictionData.frequency || 
+                    !predictionData.monetary || 
+                    !predictionData.time}
+                sx={{
+                    px: 3,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                    minWidth: '120px'
+                }}
+                startIcon={predictionLoading ? <CircularProgress size={20} /> : null}
+            >
+                {predictionLoading ? 'Predicting...' : 'Predict'}
+            </Button>
+        </>
+    ) : (
+        <>
+            {predictionResult.class === 1 ? (
+                <>
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={handleBackToRequest}
+                        sx={{
+                            mr: 2,
+                            px: 3,
+                            borderRadius: '8px',
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            minWidth: '120px'
+                        }}
+                    >
+                        Back
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleConfirmAccept}
+                        disabled={isApproving}
+                        sx={{
+                            px: 3,
+                            borderRadius: '8px',
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            minWidth: '120px'
+                        }}
+                        startIcon={isApproving ? <CircularProgress size={20} /> : null}
+                    >
+                        {isApproving ? 'Approving...' : 'Confirm'}
+                    </Button>
+                </>
+            ) : (
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleCancel}
+                    sx={{
+                        px: 3,
+                        borderRadius: '8px',
+                        textTransform: 'none',
+                        fontWeight: 'bold',
+                        minWidth: '120px'
+                    }}
+                >
+                    Close
+                </Button>
+            )}
+        </>
+    )}
+</DialogActions>        </>
+      )}
     </Dialog>
   );
 }
