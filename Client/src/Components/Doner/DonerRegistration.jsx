@@ -76,7 +76,7 @@ function DonerRegistration() {
     const genderOptions = [
         { value: 'Male', label: 'Male' },
         { value: 'Female', label: 'Female' },
-        { value: 'Third Gender', label: 'Third Gender' }
+        { value: 'Other', label: 'Other' }
     ];
 
     const validateName = (name) => /^[A-Za-z\s]+$/.test(name);

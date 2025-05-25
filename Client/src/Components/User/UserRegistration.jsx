@@ -4,7 +4,11 @@ import {
     TextField,
     FormLabel,
     InputAdornment,
-    IconButton
+    IconButton,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import '../../Styles/DonerRegistration.css';
@@ -22,6 +26,23 @@ function DonerRegistration() {
     const [ProfilePhoto, setProfilePhoto] = useState(formData.ProfilePhoto || null);
     const [showPassword, setShowPassword] = useState(false);
     const [submitError, setSubmitError] = useState('');
+
+    const keralaDistricts = [
+        'Alappuzha',
+        'Ernakulam',
+        'Idukki',
+        'Kannur',
+        'Kasaragod',
+        'Kollam',
+        'Kottayam',
+        'Kozhikode',
+        'Malappuram',
+        'Palakkad',
+        'Pathanamthitta',
+        'Thiruvananthapuram',
+        'Thrissur',
+        'Wayanad'
+    ];
 
     const [doner, setDoner] = useState({
         FullName: formData.FullName || '',
@@ -92,11 +113,8 @@ function DonerRegistration() {
             valid = false;
         }
 
-        if (!doner.District.trim()) {
+        if (!doner.District) {
             newErrors.District = 'District is required';
-            valid = false;
-        } else if (!validateName(doner.District)) {
-            newErrors.District = 'Only alphabets and spaces allowed';
             valid = false;
         }
 
@@ -161,6 +179,7 @@ function DonerRegistration() {
                 }
             });
     };
+
     return (
         <div>
             <ToastContainer
@@ -175,7 +194,6 @@ function DonerRegistration() {
                 pauseOnHover
                 style={{ marginTop: "80px" }}
             />
-
 
             <Nav />
             <div className='main-User-reg-container'>
@@ -274,22 +292,30 @@ function DonerRegistration() {
                                     }}
                                 />
 
-
                                 <FormLabel className="req-form-label">District</FormLabel>
-                                <TextField
-                                    fullWidth
-                                    name='District'
-                                    value={doner.District}
-                                    onChange={handleChange}
-                                    error={!!errors.District}
-                                    helperText={errors.District}
-                                    onKeyPress={(e) => {
-                                        if (!/^[a-zA-Z\s]*$/.test(e.key)) {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                />
-
+                                <FormControl fullWidth error={!!errors.District}>
+                                    <Select
+                                        name="District"
+                                        value={doner.District}
+                                        onChange={handleChange}
+                                        displayEmpty
+                                        required
+                                    >
+                                        <MenuItem value="" disabled>
+                                            Select District
+                                        </MenuItem>
+                                        {keralaDistricts.map((district) => (
+                                            <MenuItem key={district} value={district}>
+                                                {district}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {errors.District && (
+                                        <div style={{ color: '#f44336', fontSize: '0.75rem', margin: '3px 14px 0' }}>
+                                            {errors.District}
+                                        </div>
+                                    )}
+                                </FormControl>
 
                                 <FormLabel className="req-form-label">City</FormLabel>
                                 <TextField
@@ -305,7 +331,6 @@ function DonerRegistration() {
                                         }
                                     }}
                                 />
-
                             </div>
                         </div>
 
@@ -321,7 +346,6 @@ function DonerRegistration() {
                         </Button>
                     </form>
                     <p style={{ textAlign: "center", marginBottom: "25px" }}>Already have account ? <Link to="/UserLogin" style={{ textDecoration: "none" }}>Signup</Link> </p>
-
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import React from 'react'
 import LandingPage from './Components/common/LandingPage'
 import Login from './Components/Doner/DonerLogin'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import DonerRegistration from './Components/Doner/DonerRegistration';
 import MedicalInfo from './Components/Doner/MedicalInfo';
 import AboutUs from './Components/common/AboutUs';
@@ -61,10 +61,30 @@ import DonerContactUs from './Components/Doner/DonerContactus';
 import DonerAboutUs from './Components/Doner/DonerAboutUs';
 import ViewAllUsers from './Components/Admin/ViewAllUsers';
 
+const NavigationHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Ensure browser navigation works
+    const unblock = window.addEventListener('popstate', () => {
+      navigate(location.pathname, { replace: true });
+    });
+
+    return () => {
+      window.removeEventListener('popstate', unblock);
+    };
+  }, [navigate, location]);
+
+  return null;
+};
+
+
 function App() {
   return (
     <div>
-      <Router basename='blood_donor'>
+      <Router basename='/blood_donor'>
+        <NavigationHandler />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />
