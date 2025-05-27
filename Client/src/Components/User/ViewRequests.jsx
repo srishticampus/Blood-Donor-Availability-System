@@ -66,6 +66,8 @@ function ViewRequests() {
                 const filteredRequests = response.data.filter(request => 
                     request.IsDoner === "Pending" && request.IsHospital === "Pending"
                 );
+                console.log(filteredRequests);
+                
                 setRequests(filteredRequests);
                 setFilteredRequests(filteredRequests);
                 setLoading(false);

@@ -30,24 +30,57 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   });
   const [predictionResult, setPredictionResult] = useState(null);
   const [predictionLoading, setPredictionLoading] = useState(false);
-  const donorData = JSON.parse(localStorage.getItem('Doner')) || {};
+  const [donorData, setDonorData] = useState({});
+  const [healthInfoComplete, setHealthInfoComplete] = useState(true);
+
+  // Fetch donor data on component mount
+  useEffect(() => {
+    const fetchDonorData = async () => {
+      try {
+        const response = await axiosInstance.post(`/findDoner/${DonerId}`);
+        const data = response.data.data;
+        setDonorData(data);
+        
+        const isHealthInfoComplete = 
+          data.SurgicalHistory && data.SurgicalHistory.length > 0 &&
+          data.medicines && data.medicines.length > 0 &&
+          data.vaccinationsTaken && data.vaccinationsTaken.length > 0;
+        
+        setHealthInfoComplete(isHealthInfoComplete);
+      } catch (error) {
+        console.error('Error fetching donor data:', error);
+        setHealthInfoComplete(false);
+      }
+    };
+
+    if (DonerId) {
+      fetchDonorData();
+    }
+  }, [DonerId]);
 
   const checkDonationEligibility = () => {
     if (!donorData || !donorData.donationHistory || donorData.donationHistory.length === 0) {
       return { eligible: true, nextDate: null };
     }
 
+    // Get the most recent donation date
     const lastDonationDate = new Date(donorData.donationHistory[donorData.donationHistory.length - 1]);
     const currentDate = new Date();
     const timeDiff = currentDate - lastDonationDate;
     const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
 
+    // Calculate minimum days required based on gender
+    let minDaysRequired;
+    if (donorData.Gender === "Female") {
+      minDaysRequired = 120; // 4 months
+    } else {
+      minDaysRequired = 90; // 3 months for Male/Third Gender
+    }
+
     const nextDonationDate = calculateNextDonationDate();
     const formattedNextDate = formatDisplayDate(nextDonationDate);
 
-    if (donorData.Gender === "Male" && daysDiff < 90) {
-      return { eligible: false, nextDate: formattedNextDate };
-    } else if (donorData.Gender === "Female" && daysDiff < 120) {
+    if (daysDiff < minDaysRequired) {
       return { eligible: false, nextDate: formattedNextDate };
     }
 
@@ -61,11 +94,12 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
 
     const lastDonationDate = new Date(donorData.donationHistory[donorData.donationHistory.length - 1]);
     const nextDonationDate = new Date(lastDonationDate);
-    
-    if (donorData.Gender === "Male") {
-      nextDonationDate.setDate(nextDonationDate.getDate() + 90);
+
+    // Add appropriate days based on gender
+    if (donorData.Gender === "Female") {
+      nextDonationDate.setDate(nextDonationDate.getDate() + 120); // 4 months
     } else {
-      nextDonationDate.setDate(nextDonationDate.getDate() + 120);
+      nextDonationDate.setDate(nextDonationDate.getDate() + 90); // 3 months for Male/Third Gender
     }
 
     return nextDonationDate;
@@ -118,9 +152,14 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
 
+    if (!healthInfoComplete) {
+      toast.error('Please complete your health information before accepting requests');
+      return;
+    }
+
     const { eligible, nextDate } = checkDonationEligibility();
     if (!eligible) {
-      const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
+      const restrictionPeriod = donorData.Gender === "Female" ? "4 months" : "3 months";
       toast.error(
         `You can only donate blood once every ${restrictionPeriod}. ` + 
         `Your next eligible donation date is ${nextDate}.`
@@ -243,7 +282,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
 
   const formattedBloodType = formatBloodType(emergencyRequest.BloodType);
   const { eligible, nextDate } = checkDonationEligibility();
-  const restrictionPeriod = donorData.Gender === "Male" ? "3 months" : "4 months";
+  const restrictionPeriod = donorData.Gender === "Female" ? "4 months" : "3 months";
 
   return (
     <Dialog
@@ -281,6 +320,12 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
           </DialogTitle>
 
           <DialogContent sx={{ px: 3, py: 1 }}>
+            {!healthInfoComplete && (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Please complete your health information before accepting requests
+              </Alert>
+            )}
+
             <DetailRow label="Patient Name" value={emergencyRequest.PatientName} />
             <DetailRow label="Contact Number" value={emergencyRequest.ContactNumber} />
             <DetailRow label="Blood Type" value={
@@ -316,6 +361,13 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
             <DetailRow label="Date" value={formatDate(emergencyRequest.Date)} />
             <DetailRow label="Time" value={formatTime(emergencyRequest.Time)} />
 
+            {donorData.donationHistory && donorData.donationHistory.length > 0 && (
+              <DetailRow 
+                label="Last Donation" 
+                value={formatDisplayDate(new Date(donorData.donationHistory[donorData.donationHistory.length - 1]))} 
+              />
+            )}
+
             <Typography 
               variant="body2" 
               sx={{
@@ -337,7 +389,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
               variant="contained"
               color="primary"
               onClick={handleAccept}
-              disabled={isApproving || !eligible}
+              disabled={isApproving || !eligible || !healthInfoComplete}
               sx={{
                 mr: 2,
                 px: 3,
@@ -449,101 +501,102 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
             )}
           </DialogContent>
 
-<DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
-    {!predictionResult ? (
-        <>
-            <Button
-                variant="outlined"
-                color="secondary"
-                onClick={handleCancel}
-                disabled={predictionLoading}
-                sx={{
+          <DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
+            {!predictionResult ? (
+              <>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleCancel}
+                  disabled={predictionLoading}
+                  sx={{
                     mr: 2,
                     px: 3,
                     borderRadius: '8px',
                     textTransform: 'none',
                     fontWeight: 'bold',
                     minWidth: '120px'
-                }}
-            >
-                Cancel
-            </Button>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handlePredictionSubmit}
-                disabled={predictionLoading || 
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handlePredictionSubmit}
+                  disabled={predictionLoading || 
                     !predictionData.recency || 
                     !predictionData.frequency || 
                     !predictionData.monetary || 
                     !predictionData.time}
-                sx={{
+                  sx={{
                     px: 3,
                     borderRadius: '8px',
                     textTransform: 'none',
                     fontWeight: 'bold',
                     minWidth: '120px'
-                }}
-                startIcon={predictionLoading ? <CircularProgress size={20} /> : null}
-            >
-                {predictionLoading ? 'Predicting...' : 'Predict'}
-            </Button>
-        </>
-    ) : (
-        <>
-            {predictionResult.class === 1 ? (
-                <>
-                    <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={handleBackToRequest}
-                        sx={{
-                            mr: 2,
-                            px: 3,
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 'bold',
-                            minWidth: '120px'
-                        }}
-                    >
-                        Back
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleConfirmAccept}
-                        disabled={isApproving}
-                        sx={{
-                            px: 3,
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 'bold',
-                            minWidth: '120px'
-                        }}
-                        startIcon={isApproving ? <CircularProgress size={20} /> : null}
-                    >
-                        {isApproving ? 'Approving...' : 'Confirm'}
-                    </Button>
-                </>
+                  }}
+                  startIcon={predictionLoading ? <CircularProgress size={20} /> : null}
+                >
+                  {predictionLoading ? 'Predicting...' : 'Predict'}
+                </Button>
+              </>
             ) : (
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleCancel}
-                    sx={{
+              <>
+                {predictionResult.class === 1 ? (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleBackToRequest}
+                      sx={{
+                        mr: 2,
                         px: 3,
                         borderRadius: '8px',
                         textTransform: 'none',
                         fontWeight: 'bold',
                         minWidth: '120px'
+                      }}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleConfirmAccept}
+                      disabled={isApproving}
+                      sx={{
+                        px: 3,
+                        borderRadius: '8px',
+                        textTransform: 'none',
+                        fontWeight: 'bold',
+                        minWidth: '120px'
+                      }}
+                      startIcon={isApproving ? <CircularProgress size={20} /> : null}
+                    >
+                      {isApproving ? 'Approving...' : 'Confirm'}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleCancel}
+                    sx={{
+                      px: 3,
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 'bold',
+                      minWidth: '120px'
                     }}
-                >
+                  >
                     Close
-                </Button>
+                  </Button>
+                )}
+              </>
             )}
+          </DialogActions>
         </>
-    )}
-</DialogActions>        </>
       )}
     </Dialog>
   );

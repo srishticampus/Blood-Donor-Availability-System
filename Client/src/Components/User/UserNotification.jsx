@@ -78,7 +78,7 @@ function UserNotification() {
 
     const markAsRead = async (id) => {
         try {
-            await axios.patch(`${baseUrl}notifications/${id}/user-read`);
+            await axiosInstance.patch(`/notifications/${id}/user-read`);
             
             setNotifications(notifications.filter(notification => notification.id !== id));
             
@@ -165,12 +165,12 @@ function UserNotification() {
                                     >
                                         <CheckIcon />
                                     </button>
-                                    <button 
+                                    {/* <button 
                                         className="action-button dismiss"
                                         onClick={() => dismissNotification(notification.id)}
                                     >
                                         <CloseIcon />
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                         ))
