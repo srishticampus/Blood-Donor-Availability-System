@@ -41,6 +41,8 @@ function DonerDetails() {
         axiosInstance.post(`/ViewDonerProfile/${id}`)
             .then(response => {
                 setDonor(response.data.data);
+                console.log(response.data.data);
+                
             })
             .catch(error => {
                 setError(error.message);
@@ -78,6 +80,14 @@ function DonerDetails() {
     const displayData = (data, fallback = "N/A") => {
         if (data === undefined || data === null || data === '') return fallback;
         return data;
+    };
+
+    const getHealthStatus = () => {
+        if (donor.PregnancyorBreastfeed === "Yes") {
+            return "Not Eligible";
+        }
+        
+        return "Healthy";
     };
 
     if (loading) {
@@ -169,7 +179,7 @@ function DonerDetails() {
                                 <TableRow hover className="tableRow">
                                     <TableCell className="tableCell">Health Status</TableCell>
                                     <TableCell className="tableCell">
-                                       Healthy
+                                        {getHealthStatus()}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow hover className="tableRow">
@@ -268,7 +278,7 @@ function DonerDetails() {
                                 />
                             ) : (
                                 <iframe 
-                                    src={`http://localhost:4058/${donor.ConsentForm?.filename}`} 
+                                    src={`${baseUrl}${donor.ConsentForm?.filename}`} 
                                     style={{ 
                                         width: '100%', 
                                         height: '500px', 

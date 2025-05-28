@@ -15,7 +15,8 @@ function DonerNav({ searchTerm, onSearchChange }) {
         '/doner-Profile',
         '/doner-edit-profile',
         '/healthDetails',
-        '/doner-ContactUs'
+        '/doner-ContactUs',
+        '/doner-aboutus'
     ];
     
     const shouldHideSearch = hideSearchPaths.some(path => 

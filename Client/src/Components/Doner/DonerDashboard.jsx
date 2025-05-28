@@ -11,6 +11,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
 import {baseUrl} from '../../baseUrl';
+import GoldBadge from '../../Assets/gold.png'
+import BronzeBadge from '../../Assets/Bronze.png'
+import SilverBadge from '../../Assets/silver.png'
 
 function DonerDashboard() {
   const DonerId = localStorage.getItem("DonerId");
@@ -18,6 +21,7 @@ function DonerDashboard() {
   const [donorBloodType, setDonorBloodType] = useState("");
   const [emergencyRequests, setEmergencyRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [donorLevel, setDonorLevel] = useState(null);
 
   useEffect(() => {
     if (DonerId) {
@@ -31,10 +35,29 @@ function DonerDashboard() {
     }
   }, [donorBloodType]);
 
+  useEffect(() => {
+    if (donorData.donationHistory) {
+      calculateDonorLevel();
+    }
+  }, [donorData.donationHistory]);
+
+  const calculateDonorLevel = () => {
+    const donationCount = donorData.donationHistory?.length || 0;
+    
+    if (donationCount < 10) {
+      setDonorLevel({ badge: BronzeBadge, text: "Bronze Level" });
+    } else if (donationCount >= 10 && donationCount < 20) {
+      setDonorLevel({ badge: SilverBadge, text: "Silver Level" });
+    } else if (donationCount >= 20) {
+      setDonorLevel({ badge: GoldBadge, text: "Gold Level" });
+    }
+  };
+
   const fetchDonorData = async () => {
     try {
       const response = await axiosInstance.post(`/findDoner/${DonerId}`);
       const data = response.data.data; 
+      console.log(data);
       
       setDonorData(data);
       const formattedBloodType = formatBloodType(data.bloodgrp || "");
@@ -166,10 +189,10 @@ function DonerDashboard() {
       <DonerSideMenu />
       <div className='user-dashboard-container'>
         <div className='user-dashboard-left-side'>
-          <div className='Application-Details'>
+          {/* <div className='Application-Details'>
             <img src={BloodImg} alt="Blood Connect Logo" />
             <h2>Blood Connect</h2>
-          </div>
+          </div> */}
 
           <div className='doner-card-dashboard'>
             <div className="avatar-container">
@@ -182,10 +205,24 @@ function DonerDashboard() {
 
             <div className="text-container">
               <h3>{donorData.FullName || 'Donor'}</h3>
-              <p>Doner ID: {DonerId}</p>
+              <p>Donor ID: {DonerId}</p>
               <p>Blood Group: {donorBloodType}</p>
             </div>
           </div>
+
+          {/* Donor Level Badge Section - Split Layout */}
+          {donorLevel && (
+            <div className='donor-level-container'>
+              <div className='badge-section'>
+                <img src={donorLevel.badge} alt={donorLevel.text} className='badge-image' />
+                <h4>{donorLevel.text}</h4>
+              </div>
+              <div className='donation-count-section'>
+                <p>Total Donations:</p>
+                <h3>{donorData.donationHistory?.length || 0}</h3>
+              </div>
+            </div>
+          )}
 
           {donorData.donationHistory?.length > 0 && (
             <div className='request-accepted'>
@@ -217,19 +254,7 @@ function DonerDashboard() {
                   <p><strong>Patient:</strong> {request.PatientName || 'N/A'}</p>
                   <p><strong>Contact No:</strong> {request.ContactNumber || 'N/A'}</p>
                   <p><strong>Blood Type:</strong> {formatBloodType(request.BloodType) || 'N/A'}</p>
-                  {/* <p><strong>Status:</strong> {String(request.Status).replace(/"/g, '') || 'N/A'}</p> */}
                   <p><strong>Units Needed:</strong> {request.UnitsRequired || 0}</p>
-                  {/* <p><strong>When Needed:</strong> {formatDate(request.Date)} at {request.Time}</p> */}
-                  {/* <Link to='/donation-req'>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      sx={{ mt: 1 }}
-                    >
-                      View Details
-                    </Button>
-                  </Link> */}
                 </div>
               ))
             ) : (

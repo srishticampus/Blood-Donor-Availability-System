@@ -137,3 +137,50 @@
       margin-left: 280px;
   }
 }
+/* Add these styles to your existing CSS file */
+
+.donor-level-container {
+  height: 150px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.badge-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-section h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.badge-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.donation-count-section {
+  text-align: right;
+}
+
+.donation-count-section p {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.donation-count-section h3 {
+  margin: 5px 0 0 0;
+  color: #d32f2f;
+  font-size: 1.9rem;
+}

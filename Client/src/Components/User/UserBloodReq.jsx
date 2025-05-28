@@ -36,7 +36,7 @@ function UserBloodReq() {
         "Other"
     ];
 
- const [formData, setFormData] = React.useState({
+    const [formData, setFormData] = React.useState({
         patientName: '',
         contactNumber: '',
         doctorName: '',
@@ -50,7 +50,7 @@ function UserBloodReq() {
         address: ''
     });
 
-const [errors, setErrors] = React.useState({
+    const [errors, setErrors] = React.useState({
         patientName: '',
         contactNumber: '',
         doctorName: '',
@@ -66,11 +66,13 @@ const [errors, setErrors] = React.useState({
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
-const validateAddress = (address) => {
+
+    const validateAddress = (address) => {
         if (!address) return 'Address is required';
         if (address.length < 10) return 'Address should be at least 10 characters';
         return '';
     };
+
     const validatePatientName = (name) => {
         if (!name) return 'Patient name is required';
         const regex = /^[a-zA-Z\s]+$/;
@@ -117,15 +119,13 @@ const validateAddress = (address) => {
 
     const validateDate = (date) => {
         if (!date) return 'Date is required';
-        const today = new Date(getTodayDate());
-        const selectedDate = new Date(date);
-
-        today.setHours(0, 0, 0, 0);
-        selectedDate.setHours(0, 0, 0, 0);
-
-        if (selectedDate < today) {
-            return 'Cannot select past date';
+        
+        // Check if the date string matches YYYY-MM-DD format with 4-digit year
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(date)) {
+            return 'Date must be in YYYY-MM-DD format';
         }
+        
         return '';
     };
 
@@ -154,7 +154,7 @@ const validateAddress = (address) => {
             case 'Date':
                 error = validateDate(value);
                 break;
-            case 'address':  // Add address case
+            case 'address':
                 error = validateAddress(value);
                 break;
             default:
@@ -199,6 +199,7 @@ const validateAddress = (address) => {
             [name]: error
         }));
     }
+
     const handleSubmit = () => {
         const newErrors = {
             patientName: validatePatientName(formData.patientName),
@@ -459,9 +460,6 @@ const validateAddress = (address) => {
                                     onChange={handleChange}
                                     type="date"
                                     InputLabelProps={{ shrink: true }}
-                                    inputProps={{
-                                        min: getTodayDate()
-                                    }}
                                     error={!!errors.Date}
                                     helperText={errors.Date}
                                     onBlur={handleBlur}
@@ -478,7 +476,8 @@ const validateAddress = (address) => {
                                     InputLabelProps={{ shrink: true }}
                                 />
                             </h5>
-<h5>Address
+
+                            <h5>Address
                                 <TextField
                                     className="edit-input"
                                     name="address"

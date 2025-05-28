@@ -20,6 +20,7 @@ import HosNav from './HosNav';
 import HosSidemenu from './HosSidemenu';
 import axios from 'axios';
 import axiosInstance from '../Service/BaseUrl';
+
 function WilligDoners() {
     const [donors, setDonors] = useState([]);
     const [filteredDonors, setFilteredDonors] = useState([]);
@@ -30,6 +31,8 @@ function WilligDoners() {
         const fetchDonors = async () => {
             try {
                 const response = await axiosInstance.post('/ViewAllDoner');
+                console.log(response);
+                
                 const processedDonors = processDonors(response.data.data);
                 setDonors(processedDonors);
                 setFilteredDonors(processedDonors); 
@@ -61,6 +64,12 @@ function WilligDoners() {
         const currentDate = new Date();
         
         return donorData.map(donor => {
+            // First check for pregnancy/breastfeeding status
+            if (donor.PregnancyorBreastfeed === "Yes") {
+                return { ...donor, Healthstatus: 'Not Eligible' };
+            }
+
+            // If no donation history, consider as healthy (if not pregnant/breastfeeding)
             if (!donor.donationHistory || donor.donationHistory.length === 0) {
                 return { ...donor, Healthstatus: 'Healthy' };
             }
@@ -98,6 +107,14 @@ function WilligDoners() {
                 return {
                     color: '#616161',
                     backgroundColor: '#E9E9E9',
+                    padding: '6px 12px',
+                    borderRadius: '16px',
+                    display: 'inline-block'
+                };
+            case 'Not Eligible':
+                return {
+                    color: '#D32F2F',
+                    backgroundColor: '#FFEBEE',
                     padding: '6px 12px',
                     borderRadius: '16px',
                     display: 'inline-block'

@@ -32,6 +32,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   const [predictionLoading, setPredictionLoading] = useState(false);
   const [donorData, setDonorData] = useState({});
   const [healthInfoComplete, setHealthInfoComplete] = useState(true);
+  const [isPregnantOrBreastfeeding, setIsPregnantOrBreastfeeding] = useState(false);
 
   // Fetch donor data on component mount
   useEffect(() => {
@@ -40,6 +41,12 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
         const response = await axiosInstance.post(`/findDoner/${DonerId}`);
         const data = response.data.data;
         setDonorData(data);
+        console.log(data);
+        
+        // Check if donor is pregnant or breastfeeding
+        if (data.PregnancyorBreastfeed === "Yes") {
+          setIsPregnantOrBreastfeeding(true);
+        }
         
         const isHealthInfoComplete = 
           data.SurgicalHistory && data.SurgicalHistory.length > 0 &&
@@ -59,6 +66,11 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   }, [DonerId]);
 
   const checkDonationEligibility = () => {
+    // First check if pregnant or breastfeeding
+    if (isPregnantOrBreastfeeding) {
+      return { eligible: false, reason: "Pregnant or breastfeeding donors cannot donate blood" };
+    }
+
     if (!donorData || !donorData.donationHistory || donorData.donationHistory.length === 0) {
       return { eligible: true, nextDate: null };
     }
@@ -81,7 +93,10 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
     const formattedNextDate = formatDisplayDate(nextDonationDate);
 
     if (daysDiff < minDaysRequired) {
-      return { eligible: false, nextDate: formattedNextDate };
+      return { 
+        eligible: false, 
+        reason: `You can only donate blood once every ${donorData.Gender === "Female" ? "4 months" : "3 months"}. Your next eligible donation date is ${formattedNextDate}.`
+      };
     }
 
     return { eligible: true, nextDate: null };
@@ -152,18 +167,19 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
       return;
     }
 
+    if (isPregnantOrBreastfeeding) {
+      toast.error('Pregnant or breastfeeding donors cannot donate blood');
+      return;
+    }
+
     if (!healthInfoComplete) {
       toast.error('Please complete your health information before accepting requests');
       return;
     }
 
-    const { eligible, nextDate } = checkDonationEligibility();
+    const { eligible, reason } = checkDonationEligibility();
     if (!eligible) {
-      const restrictionPeriod = donorData.Gender === "Female" ? "4 months" : "3 months";
-      toast.error(
-        `You can only donate blood once every ${restrictionPeriod}. ` + 
-        `Your next eligible donation date is ${nextDate}.`
-      );
+      toast.error(reason);
       setOpen(false);
       return;
     }
@@ -281,8 +297,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
   if (!emergencyRequest) return null;
 
   const formattedBloodType = formatBloodType(emergencyRequest.BloodType);
-  const { eligible, nextDate } = checkDonationEligibility();
-  const restrictionPeriod = donorData.Gender === "Female" ? "4 months" : "3 months";
+  const { eligible, reason } = checkDonationEligibility();
 
   return (
     <Dialog
@@ -320,6 +335,12 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
           </DialogTitle>
 
           <DialogContent sx={{ px: 3, py: 1 }}>
+            {isPregnantOrBreastfeeding && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                Pregnant or breastfeeding donors cannot donate blood
+              </Alert>
+            )}
+
             {!healthInfoComplete && (
               <Alert severity="warning" sx={{ mb: 2 }}>
                 Please complete your health information before accepting requests
@@ -380,7 +401,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
             >
               {eligible 
                 ? "You are eligible to donate"
-                : `You must wait ${restrictionPeriod} between donations. Next eligible date: ${nextDate}`}
+                : reason}
             </Typography>
           </DialogContent>
 
@@ -389,7 +410,7 @@ function EmergencyPopup({ requests, onClose, DonerId, onRequestUpdate }) {
               variant="contained"
               color="primary"
               onClick={handleAccept}
-              disabled={isApproving || !eligible || !healthInfoComplete}
+              disabled={isApproving || !eligible || !healthInfoComplete || isPregnantOrBreastfeeding}
               sx={{
                 mr: 2,
                 px: 3,

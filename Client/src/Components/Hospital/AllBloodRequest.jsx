@@ -95,7 +95,7 @@ function AllBloodRequest() {
             })
             .catch(error => {
                 console.error('Error fetching blood requests:', error);
-                toast.error('Failed to fetch blood requests');
+                // toast.error('Failed to fetch blood requests');
                 setLoading(false);
             });
     }, []);
