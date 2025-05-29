@@ -119,13 +119,13 @@ function UserBloodReq() {
 
     const validateDate = (date) => {
         if (!date) return 'Date is required';
-        
+
         // Check if the date string matches YYYY-MM-DD format with 4-digit year
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(date)) {
             return 'Date must be in YYYY-MM-DD format';
         }
-        
+
         return '';
     };
 
@@ -187,7 +187,7 @@ function UserBloodReq() {
             case 'Date':
                 error = validateDate(value);
                 break;
-            case 'address':  
+            case 'address':
                 error = validateAddress(value);
                 break;
             default:
@@ -393,7 +393,7 @@ function UserBloodReq() {
                                     inputProps={{ min: 1, step: 1 }}
                                 />
                             </h5>
-                             
+
                             <h5>Status
                                 <Select
                                     name="status"
@@ -463,6 +463,9 @@ function UserBloodReq() {
                                     error={!!errors.Date}
                                     helperText={errors.Date}
                                     onBlur={handleBlur}
+                                    inputProps={{
+                                        min: getTodayDate() // This will prevent selecting past dates
+                                    }}
                                 />
                             </h5>
 

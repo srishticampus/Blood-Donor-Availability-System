@@ -50,7 +50,8 @@ function EditUserRequest() {
         status: '',
         USERID: USERID,
         Date: '',
-        Time: ''
+        Time: '',
+        address: ''
     });
 
     const [errors, setErrors] = React.useState({
@@ -58,7 +59,8 @@ function EditUserRequest() {
         contactNumber: false,
         doctorName: false,
         unitsRequired: false,
-        Date: false
+        Date: false,
+        address: false
     });
 
     const formatDate = (isoDate) => {
@@ -71,6 +73,12 @@ function EditUserRequest() {
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    };
+
+    const validateAddress = (address) => {
+        if (!address) return true; // Mark as error if empty
+        if (address.length < 10) return true; // Mark as error if too short
+        return false;
     };
 
     useEffect(() => {
@@ -93,7 +101,8 @@ function EditUserRequest() {
                         status: response.data.Status || '',
                         USERID: response.data.USERID || USERID,
                         Date: validatedDate,
-                        Time: response.data.Time || ''
+                        Time: response.data.Time || '',
+                        address: response.data.address || ''
                     });
                 }
             } catch (error) {
@@ -118,6 +127,8 @@ function EditUserRequest() {
                 return !/^\d+$/.test(value) || parseInt(value) <= 0;
             case 'Date':
                 return value < getTodayDate();
+            case 'address':
+                return validateAddress(value);
             default:
                 return false;
         }
@@ -156,7 +167,8 @@ function EditUserRequest() {
             contactNumber: validateField('contactNumber', formData.contactNumber),
             doctorName: validateField('doctorName', formData.doctorName),
             unitsRequired: validateField('unitsRequired', formData.unitsRequired),
-            Date: validateField('Date', formData.Date)
+            Date: validateField('Date', formData.Date),
+            address: validateField('address', formData.address)
         };
 
         setErrors(newErrors);
@@ -176,7 +188,8 @@ function EditUserRequest() {
             Status: formData.status,
             USERID: formData.USERID,
             Date: formData.Date,
-            Time: formData.Time
+            Time: formData.Time,
+            address: formData.address
         };
 
         axiosInstance.post(`/EditHospital/BloodReq/${id}`, requestData)
@@ -356,6 +369,21 @@ function EditUserRequest() {
                                     onChange={handleChange}
                                     type="time"
                                     InputLabelProps={{ shrink: true }}
+                                />
+                            </h5>
+                            <h5>Address
+                                <TextField
+                                    className="edit-input"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    error={errors.address}
+                                    helperText={errors.address ? "Address should be at least 10 characters long" : ""}
+                                    multiline
+                                    rows={3}
+                                    inputProps={{
+                                        minLength: 10
+                                    }}
                                 />
                             </h5>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '40px' }}>
