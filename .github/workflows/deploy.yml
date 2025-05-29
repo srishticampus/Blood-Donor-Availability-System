@@ -10,6 +10,7 @@ env:
   VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
   DEPLOY_DIR: /home/ubuntu/new_hybrid_projects/blood_donor
   PM2_APP_NAME: blood_donor
+  PYTHON_VERSION: 3.11.6
 
 jobs:
   deploy:
@@ -26,13 +27,15 @@ jobs:
           npm ci
           npm run build -- --outDir=../dist
 
-      # Backend preparation
+      # Backend preparation with Python files
       - name: Prepare backend
         working-directory: ./Server
         run: |
           npm i
+          # Copy Python-related files to root for deployment package
+          cp predict.py best_model_with_smote.pkl requirements.txt ../
 
-      # Create deployment package with proper .env handling
+      # Create deployment package with Python files
       - name: Create deployment structure
         run: |
           mkdir -p deploy
@@ -42,10 +45,11 @@ jobs:
 
           # Create backend directory and copy files
           mkdir -p deploy/backend
+          # Move Python files first
+          mv predict.py best_model_with_smote.pkl requirements.txt deploy/backend/
+          # Then copy all other backend files
           cp -r Server/* deploy/backend/
           rm -rf deploy/backend/node_modules
-
-          # Create .env file directly in deploy/backend
 
       # Compress for transfer
       - name: Compress deployment package
@@ -64,26 +68,68 @@ jobs:
 
       - name: SSH and deploy on VPS
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_IP }} << EOF
-          # Create directory if not exists
-          mkdir -p ${{ env.DEPLOY_DIR }}
+          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_IP }} << 'EOF'
+          #!/bin/bash
+          
+          # 1. Python Setup (only if not installed)
+          if ! command -v python3.11 &> /dev/null || \
+             [[ $(python3.11 -c "import sys; print(sys.version.split()[0])") != "$PYTHON_VERSION" ]]; then
+              
+              echo "Python $PYTHON_VERSION not found. Installing..."
+              
+              # Install system dependencies
+              sudo apt-get update
+              sudo apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
+                  libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+              
+              # Install Python 3.11.6
+              PYTHON_TAR=Python-$PYTHON_VERSION.tgz
+              wget https://www.python.org/ftp/python/$PYTHON_VERSION/$PYTHON_TAR
+              tar -xf $PYTHON_TAR
+              cd Python-$PYTHON_VERSION
+              ./configure --enable-optimizations
+              make -j $(nproc)
+              sudo make altinstall
+              cd ..
+              rm -rf Python-$PYTHON_VERSION $PYTHON_TAR
+          else
+              echo "Python $PYTHON_VERSION is already installed"
+          fi
+          
+          # 2. Existing deployment setup
+          mkdir -p $DEPLOY_DIR
+          rm -rf $DEPLOY_DIR/*
+          tar -xzvf /tmp/blood_donor.tar.gz -C $DEPLOY_DIR
 
-          # Clear existing files (except uploads if needed)
-          rm -rf ${{ env.DEPLOY_DIR }}/*
+          # 3. Python Environment Setup
+          cd $DEPLOY_DIR/backend
+          python3.11 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          chmod 644 best_model_with_smote.pkl
 
-          # Extract files
-          tar -xzvf /tmp/blood_donor.tar.gz -C ${{ env.DEPLOY_DIR }}
+          # 4. Node.js Setup (if not installed)
+          if ! command -v node &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+          fi
 
-          # Ensure uploads directory exists with proper permissions
-          mkdir -p ${{ env.DEPLOY_DIR }}/backend/uploads
-          chmod -R 755 ${{ env.DEPLOY_DIR }}/backend/uploads
-
-          # Install backend dependencies
-          cd ${{ env.DEPLOY_DIR }}/backend
+          # 5. Existing Node.js application setup
+          mkdir -p $DEPLOY_DIR/backend/uploads
+          chmod -R 755 $DEPLOY_DIR/backend/uploads
           npm install --omit=dev
 
-          # Restart application with PM2
-          pm2 delete ${{ env.PM2_APP_NAME }} || true
-          pm2 start index.js --name "${{ env.PM2_APP_NAME }}"
+          # 6. PM2 Setup (if not installed)
+          if ! command -v pm2 &> /dev/null; then
+              sudo npm install -g pm2
+          fi
+
+          # 7. Restart application
+          pm2 delete $PM2_APP_NAME || true
+          pm2 start index.js --name "$PM2_APP_NAME"
           pm2 save
+          pm2 startup | grep -v "sudo" | bash
+          
+          echo "Deployment completed successfully with Python support!"
           EOF
