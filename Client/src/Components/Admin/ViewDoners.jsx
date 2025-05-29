@@ -13,11 +13,15 @@ import {
     Box,
     Typography,
     Avatar,
-    CircularProgress
+    CircularProgress,
+    Tooltip
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../Service/BaseUrl';
 import {baseUrl} from '../../baseUrl';
+import GoldBadge from '../../Assets/gold.png';
+import BronzeBadge from '../../Assets/Bronze.png';
+import SilverBadge from '../../Assets/silver.png';
 
 function ViewDoner() {
     const [doners, setDoners] = useState([]);
@@ -29,6 +33,8 @@ function ViewDoner() {
     useEffect(() => {
         axiosInstance.post('/ViewAllDoner')
             .then((result) => {
+                console.log(result);
+                
                 setDoners(result.data.data);
                 setFilteredDoners(result.data.data);
                 setLoading(false);
@@ -75,6 +81,35 @@ function ViewDoner() {
         const year = date.getFullYear();
         
         return `${day}/${month}/${year}`;
+    };
+
+    const getDonationBadge = (donationHistory) => {
+        if (!donationHistory || !Array.isArray(donationHistory)) {
+            return null;
+        }
+        
+        const donationCount = donationHistory.length;
+        
+        if (donationCount >= 20) {
+            return (
+                <Tooltip title={`Gold Donor (${donationCount} donations)`} placement="right">
+                    <img src={GoldBadge} alt="Gold Badge" style={{ width: '30px' }} />
+                </Tooltip>
+            );
+        } else if (donationCount >= 10) {
+            return (
+                <Tooltip title={`Silver Donor (${donationCount} donations)`} placement="right">
+                    <img src={SilverBadge} alt="Silver Badge" style={{ width: '30px' }} />
+                </Tooltip>
+            );
+        } else if (donationCount >= 0) {
+            return (
+                <Tooltip title={`Bronze Donor (${donationCount} donations)`} placement="right">
+                    <img src={BronzeBadge} alt="Bronze Badge" style={{ width: '30px' }} />
+                </Tooltip>
+            );
+        }
+        return null;
     };
 
     if (loading) {
@@ -148,8 +183,9 @@ function ViewDoner() {
                                     <TableCell className="table-head-cell">DOB</TableCell>
                                     <TableCell className="table-head-cell">Gender</TableCell>
                                     <TableCell className="table-head-cell">Mobile</TableCell>
-                                    <TableCell className="table-head-cell">Email</TableCell>
+                                    {/* <TableCell className="table-head-cell">Email</TableCell> */}
                                     <TableCell className="table-head-cell">Address</TableCell>
+                                    <TableCell className="table-head-cell">Donation Level</TableCell>
                                     <TableCell className="table-head-cell">View More</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -160,16 +196,21 @@ function ViewDoner() {
                                             <TableCell className="tableCell">
                                                 <Avatar 
                                                     alt={donor.FullName} 
-                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}`|| "" }
+                                                    src={`${baseUrl}${donor.ProfilePhoto?.filename}` || "" }
                                                     sx={{ width: 40, height: 40 }}
                                                 />
                                             </TableCell>
-                                            <TableCell className="tableCell">{donor.FullName}</TableCell>
+                                            <TableCell className="tableCell">
+                                                {donor.FullName}
+                                            </TableCell>
                                             <TableCell className="tableCell">{formatDate(donor.DateOfBirth)}</TableCell>
                                             <TableCell className="tableCell">{donor.Gender}</TableCell>
                                             <TableCell className="tableCell">{donor.PhoneNo}</TableCell>
-                                            <TableCell className="tableCell">{donor.Email}</TableCell>
+                                            {/* <TableCell className="tableCell">{donor.Email}</TableCell> */}
                                             <TableCell className="tableCell">{donor.District}</TableCell>
+                                            <TableCell className="tableCell" align="center">
+                                                {getDonationBadge(donor.donationHistory) || '-'}
+                                            </TableCell>
                                             <TableCell className="tableCell">
                                                 <Link 
                                                     to={`/doner-details/${donor._id}`}
@@ -186,7 +227,7 @@ function ViewDoner() {
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center">
+                                        <TableCell colSpan={9} align="center">
                                             <Box 
                                                 display="flex" 
                                                 justifyContent="center" 
