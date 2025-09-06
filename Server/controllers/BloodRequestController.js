@@ -36,9 +36,7 @@ exports.createBloodRequest = async (req, res) => {
 
     const result = await newRequest.save();
 
-    // Check if status is Very Urgent or Emergency
     if (Status === 'Very Urgent' || Status === 'Emergency') {
-      // Send emails in background (don't await)
       sendEmergencyRequestToDoners(result)
         .catch(err => console.error('Background email error:', err));
     }
