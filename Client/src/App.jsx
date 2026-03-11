@@ -62,29 +62,13 @@ import DonerAboutUs from './Components/Doner/DonerAboutUs';
 import ViewAllUsers from './Components/Admin/ViewAllUsers';
 import ChatBot from './Components/ChatBot';
 
-const NavigationHandler = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  React.useEffect(() => {
-    const unblock = window.addEventListener('popstate', () => {
-      navigate(location.pathname, { replace: true });
-    });
-
-    return () => {
-      window.removeEventListener('popstate', unblock);
-    };
-  }, [navigate, location]);
-
-  return null;
-};
 
 
 function App() {
   return (
     <div>
       <Router basename='/blood_donor'>
-        <NavigationHandler />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<Registration />} />
@@ -98,14 +82,7 @@ function App() {
           <Route path="/resetPassDoner/:id" element={<DonerResetPass />} />
           <Route path="/healthDetails" element={<AddHealthDetails />} />
           <Route path="/doner-medical-details" element={<MedicalInfo />} />
-          <Route path="/donation-req" element={<DonerBloodRequest />} />
-          <Route path="/doner-dashboard" element={<DonerDashboard />} />
-          <Route path="/doner-Profile" element={<DonerProfile />} />
-          <Route path="/doner-edit-profile" element={<DonerEditProfile />} />
-          <Route path="/doner-completed-requests" element={<DonerDonationHistory />} />
-          <Route path="/doner-FullFilled" element={<Approving />} />
-          <Route path="/doner-ContactUs" element={<DonerContactUs />} />
-          <Route path="/doner-aboutus" element={<DonerAboutUs />} />
+         
 
           {/* Admin route */}
           <Route path="/AdminLogin" element={<AdminLogin />} />
@@ -113,10 +90,7 @@ function App() {
           <Route path="/doner-details/:id" element={<DonerDetails />} />
           <Route path="/Hospital-req" element={<HospitalReqt />} />
           <Route path="/approved-hospitals" element={<ApprovedHospitals />} />
-          <Route path="/view-doners" element={<ViewDoner />} />
-          <Route path="/emergency-alerts" element={<EmergencyAlert />} />
-          <Route path="/completed-requests" element={<CompletedRequests />} />
-          <Route path="/enquiries" element={<UserEnquiry />} />
+         
           <Route path="/notifications" element={<Notification />} />
           <Route path="/blood-requests" element={<BloodRequests />} />
           <Route path="/ViewAllUsers" element={<ViewAllUsers />} />
